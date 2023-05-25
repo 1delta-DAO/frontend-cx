@@ -1,0 +1,189 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "comet",
+        "type": "address"
+      }
+    ],
+    "name": "getAssetData",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint8",
+            "name": "offset",
+            "type": "uint8"
+          },
+          {
+            "internalType": "address",
+            "name": "asset",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "priceFeed",
+            "type": "address"
+          },
+          {
+            "internalType": "uint64",
+            "name": "scale",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "borrowCollateralFactor",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "liquidateCollateralFactor",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "liquidationFactor",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint128",
+            "name": "supplyCap",
+            "type": "uint128"
+          },
+          {
+            "internalType": "bool",
+            "name": "isBase",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "price",
+            "type": "uint256"
+          },
+          {
+            "internalType": "int256",
+            "name": "reserves",
+            "type": "int256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "borrowRate",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "supplyRate",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "utilization",
+            "type": "uint256"
+          },
+          {
+            "internalType": "int256",
+            "name": "baseReserves",
+            "type": "int256"
+          },
+          {
+            "internalType": "uint128",
+            "name": "totalSupplyAsset",
+            "type": "uint128"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalBorrow",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct CometLens.AssetData",
+        "name": "data",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "comet",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "delta",
+        "type": "address"
+      }
+    ],
+    "name": "getUserData",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "isAllowed",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "borrowBalance",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "supplyBalance",
+            "type": "uint256"
+          },
+          {
+            "internalType": "int104",
+            "name": "principal",
+            "type": "int104"
+          },
+          {
+            "internalType": "uint64",
+            "name": "baseTrackingIndex",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "baseTrackingAccrued",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint16",
+            "name": "assetsIn",
+            "type": "uint16"
+          },
+          {
+            "internalType": "uint128",
+            "name": "balance",
+            "type": "uint128"
+          }
+        ],
+        "internalType": "struct CometLens.UserData",
+        "name": "data",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

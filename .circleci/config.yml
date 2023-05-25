@@ -1,0 +1,45 @@
+version: 2.1
+
+orbs:
+  gcp-cli: circleci/gcp-cli@2.4.1
+
+jobs:
+  build-and-push-to-gcs:
+    docker:
+      - image: circleci/node:14
+    parameters:
+      domain:
+        type: string
+    steps:
+      - checkout
+      - gcp-cli/install
+      - gcp-cli/initialize
+      - run:
+          name: Build static files
+          command: |
+            yarn install
+            CI=false PUBLIC_URL=https://<< parameters.domain >> yarn build
+      - run:
+          name: Push static files to gcs
+          command: gsutil -m rsync -d -R build gs://<< parameters.domain >>
+      - run: sleep 7
+      - run:
+          name: Remove Cache Control from static files
+          command: gsutil setmeta -r -h "Cache-control:no-cache, max-age=0" gs://<< parameters.domain >>
+
+workflows:
+  version: 2
+  pipeline:
+    jobs:
+      - build-and-push-to-gcs:
+          name: staging/deploy
+          domain: staging.1delta.io
+          filters:
+            branches:
+              only: main
+      - build-and-push-to-gcs:
+          name: production/deploy
+          domain: app.1delta.io
+          filters:
+            branches:
+              only: release
