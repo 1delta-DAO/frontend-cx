@@ -1,4 +1,3 @@
-import { BetaBanner, BetaContainer } from 'pages/1delta/components/Beta'
 import { Trans } from '@lingui/macro'
 import useScrollPosition from '@react-hook/window-scroll'
 import { useWeb3React } from '@web3-react/core'
@@ -184,9 +183,6 @@ export default function Header() {
       <Title href=".">
         <StyledIconAbs>
           <Logo width="42px" height="100%" title="logo" />
-          <BetaContainer>
-            <BetaBanner />
-          </BetaContainer>
         </StyledIconAbs>
       </Title>
       <HeaderControls>

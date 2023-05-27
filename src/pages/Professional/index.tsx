@@ -88,8 +88,6 @@ import { SwitchCircle } from "components/Wallet";
 import { fetchChainLinkData } from "state/oracles/fetchChainLinkData";
 import { fetchAAVEAggregatorDataAsync } from "state/oracles/fetchAaveAggregatorData";
 import { fetchUserBalances } from "state/1delta/fetchAssetBalances";
-import GeneralMoneyMarketPanel from "./components/MoneyMarket";
-import MarginTradeModal from 'components/SwapModal/marginTradeModal'
 import { ArrowDotted } from "./components/Arrow";
 import { getTradingViewSymbol } from "constants/chartMapping";
 import { useGetRiskParameters, useRiskChange } from "hooks/riskParameters/useRiskParameters";
@@ -1310,26 +1308,6 @@ export default function Professional() {
 
   return (
     <Container >
-      <MarginTradeModal
-        isMobile={isMobile}
-        isOpen={isSwapModalVisible}
-        onDismiss={handleSwapModelDismissed}
-        maxHeight={90}
-        minWidth={800}
-        maxWidth={800}
-      >
-        <ModalContainer isMobile={isMobile}>
-          <Close onClick={handleSwapModelDismissed}>
-            <CloseIcon />
-          </Close>
-          {isSwapModalVisible && (
-            <GeneralMoneyMarketPanel
-              initInteraction={interaction}
-              assetData={assetData}
-            />
-          )}
-        </ModalContainer>
-      </MarginTradeModal>
       <ConfirmSwapModal
         riskMessage={riskErrorText}
         hasRiskError={hasRiskError}

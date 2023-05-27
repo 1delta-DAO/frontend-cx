@@ -8,7 +8,7 @@ import {
 } from 'components/Styles/tableStyles'
 import {
   AnimatedTokenPositionIcon
-} from 'pages/1delta/components/TokenDetail'
+} from 'components/TokenDetail'
 import {
   formatSmallGeneralUSDValue,
   formatSmallGeneralValue,
