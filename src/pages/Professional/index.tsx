@@ -10,7 +10,8 @@ import {
   PositionSides,
   OneDeltaTradeType,
   SupportedAssets,
-  MarginTradeType
+  MarginTradeType,
+  Asset
 } from "types/1delta";
 import Dropdown from "../../components/Dropdown/dropdown";
 import { TOKEN_SVGS, ZERO_BN, getSupportedAssets } from "constants/1delta";
@@ -71,10 +72,11 @@ import { useCurrentLendingProtocol, useDeltaAssetState, useDeltaState, useGetCur
 import { DepositYield } from "components/YieldDetails/YieldOptionButtons";
 import { useTradeTypeSelector } from "state/professionalTradeSelection/hooks";
 import { useProfessionalActionHandlers } from "state/professionalTradeSelection/hooks";
-import { useDerivedSwapInfoClientSideProfessional } from "state/professionalTradeSelection/tradeHooks";
+import { useDerivedSwapInfoMargin } from "state/professionalTradeSelection/tradeHooks";
 import { setTradeType } from "state/professionalTradeSelection/actions";
 import { Text } from "rebass";
 import CurrencyInputPro from "components/CurrencyInputPanel/CustomListInputPanel/CurrencyInputPro";
+import PairInput from "components/CurrencyInputPanel/PairInput";
 import PositionTable, { MappedSwapAmounts } from "./components/MarketTable";
 import { useOracleState, usePriceParams, usePrices } from "state/oracles/hooks";
 import { usePollLendingData } from "hooks/polling/pollData";
@@ -89,7 +91,7 @@ import { useBalanceText, useCurrencyAmounts } from "../../hooks/trade";
 import { usePrepareAssetData } from "hooks/asset/useAssetData";
 import { MoneyMarketButtons } from "components/Button/PositionEditingButtons";
 import { useGeneralRiskValidation } from "pages/1delta/hooks/riskValidation";
-import { formatEther } from "ethers/lib/utils";
+import { formatEther, parseUnits } from "ethers/lib/utils";
 import { useGeneralBalanceValidation } from "pages/1delta/hooks/balanceValidation";
 import { generateCalldata } from "utils/calldata/generateCall";
 import { SwitchCircle } from "components/Wallet";
@@ -101,6 +103,11 @@ import MarginTradeModal from 'components/SwapModal/marginTradeModal'
 import { ArrowDotted } from "./components/Arrow";
 import { getTradingViewSymbol } from "constants/chartMapping";
 import { useGetRiskParameters, useRiskChange } from "hooks/riskParameters/useRiskParameters";
+import { useDerivedMoneyMarketTradeInfo, useMoneyMarketState, useMoneyMarketActionHandlers } from "state/moneyMarket/hooks";
+import GeneralCurrencyInputPanel from "components/CurrencyInputPanel/GeneralInputPanel/GeneralCurrencyInputPanel";
+import { useCurrency, useCurrencyWithFallback } from "hooks/Tokens";
+import { getTokenAddresses } from "hooks/1delta/addressGetter";
+import DepositTypeDropdown, { DepositMode } from "components/Dropdown/depositTypeDropdown";
 
 
 export const ArrowWrapper = styled.div<{ clickable: boolean; redesignFlag: boolean }>`
@@ -120,7 +127,7 @@ export const ArrowWrapper = styled.div<{ clickable: boolean; redesignFlag: boole
   border: 2px solid;
   border-color: ${({ theme, redesignFlag }) => (redesignFlag ? theme.backgroundSurface : theme.deprecated_bg0)};
 
-  z-index: 2;
+  z-index: 0;
   ${({ clickable }) =>
     clickable
       ? css`
@@ -305,6 +312,25 @@ const Container = styled.div`
   max-width: 2000px;
 `
 
+const SliderContainer = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  padding 2px;
+  align-items: center;
+  justify-content: center;
+  margin-left: 10px;
+  margin-right: 10px;
+`
+const SliderValue = styled.div`
+  width: 40px;
+  padding 2px;
+  color: ${({ theme }) => (theme.textSecondary)};
+  background-color: ${({ theme }) => theme.deprecated_bg1};
+  border-radius: 2px;
+  padding: 2px;
+`
+
 const ContentContainer = styled(Row)`
 ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
 display: flex;
@@ -335,6 +361,19 @@ const InputPanelContainer = styled.div`
 margin: 2px;
 `
 
+const getPairs = (assets: SupportedAssets[]): [SupportedAssets, SupportedAssets][] => {
+
+  const pairs: [SupportedAssets, SupportedAssets][] = []
+  const noAssets = assets.length
+  for (let i = 0; i < noAssets; i++) {
+    for (let k = 0; k < noAssets; k++) {
+      if (assets[i] !== assets[k])
+        pairs.push([assets[i], assets[k]])
+    }
+  }
+  return pairs
+}
+
 interface AssetRowProps {
   asset: SupportedAssets
   onSelect: (a: SupportedAssets) => void
@@ -358,6 +397,7 @@ interface DropdownLabelProps {
   asset: SupportedAssets
 
 }
+
 
 const LabelAssetText = styled.span`
 font-size: 12px;
@@ -389,12 +429,24 @@ enum ProTradeType {
 
 }
 
+const assetToId = (asset: Asset, chainId: number, protocol: LendingProtocol) => {
+  if (asset.id === SupportedAssets.ETH || asset.id === SupportedAssets.MATIC)
+    return 'ETH'
+  else {
+    try {
+      return getTokenAddresses(chainId, protocol)[String(asset.id)]
+    } catch (err) {
+      console.log(err)
+      return 'ETH'
+    }
+  }
+}
+
 export default function Professional() {
   const redesignFlag = useRedesignFlag()
   const redesignFlagEnabled = redesignFlag === RedesignVariant.Enabled
   const { connectionIsSupported, chainId, account } = useNetworkState()
-  const currentProtocol = useCurrentLendingProtocol()
-  const selectLender = useSelectLendingProtocol()
+  const currentProtocol = LendingProtocol.COMPOUND
 
   const deltaAccount = useGetCurrentAccount(chainId)
 
@@ -409,16 +461,16 @@ export default function Professional() {
   const [currencyIn, selectCurrencyIn] = useState(SupportedAssets.USDC)
   const [currencyOut, selectCurrencyOut] = useState(SupportedAssets.WETH)
 
+  const [pair, selectPair] = useState<[SupportedAssets, SupportedAssets]>([SupportedAssets.WETH, SupportedAssets.USDC])
 
+
+  const [leverage, setLeverage] = useState(1)
 
   const assets = useMemo(() => getSupportedAssets(chainId, LendingProtocol.AAVE), [chainId])
 
+  const pairs = useMemo(() => getPairs(assets), [assets])
 
   const hasNoImplementation = useMemo(() => MAINNET_CHAINS.includes(chainId), [chainId])
-
-
-  const [hasNoImplementationCompound, hasNoImplementationAave] = useMemo(() => [!COMPOUND_CHAINIDS.includes(chainId), !AAVE_CHAINIDS.includes(chainId)]
-    , [chainId])
 
 
   const [hasCompoundView, hasAaveView] = useMemo(() => [COMPOUND_VIEW_CHAINIDS.includes(chainId), AAVE_VIEW_CHAINIDS.includes(chainId)]
@@ -591,17 +643,105 @@ export default function Professional() {
     }),
     [currencyAmounts]
   )
+  const [selectedCurrencyOutside, setCurrencyOutside] = useState<string | undefined>(SupportedAssets.USDC)
+
+
+  const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRecipient } = useMoneyMarketActionHandlers()
+
+  const handleCcyInputSelect = useCallback(
+    (inputCurrency: Currency) => {
+      setApprovalSubmitted(false) // reset 2 step UI for approvals
+      onCurrencySelection(Field.INPUT, inputCurrency)
+      setCurrencyOutside(inputCurrency.symbol)
+    },
+    [onCurrencySelection]
+  )
 
   // swap state
-  const { independentField, typedValue, recipient } = useProfessionalTradeSelectionState()
+  const handleOutputSelect = useCallback(
+    (outputCurrency: Currency) => {
+      onCurrencySelection(Field.OUTPUT, outputCurrency)
+    },
+    [onCurrencySelection]
+  )
+
+
+  const { typedValue, independentField, recipient } = useMoneyMarketState()
+
+
+
+  const [depositMode, setDepositMode] = useState(DepositMode.TO_COLLATERAL)
+
+  const depositAsset = useMemo(() => {
+    if (depositMode === DepositMode.DIRECT) {
+      return pair[0]
+    } else if (depositMode === DepositMode.TO_USDC) {
+      return SupportedAssets.USDC
+    } else return pair[0]
+  },
+    [pair, depositMode]
+  )
+
+  const prices = usePrices([...pair, depositAsset], chainId)
+
+  const [depositId, collateralId, debtId] = useMemo(() => {
+    return [
+      assetToId(deltaAssets[depositAsset], chainId, currentProtocol),
+      assetToId(deltaAssets[pair[0]], chainId, currentProtocol),
+      assetToId(deltaAssets[pair[1]], chainId, currentProtocol)
+    ]
+  },
+    [depositAsset, pair, chainId, currentProtocol]
+  )
+
+  const selectedCurrency = useCurrency(selectedCurrencyOutside, currentProtocol)
+
+  const collateralCurrency = useCurrency(collateralId, currentProtocol)
+  const depositCurrency = useCurrency(depositId, currentProtocol)
+  const debtCurrency = useCurrency(debtId, currentProtocol)
+
+  const {
+    trade: { state: tradeStateIn, trade: tradeIn },
+    allowedSlippage: allowedSlippageIn,
+    parsedAmount: parsedAmountIn,
+    inputError: swapInInputError,
+  } = useDerivedMoneyMarketTradeInfo(
+    selectedCurrency,
+    depositCurrency,
+    false
+  )
+
+
+  const depositDollarValue = useMemo(() => {
+    if (depositMode === DepositMode.DIRECT) return Number(typedValue) * prices[2]
+
+    return Number(tradeIn?.outputAmount.toExact()) * prices[2]
+  },
+    [deltaAssets]
+  )
+
+  const borrowAmount = useMemo(() => {
+    if (!debtCurrency || !prices[2]) return undefined
+    try {
+      return CurrencyAmount.fromRawAmount(debtCurrency, parseUnits(String(depositDollarValue / prices[2] * (leverage - 1)), debtCurrency?.decimals).toString())
+    }
+    catch (e) {
+      return undefined
+    }
+  },
+    [prices, debtCurrency, leverage]
+  )
+
   const {
     trade: { state: tradeState, trade },
     allowedSlippage,
     parsedAmount,
     inputError: swapInputError,
-  } = useDerivedSwapInfoClientSideProfessional(
-    OneDeltaTradeType.Professional,
-    currencyAmounts)
+  } = useDerivedSwapInfoMargin(
+    debtCurrency,
+    borrowAmount,
+    collateralCurrency,
+  )
 
   const {
     wrapType,
@@ -637,8 +777,6 @@ export default function Professional() {
     [fiatValueInput, fiatValueOutput, routeIsSyncing]
   )
 
-  const { onUserInput, onChangeRecipient } = useProfessionalActionHandlers()
-
   const dependentField: Field = independentField === Field.INPUT ? Field.OUTPUT : Field.INPUT
 
   const [maxInput, setMaxInput] = useState(false)
@@ -649,14 +787,6 @@ export default function Professional() {
       onUserInput(Field.INPUT, value)
       maxInput && setMaxInput(false)
       maxOutput && setMaxOutput(false)
-    },
-    [onUserInput, maxInput, maxOutput]
-  )
-  const handleTypeOutput = useCallback(
-    (value: string) => {
-      onUserInput(Field.OUTPUT, value)
-      maxOutput && setMaxOutput(false)
-      maxInput && setMaxInput(false)
     },
     [onUserInput, maxInput, maxOutput]
   )
@@ -693,29 +823,6 @@ export default function Professional() {
   )
 
   const marginTraderContract = useGetMarginTraderContract(chainId, relevantAccount)
-
-
-  const handleSelectInterestModeSource = useCallback(() => {
-    if (!assetIn?.aaveData[chainId].reserveData?.stableBorrowRateEnabled) {
-      setSourceBorrowInterestMode(AaveInterestMode.VARIABLE)
-      return null // no selections shall be possible
-    } else {
-      if (sourceBorrowInterestMode !== AaveInterestMode.VARIABLE)
-        return setSourceBorrowInterestMode(AaveInterestMode.VARIABLE)
-      return setSourceBorrowInterestMode(AaveInterestMode.STABLE)
-    }
-  }, [sourceBorrowInterestMode, assetIn])
-
-  const handleSelectInterestModeTarget = useCallback(() => {
-    if (!assetOut?.aaveData[chainId].reserveData?.stableBorrowRateEnabled) {
-      setTargetBorrowInterestMode(AaveInterestMode.VARIABLE)
-      return null // no selections shall be possible
-    } else {
-      if (targetBorrowInterestMode !== AaveInterestMode.VARIABLE)
-        return setTargetBorrowInterestMode(AaveInterestMode.VARIABLE)
-      return setTargetBorrowInterestMode(AaveInterestMode.STABLE)
-    }
-  }, [targetBorrowInterestMode, assetOut])
 
   const {
     approvalStateOfConcern,
@@ -866,6 +973,7 @@ export default function Professional() {
     trade?.outputAmount?.currency?.symbol,
   ])
 
+
   // errors
   const [showInverted, setShowInverted] = useState<boolean>(false)
   const [swapQuoteReceivedDate, setSwapQuoteReceivedDate] = useState<Date | undefined>()
@@ -1000,7 +1108,6 @@ export default function Professional() {
     hf,
   ])
 
-  const [leverage, setLeverage] = useState(1)
 
   const { supply, borrow, healthFactor, ltv, collateral, hasBalance } = useRiskParameters(
     chainId,
@@ -1031,37 +1138,10 @@ export default function Professional() {
     }, [collateral])
 
 
-  const [selectingAccount, setSelectingAccount] = useState(false)
 
 
-  const selectAccount = useCallback(
-    (index: number) => {
-      if (currentProtocol === LendingProtocol.COMPOUND) dispatch(set1DeltaAccount({ chainId, index }))
-    },
-    [dispatch, currentProtocol, chainId]
-  )
+  const handlePairSwap = useCallback(() => selectPair([pair[1], pair[0]]), [pair])
 
-  const [isAccountModalVisible, setAccountModalVisible] = useState(false)
-
-  const handleAccountModalOpen = () => {
-    setAccountModalVisible(true)
-  }
-
-  const handleProtocolSwitch = useCallback((targetProtocol: LendingProtocol) => {
-    if (targetProtocol === LendingProtocol.AAVE && hasAaveView)
-      dispatch(
-        switchLendingProtocol({
-          targetProtocol,
-        })
-      )
-    if (targetProtocol === LendingProtocol.COMPOUND)
-      dispatch(
-        switchLendingProtocol({
-          targetProtocol,
-        })
-      )
-
-  }, [dispatch, currentProtocol, hasAaveView])
 
   const { aprData, assetData, balanceData } = usePrepareAssetData(currentProtocol, chainId, account)
 
@@ -1090,6 +1170,9 @@ export default function Professional() {
     })
   }, [assets])
 
+
+
+
   const handleTradeTypeMargin = useCallback(() => {
     setMarginTradeType(MarginTradeType.Open)
     dispatch(setTradeType({ tradeType: OneDeltaTradeType.MarginSwap }))
@@ -1103,60 +1186,9 @@ export default function Professional() {
     [dispatch, assetData]
   )
 
-  const handleTradeTypeCollateralSwap = useCallback(() => {
-    setSide(PositionSides.Collateral)
-    dispatch(setTradeType({ tradeType: OneDeltaTradeType.SingleSide }))
-    setProTradeType(ProTradeType.CollateralSwap)
-    setMarginTradeType(MarginTradeType.Collateral)
-    selectCurrencyIn(collateralAssets[0])
-    setSelectableAssets({
-      assetsIn: collateralAssets,
-      assetsOut: assets
-    })
-  },
-    [dispatch, collateralAssets, assets]
-  )
-
-  const handleTradeTypeDebtSwap = useCallback(() => {
-    setSide(PositionSides.Borrow)
-    dispatch(setTradeType({ tradeType: OneDeltaTradeType.SingleSide }))
-    setProTradeType(ProTradeType.DebtSwap)
-    setMarginTradeType(MarginTradeType.Debt)
-    selectCurrencyOut(debtAssets[0])
-    setSelectableAssets({
-      assetsIn: assets,
-      assetsOut: debtAssets
-    })
-  },
-    [dispatch, assets, debtAssets]
-  )
-
-
-  const handleTradeTypeLiquidate = useCallback(() => {
-    setMarginTradeType(MarginTradeType.Trim)
-    dispatch(setTradeType({ tradeType: OneDeltaTradeType.MarginSwap }))
-    setProTradeType(ProTradeType.Liquidate)
-    selectCurrencyIn(collateralAssets[0])
-    selectCurrencyOut(debtAssets[0])
-    setSelectableAssets({
-      assetsIn: collateralAssets,
-      assetsOut: debtAssets
-    })
-  },
-    [dispatch, debtAssets, collateralAssets]
-  )
-
   const [isSwapModalVisible, setSwapModalVisible] = useState(false)
 
   const interaction = useSingleInteraction()
-
-  const setMoneyMarketModalActive = () => {
-    setSwapModalVisible(true)
-    if ([MarginTradeType.Supply, MarginTradeType.Withdraw].includes(interaction))
-      setSide(PositionSides.Collateral)
-    else setSide(PositionSides.Borrow)
-    // set model visible
-  }
 
   const handleSwapModelDismissed = () => {
     setSwapModalVisible(false)
@@ -1284,123 +1316,17 @@ export default function Professional() {
         fiatValueOutput={fiatValueOutput}
       />
       <ContentContainer>
-        <ConfigPanel>
-          <LendingProtocolPickerBoring
-            isMobile={isMobile}
-            handleProtocolSwitch={handleProtocolSwitch}
-            chainId={chainId}
-            currentProtocol={currentProtocol}
-          />
-          <ProfessionalAccountSelectionCard
-            tradeImpact={riskChange}
-            currentProtocol={currentProtocol}
-            connectionIsSupported={connectionIsSupported}
-            userWallet={account}
-            selectingAccount={selectingAccount}
-            chainId={chainId}
-            accounts={userAccountData}
-            isMobile={isMobile}
-            setSelectingAccount={setSelectingAccount}
-            selectAccount={selectAccount}
-            userAccount={userAccount}
-            handleAccountModalOpen={handleAccountModalOpen}
-            hasNoImplementationCompound={hasNoImplementationCompound}
-            collateral={supply}
-            debt={borrow}
-            liquidity={collateral}
-          />
-
-          <BarCardWithChange
-            notConnected={!Boolean(account)}
-            currentProtocol={currentProtocol}
-            hasBalance={hasBalance}
-            ltv={Number(formatEther(riskChange.ltv)) * 100}
-            healthFactor={Number(formatEther(riskChange.healthFactor))}
-            ltvNew={Number(formatEther(riskChange.ltvNew)) * 100}
-            healthFactorNew={Number(formatEther(riskChange.healthFactorNew))}
-          />
-          <MoneyMarketButtons
-            hasPosition={true}
-            hasCollateral={true}
-            hasDebt={true}
-            onClick={setMoneyMarketModalActive}
-          />
-        </ConfigPanel>
-        <CartAndTableContainer >
-          <CurrencySelectionRow>
-            <Dropdown label={<DropdownLabel asset={chartCurrencyIn} />}>
-              {assets.map((a, i) =>
-                <AssetRow asset={a} onSelect={handleSetChartCcyIn} key={a} />
-              )}
-            </Dropdown>
-
-            <Dropdown label={<DropdownLabel asset={chartCurrencyOut} />}>
-              {assets.map((a, i) =>
-                <AssetRow asset={a} onSelect={handleSetChartCcyOut} key={a} />
-              )}
-            </Dropdown>
-            <PriceRow>
-              {!isMobile && <PriceText>
-                Oracle:
-              </PriceText>}
-              <PriceText>
-                {(chartPrices[1] / chartPrices[0]).toLocaleString()}
-              </PriceText>
-            </PriceRow>
-          </CurrencySelectionRow>
-          <ChartContainer>
-            <TradingViewWidget
-              symbol={tradingViewSymbol}
-              theme={isDark ? 'DARK' : 'LIGHT'}
-              allow_symbol_change={false}
-              autosize={true}
-              interval={'30'}
-              hide_volume={true}
-              style={'2'}
-            />
-          </ChartContainer>
-          <PositionTable
-            tradeImpact={tradeImpact}
-            isMobile={isMobile}
-            assetData={assetData}
-          />
-        </CartAndTableContainer>
         <SwapPanel>
-          <ButtonRow>
-            <TypeButton onClick={handleTradeTypeMargin} selected={marginTradeType === MarginTradeType.Open}>
-              Open
-            </TypeButton>
-            <TypeButton
-              onClick={handleTradeTypeLiquidate}
-              selected={marginTradeType === MarginTradeType.Trim}
-              disabled={collateralAssets.length === 0 || debtAssets.length === 0}
-            >
-              Close
-            </TypeButton>
-            <TypeButton
-              onClick={handleTradeTypeCollateralSwap}
-              selected={marginTradeType === MarginTradeType.Collateral}
-              disabled={collateralAssets.length === 0}
-            >
-              Collateral Swap
-            </TypeButton>
-            <TypeButton
-              onClick={handleTradeTypeDebtSwap}
-              selected={marginTradeType === MarginTradeType.Debt}
-              disabled={debtAssets.length === 0}
-            >
-              Debt Swap
-            </TypeButton>
-          </ButtonRow>
           <InputPanelContainer>
             <InputWrapper redesignFlag={redesignFlagEnabled}>
-              <CurrencyInputPro
-                onAssetSelect={handleSetCurrencyIn}
-                assetList={selectableAssets.assetsIn}
-                placeholder={currencyIn}
-                topLabel={<PanelLabel color='red' text='Sell' />}
-                isPlus={false}
-                providedTokenList={restrictedTokenList}
+              <GeneralCurrencyInputPanel
+                onCurrencySelect={handleCcyInputSelect}
+                topLabel={<PanelLabel
+                  color='green'
+                  text='Pay'
+                  selectedOption={depositMode}
+                  onSelect={setDepositMode} />
+                }
                 label={
                   independentField === Field.OUTPUT && !showWrap ? (
                     <>From (at most)</>
@@ -1410,8 +1336,7 @@ export default function Professional() {
                 }
                 value={formattedAmounts[Field.INPUT]}
                 showMaxButton={showMaxButton}
-                asset={assetIn.id}
-                currency={currencyAmounts[Field.INPUT]?.currency}
+                currency={selectedCurrency}
                 onUserInput={handleTypeInput}
                 onMax={handleMaxInput}
                 fiatValue={fiatValueInput ?? undefined}
@@ -1419,10 +1344,7 @@ export default function Professional() {
                 showCommonBases={true}
                 id={'CURRENCY_INPUT_PANEL'}
                 loading={independentField === Field.OUTPUT && routeIsSyncing}
-                providedCurrencyBalance={currencyAmounts[Field.INPUT]}
-                balanceText={textTop}
-                balanceSignIsPlus={plusTop}
-                topRightLabel={hasSwitchTop && hasStableRateIn && <IRModeSwitch onSwitch={handleSelectInterestModeSource} text={sourceBorrowInterestMode} />}
+                topRightLabel={undefined}
               />
             </InputWrapper>
             <ArrowWrapper clickable={isSupportedChain(chainId)} redesignFlag={redesignFlagEnabled}>
@@ -1437,15 +1359,15 @@ export default function Professional() {
             </ArrowWrapper>
 
             <InputWrapper redesignFlag={redesignFlagEnabled}>
-              <CurrencyInputPro
-                onAssetSelect={handleSetCurrencyOut}
-                assetList={selectableAssets.assetsOut}
+              <PairInput
+                onPairSelect={selectPair}
+                pairList={pairs}
                 placeholder={currencyOut}
-                topLabel={<PanelLabel color='green' text='Buy' />}
+                topLabel={<PanelLabelPair color='green' text='Open' />}
                 isPlus={true}
                 providedTokenList={restrictedTokenList}
                 value={formattedAmounts[Field.OUTPUT]}
-                onUserInput={handleTypeOutput}
+                onUserInput={() => null}
                 label={
                   independentField === Field.INPUT && !showWrap ? (
                     <>To (at least)</>
@@ -1458,8 +1380,8 @@ export default function Professional() {
                 hideBalance={false}
                 fiatValue={fiatValueOutput ?? undefined}
                 priceImpact={stablecoinPriceImpact}
-                currency={currencyAmounts[Field.OUTPUT]?.currency} //{currencies[Field.OUTPUT] ?? null}
-                asset={assetOut.id}
+                currency={currencyAmounts[Field.OUTPUT]?.currency}
+                pair={pair}
                 providedCurrencyBalance={currencyAmounts[Field.OUTPUT]}
                 balanceText={textBottom}
                 // onCurrencySelect={null}
@@ -1468,7 +1390,7 @@ export default function Professional() {
                 id={'CURRENCY_OUTPUT_PANEL'}
                 loading={independentField === Field.INPUT && routeIsSyncing}
                 balanceSignIsPlus={plusBottom}
-                topRightLabel={hasSwitchBottom && hasStableRateOut && <IRModeSwitch onSwitch={handleSelectInterestModeTarget} text={targetBorrowInterestMode} />}
+                topRightLabel={<PairSwap onSwitch={handlePairSwap} />}
               />
             </InputWrapper>
           </InputPanelContainer>
@@ -1485,8 +1407,13 @@ export default function Professional() {
               <AddressInputPanel id="recipient" value={recipient} onChange={onChangeRecipient} />
             </>
           ) : null}
-
-          <div style={{ marginTop: '10px', }}>
+          <SliderContainer >
+            <SliderValue>
+              {leverage}x
+            </SliderValue>
+            <DecimalSlider min={1} max={5} step={0.1} markers={[0, 1, 2, 3, 4, 5]} onChange={setLeverage} value={leverage} />
+          </SliderContainer>
+          <div style={{ marginTop: '10px', zIndex: 0 }}>
             {swapIsUnsupported ? (
               <ButtonPrimary disabled={true}>
                 <ThemedText.DeprecatedMain mb="4px">
@@ -1515,7 +1442,7 @@ export default function Professional() {
               </GreyCard>
             ) : showApproveFlow ? (
               <AutoRow style={{ flexWrap: 'nowrap', width: '100%' }} gap={'5px'}>
-                <AutoColumn style={{ width: '100%' }} gap="12px">
+                <AutoColumn style={{ width: '100%', zIndex: 0 }} gap="12px">
                   <ButtonConfirmed
                     onClick={handleApprove}
                     disabled={approveTokenButtonDisabled}
@@ -1623,17 +1550,46 @@ export default function Professional() {
             />
           )}
           {showPriceImpactWarning && <PriceImpactWarning priceImpact={largerPriceImpact} />}
-          {/* {account && (
-            <PanelContainer>
-              <AdvancedRiskDetailsSingleSide
-                tradeImpact={riskChange}
-                allowedSlippage={allowedSlippage}
-                noTrade={!typedValue}
-                isMobile={isMobile}
-              />
-            </PanelContainer>
-          )} */}
         </SwapPanel>
+        <CartAndTableContainer >
+          <CurrencySelectionRow>
+            <Dropdown label={<DropdownLabel asset={chartCurrencyIn} />}>
+              {assets.map((a, i) =>
+                <AssetRow asset={a} onSelect={handleSetChartCcyIn} key={a} />
+              )}
+            </Dropdown>
+
+            <Dropdown label={<DropdownLabel asset={chartCurrencyOut} />}>
+              {assets.map((a, i) =>
+                <AssetRow asset={a} onSelect={handleSetChartCcyOut} key={a} />
+              )}
+            </Dropdown>
+            <PriceRow>
+              {!isMobile && <PriceText>
+                Oracle:
+              </PriceText>}
+              <PriceText>
+                {(chartPrices[1] / chartPrices[0]).toLocaleString()}
+              </PriceText>
+            </PriceRow>
+          </CurrencySelectionRow>
+          <ChartContainer>
+            <TradingViewWidget
+              symbol={tradingViewSymbol}
+              theme={isDark ? 'DARK' : 'LIGHT'}
+              allow_symbol_change={false}
+              autosize={true}
+              interval={'30'}
+              hide_volume={true}
+              style={'2'}
+            />
+          </ChartContainer>
+          <PositionTable
+            tradeImpact={tradeImpact}
+            isMobile={isMobile}
+            assetData={assetData}
+          />
+        </CartAndTableContainer>
       </ContentContainer>
     </Container>
   )
@@ -1642,19 +1598,44 @@ export default function Professional() {
 
 interface LabelProps {
   color: string;
-  text: string
+  text: string;
 }
 
-const PanelLabel = ({ color, text }: LabelProps) => {
-  return <ThemedText.DeprecatedLabel fontSize="12px" textAlign="left" padding="2px 12px" color={color}>
-    {text}
-  </ThemedText.DeprecatedLabel>
+interface TopLabelProps extends LabelProps {
+  selectedOption: DepositMode
+  onSelect: (opt: DepositMode) => void
 }
 
-interface SwitchProps {
-  onSwitch: () => void;
-  text: AaveInterestMode
+
+const PanelLabel = ({ color, text, selectedOption, onSelect }: TopLabelProps) => {
+  return <PanelContainer>
+    <div style={{ color, fontSize: '14px', marginLeft: '10px' }}>
+      {text}
+    </div>
+    <DepositTypeDropdown selectedOption={selectedOption} onSelect={onSelect}></DepositTypeDropdown>
+  </PanelContainer>
 }
+
+const PanelContainer = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+`
+
+const PanelLabelPair = ({ color, text }: LabelProps) => {
+  return <PanelContainer>
+    <div style={{ color, fontSize: '14px', marginLeft: '10px' }}>
+      {text}
+    </div>
+    <>
+      value
+    </>
+  </PanelContainer>
+}
+
+
 
 
 const SwitchButton = styled(ButtonSecondary)`
@@ -1670,15 +1651,14 @@ const SwitchButton = styled(ButtonSecondary)`
   padding: 5px;
 `
 
-const modeToText = {
-  [AaveInterestMode.NONE]: 'None',
-  [AaveInterestMode.STABLE]: 'Stable',
-  [AaveInterestMode.VARIABLE]: 'Variable',
+interface PairSwitchProps {
+  onSwitch: () => void;
 }
 
-const IRModeSwitch = ({ onSwitch, text }: SwitchProps) => {
+
+const PairSwap = ({ onSwitch }: PairSwitchProps) => {
   return <SwitchButton onClick={onSwitch}>
-    {modeToText[text]}
+    Switch
     <SwitchCircle size={13} />
   </SwitchButton>
 }

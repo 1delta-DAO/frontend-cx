@@ -95,7 +95,7 @@ export const addresses0VixOTokens: AddressDictionary = {
   [SupportedAssets.MATICX]: {
     [SupportedChainId.POLYGON]: '0xAAcc5108419Ae55Bc3588E759E28016d06ce5F40',
   },
-  [SupportedAssets.MIMATIC]: {
+  [SupportedAssets.MAI]: {
     [SupportedChainId.POLYGON]: '0xC57E5e261d49Af3026446de3eC381172f17bB799',
   },
   [SupportedAssets.JEUR]: {

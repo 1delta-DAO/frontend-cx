@@ -165,7 +165,7 @@ export const addressesAaveATokens: AddressDictionary = {
     [SupportedChainId.POLYGON_MUMBAI]: '0xC0e5f125D33732aDadb04134dB0d351E9bB5BCf6',
     [SupportedChainId.POLYGON]: '0x6d80113e533a2C0fe82EaBD35f1875DcEA89Ea97',
   },
-  [SupportedAssets.MIMATIC]: {
+  [SupportedAssets.MAI]: {
     [SupportedChainId.POLYGON]: '0xeBe517846d0F36eCEd99C735cbF6131e1fEB775D',
   },
   [SupportedAssets.MATICX]: {
@@ -314,7 +314,7 @@ export const addressesAaveVTokens: AddressDictionary = {
     [SupportedChainId.POLYGON_MUMBAI]: '0x3062CEfc74220dcB7341d268653F9ACAe8fB1107',
     [SupportedChainId.POLYGON]: '0x4a1c3aD6Ed28a636ee1751C69071f6be75DEb8B8',
   },
-  [SupportedAssets.MIMATIC]: {
+  [SupportedAssets.MAI]: {
     [SupportedChainId.POLYGON]: '0x18248226C16BF76c032817854E7C83a2113B4f06',
   },
   [SupportedAssets.MATICX]: {

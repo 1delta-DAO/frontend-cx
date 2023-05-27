@@ -82,7 +82,7 @@ const STABLECOINS = [
   SupportedAssets.USDC,
   SupportedAssets.USDT,
   SupportedAssets.MATICX,
-  SupportedAssets.MIMATIC,
+  SupportedAssets.MAI,
   SupportedAssets.JEUR,
   SupportedAssets.EURS,
   SupportedAssets.AGEUR

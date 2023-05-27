@@ -369,3 +369,102 @@ export function useDerivedMoneyMarketTradeInfoBroker(
   )
 }
 
+
+
+// from the current swap inputs, compute the best trade and return it.
+export function useDerivedMoneyMarketTradeInfo(
+  inCurrency: Currency | null | undefined,
+  outCurrency: Currency | null | undefined,
+  isDirect?: boolean
+): {
+  currencies: { [field in Field]?: Currency | null }
+  parsedAmount: CurrencyAmount<Currency> | undefined
+  inputError?: ReactNode
+  trade: {
+    trade: InterfaceTrade<Currency, Currency, TradeType> | undefined
+    state: TradeState
+  }
+  allowedSlippage: Percent
+} {
+  const { account } = useWeb3React()
+
+  const { independentField, typedValue, recipient } = useMoneyMarketState()
+
+  const currencies: { [field in Field]?: Currency | null } = useMemo(
+    () => ({
+      [Field.INPUT]: inCurrency,
+      [Field.OUTPUT]: outCurrency,
+    }),
+    [inCurrency, outCurrency]
+  )
+
+  const inputCurrency = inCurrency
+  const outputCurrency = outCurrency
+
+  const to: string | null = (recipient === null ? account : recipient) ?? null
+
+  const relevantTokenBalances = useCurrencyBalances(
+    account ?? undefined,
+    useMemo(() => [inputCurrency ?? undefined, outputCurrency ?? undefined], [inputCurrency, outputCurrency])
+  )
+
+  const isExactIn: boolean = independentField === Field.INPUT
+  const parsedAmount = useMemo(
+    () => tryParseCurrencyAmount(typedValue, (isExactIn ? inputCurrency : outputCurrency) ?? undefined),
+    [inputCurrency, isExactIn, outputCurrency, typedValue]
+  )
+
+  const trade = useBestMoneyMarketTradeBroker(
+    isExactIn ? TradeType.EXACT_INPUT : TradeType.EXACT_OUTPUT,
+    isDirect ? undefined : parsedAmount,
+    isDirect ? undefined : (isExactIn ? outputCurrency : inputCurrency) ?? undefined
+  )
+
+  // allowed slippage is either auto slippage, or custom user defined slippage if auto slippage disabled
+  const autoSlippageTolerance = useAutoSlippageTolerance(trade.trade)
+  const allowedSlippage = useUserSlippageToleranceWithDefault(autoSlippageTolerance)
+
+  const inputError = useMemo(() => {
+    let inputError: ReactNode | undefined
+
+    if (!account) {
+      inputError = <Trans>Connect Wallet</Trans>
+    }
+
+    if (!currencies[Field.INPUT] || !currencies[Field.OUTPUT]) {
+      inputError = inputError ?? <Trans>Select a token</Trans>
+    }
+
+    if (!parsedAmount) {
+      inputError = inputError ?? <Trans>Enter an amount</Trans>
+    }
+
+    const formattedTo = isAddress(to)
+    if (!to || !formattedTo) {
+      inputError = inputError ?? <Trans>Enter a recipient</Trans>
+    } else {
+      if (BAD_RECIPIENT_ADDRESSES[formattedTo]) {
+        inputError = inputError ?? <Trans>Invalid recipient</Trans>
+      }
+    }
+
+
+    // if (balanceIn && amountIn && balanceIn.lessThan(amountIn)) {
+    //   inputError = <Trans>Insufficient {amountIn.currency.symbol} balance</Trans>
+    // }
+
+    return inputError
+  }, [account, allowedSlippage, currencies, parsedAmount, to, trade.trade])
+
+  return useMemo(
+    () => ({
+      currencies,
+      parsedAmount,
+      inputError,
+      trade,
+      allowedSlippage,
+    }),
+    [allowedSlippage, currencies, inputError, parsedAmount, trade]
+  )
+}
+

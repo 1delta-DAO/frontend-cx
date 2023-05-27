@@ -7,7 +7,6 @@ import { useIsDarkMode } from 'state/user/hooks'
 import styled from 'styled-components/macro'
 import { Z_INDEX } from 'theme/zIndex'
 
-import Home from './1delta'
 import Professional from './Professional'
 import { useAnalyticsReporter } from '../components/analytics'
 import ErrorBoundary from '../components/ErrorBoundary'
@@ -95,8 +94,7 @@ export default function App() {
           <Polling />
           <Suspense fallback={<Loader />}>
             <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/pro" element={<Professional />} />
+              <Route path="/" element={<Professional />} />
             </Routes>
           </Suspense>
           <Marginer />

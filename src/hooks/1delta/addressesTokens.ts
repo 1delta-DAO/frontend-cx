@@ -66,7 +66,7 @@ export const addressesTokens: AddressDictionary = {
   [SupportedAssets.JEUR]: {
     [SupportedChainId.POLYGON]: '0x4e3decbb3645551b8a19f0ea1678079fcb33fb4c',
   },
-  [SupportedAssets.MIMATIC]: {
+  [SupportedAssets.MAI]: {
     [SupportedChainId.POLYGON]: '0xa3fa99a148fa48d14ed51d610c367c61876997f1',
   },
   [SupportedAssets.BAL]: {

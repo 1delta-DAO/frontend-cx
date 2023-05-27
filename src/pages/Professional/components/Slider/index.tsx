@@ -5,7 +5,7 @@ import styled from 'styled-components';
 
 const SliderContainer = styled.div`
   position: relative;
-  width: 80%;
+  width: 100%;
   `
 
 
@@ -43,6 +43,8 @@ const DecimalSlider: React.FC<DecimalSliderProps> = ({ min, max, step, markers, 
   return (
     <SliderContainer>
       <input
+        style={{ width: '90%' }}
+        width='100%'
         type="range"
         min={min}
         max={max}

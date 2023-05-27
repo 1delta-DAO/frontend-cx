@@ -192,7 +192,7 @@ export enum SupportedAssets {
   SAI = 'SAI',
   REP = 'REP',
   MATICX = 'MATICX',
-  MIMATIC = 'MIMATIC',
+  MAI = 'MAI',
   STMATIC = 'STMATIC',
   WSTETH = 'WSTETH',
   GDAI = 'GDAI',
