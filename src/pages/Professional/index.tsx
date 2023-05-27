@@ -1,4 +1,4 @@
-import { BaseButton, ButtonGray, ButtonSecondary } from "components/Button";
+import { BaseButton, ButtonSecondary } from "components/Button";
 import Loader from "components/Loader";
 import { darken } from "polished";
 import { useEffect, useMemo, useState, useCallback } from "react";
@@ -13,16 +13,15 @@ import {
   MarginTradeType,
   Asset
 } from "types/1delta";
-import Dropdown from "../../components/Dropdown/dropdown";
 import { TOKEN_SVGS, ZERO_BN, getSupportedAssets, ETHEREUM_CHAINS, POLYGON_CHAINS } from "constants/1delta";
 import { useNetworkState } from "state/globalNetwork/hooks";
-import { LendingProtocol, set1DeltaAccount, switchLendingProtocol } from "state/1delta/actions";
+import { LendingProtocol } from "state/1delta/actions";
 import { AutoColumn } from "components/Column";
-import { ArrowContainer, ArrowUpWrapper, InputWrapper } from "./components/wrappers";
-import { ArrowDown, CheckCircle, ChevronDown, HelpCircle, PlusCircle } from "react-feather";
+import { ArrowContainer, InputWrapper } from "./components/wrappers";
+import { ArrowDown, CheckCircle, HelpCircle } from "react-feather";
 import { Trans } from '@lingui/macro'
 import { Trade } from '@uniswap/router-sdk'
-import { Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
+import { Currency, CurrencyAmount, TradeType } from '@uniswap/sdk-core'
 import PriceImpactWarning from 'components/swap/PriceImpactWarning'
 import SwapDetailsDropdown from 'components/swap/SwapDetailsDropdown'
 import { MouseoverTooltip } from 'components/Tooltip'
@@ -67,30 +66,22 @@ import { currencyId } from 'utils/currencyId'
 import { useTransactionAdder } from 'state/transactions/hooks'
 import { MarginTradingButtonText } from 'components/Styles'
 import { parseMessage } from 'constants/errors'
-import { useCurrentLendingProtocol, useDeltaAssetState, useDeltaState, useGetCurrentAccount, useSelectLendingProtocol } from "state/1delta/hooks";
-import { DepositYield } from "components/YieldDetails/YieldOptionButtons";
+import { useDeltaAssetState, useDeltaState, useGetCurrentAccount, useSelectLendingProtocol } from "state/1delta/hooks";
 import { useTradeTypeSelector } from "state/professionalTradeSelection/hooks";
-import { useProfessionalActionHandlers } from "state/professionalTradeSelection/hooks";
 import { useDerivedSwapInfoMargin } from "state/professionalTradeSelection/tradeHooks";
 import { setTradeType } from "state/professionalTradeSelection/actions";
 import { Text } from "rebass";
-import CurrencyInputPro from "components/CurrencyInputPanel/CustomListInputPanel/CurrencyInputPro";
 import PairInput from "components/CurrencyInputPanel/PairInput";
-import PositionTable, { MappedSwapAmounts } from "./components/MarketTable";
-import { useOracleState, usePriceParams, usePrices } from "state/oracles/hooks";
+import PositionTable from "./components/MarketTable";
+import { useOracleState, usePrices } from "state/oracles/hooks";
 import { usePollLendingData } from "hooks/polling/pollData";
 import { useSingleInteraction } from "state/marginTradeSelection/hooks";
 import { useRiskParameters } from "hooks/professional/riskParameters";
 import DecimalSlider from "./components/Slider";
-import BarCard, { BarCardWithChange } from "components/AccountCards/BarCard";
-import ProfessionalAccountSelectionCard from "./components/Account/details";
 import { useMarginTradeApproval } from "hooks/approval";
-import { LendingProtocolPickerBoring } from "components/ProtocolSelection";
 import { useBalanceText, useCurrencyAmounts } from "../../hooks/trade";
 import { usePrepareAssetData } from "hooks/asset/useAssetData";
-import { MoneyMarketButtons } from "components/Button/PositionEditingButtons";
 import { useGeneralRiskValidation } from "pages/Professional/hooks/riskValidation";
-import { formatEther, parseUnits } from "ethers/lib/utils";
 import { useGeneralBalanceValidation } from "pages/Professional/hooks/balanceValidation";
 import { generateCalldata } from "utils/calldata/generateCall";
 import { SwitchCircle } from "components/Wallet";
