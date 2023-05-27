@@ -19,7 +19,7 @@ import { useNetworkState } from "state/globalNetwork/hooks";
 import { LendingProtocol, set1DeltaAccount, switchLendingProtocol } from "state/1delta/actions";
 import { AutoColumn } from "components/Column";
 import { ArrowContainer, ArrowUpWrapper, InputWrapper } from "./components/wrappers";
-import { ArrowDown, CheckCircle, HelpCircle, PlusCircle } from "react-feather";
+import { ArrowDown, CheckCircle, ChevronDown, HelpCircle, PlusCircle } from "react-feather";
 import { Trans } from '@lingui/macro'
 import { Trade } from '@uniswap/router-sdk'
 import { Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
@@ -45,7 +45,6 @@ import { AutoRow } from '../../components/Row'
 import confirmPriceImpactWithoutFee from '../../components/swap/confirmPriceImpactWithoutFee'
 import ConfirmSwapModal from '../../components/swap/ConfirmMarginTradeModal'
 import { Dots, PageWrapper, SwapCallbackError, SwapWrapper } from '../../components/swap/styleds'
-import { SwitchLocaleLink } from '../../components/SwitchLocaleLink'
 import { ApprovalState } from '../../hooks/useApproveCallback'
 import { useIsSwapUnsupported } from '../../hooks/useIsSwapUnsupported'
 import { useStablecoinValue } from '../../hooks/useStablecoinPrice'
@@ -111,6 +110,7 @@ import DepositTypeDropdown, { DepositMode } from "components/Dropdown/depositTyp
 import { USDC_POLYGON } from "constants/tokens";
 import useDebounce from "hooks/useDebounce";
 import { UniswapTrade } from "utils/Types";
+import PairSearchDropdown from "components/Dropdown/dropdownPairSearch";
 
 
 export const ArrowWrapper = styled.div<{ clickable: boolean; redesignFlag: boolean }>`
@@ -466,8 +466,14 @@ export default function Professional() {
   const [currencyIn, selectCurrencyIn] = useState(SupportedAssets.USDC)
   const [currencyOut, selectCurrencyOut] = useState(SupportedAssets.WETH)
 
-  const [pair, selectPair] = useState<[SupportedAssets, SupportedAssets]>([SupportedAssets.WETH, SupportedAssets.USDC])
 
+  const [pair, selectPair] = useState<[SupportedAssets, SupportedAssets]>([SupportedAssets.WETH, SupportedAssets.USDC])
+  const [chartPair, setChartPair] = useState(pair)
+
+  const handleSelectPair = (p: [SupportedAssets, SupportedAssets]) => {
+    selectPair(p)
+    setChartPair(p)
+  }
 
   const [leverage, setLeverage] = useState(1)
 
@@ -661,14 +667,6 @@ export default function Professional() {
     [onCurrencySelection]
   )
 
-  // swap state
-  const handleOutputSelect = useCallback(
-    (outputCurrency: Currency) => {
-      onCurrencySelection(Field.OUTPUT, outputCurrency)
-    },
-    [onCurrencySelection]
-  )
-
   const { typedValue, independentField, recipient } = useMoneyMarketState()
 
   const [depositMode, setDepositMode] = useState(DepositMode.TO_COLLATERAL)
@@ -684,7 +682,8 @@ export default function Professional() {
 
   const depositAsset = useMemo(() => {
     if (depositMode === DepositMode.DIRECT) {
-      return pair[0]
+      if (selectedAsset) return selectedAsset
+      else return pair[0]
     } else if (depositMode === DepositMode.TO_USDC) {
       return SupportedAssets.USDC
     } else return pair[0]
@@ -692,6 +691,7 @@ export default function Professional() {
     [pair, depositMode]
   )
 
+  // validates selectable deposit modes
   const availableDepoModes = useMemo(() => {
     // deposit = USDC -> don't show to_usdc
     if (selectedAsset === SupportedAssets.USDC) {
@@ -809,12 +809,12 @@ export default function Professional() {
   )
 
   const [routeNotFound, routeIsLoading, routeIsSyncing] = useMemo(
-    () => [!trade?.swaps, TradeState.LOADING === tradeState, TradeState.SYNCING === tradeState],
+    () => [!trade?.swaps, TradeState.LOADING === tradeState, TradeState.SYNCING === tradeState || TradeState.SYNCING === tradeInState],
     [trade, tradeState]
   )
 
-  const fiatValueInput = useStablecoinValue(parsedAmounts[Field.INPUT])
-  const fiatValueOutput = useStablecoinValue(parsedAmounts[Field.OUTPUT])
+  const fiatValueInput = useStablecoinValue(trade?.inputAmount)
+  const fiatValueOutput = useStablecoinValue(trade?.outputAmount)
   const stablecoinPriceImpact = useMemo(
     () => (routeIsSyncing ? undefined : computeFiatValuePriceImpact(fiatValueInput, fiatValueOutput)),
     [fiatValueInput, fiatValueOutput, routeIsSyncing]
@@ -1183,7 +1183,7 @@ export default function Professional() {
 
 
 
-  const handlePairSwap = useCallback(() => selectPair([pair[1], pair[0]]), [pair])
+  const handlePairSwap = useCallback(() => handleSelectPair([pair[1], pair[0]]), [pair])
 
 
   const { aprData, assetData, balanceData } = usePrepareAssetData(currentProtocol, chainId, account)
@@ -1315,7 +1315,7 @@ export default function Professional() {
 
   const chartPrices = usePrices([chartCurrencyIn, chartCurrencyOut], chainId)
 
-  const tradingViewSymbol = useMemo(() => getTradingViewSymbol(chartCurrencyOut, chartCurrencyIn), [chartCurrencyOut, chartCurrencyIn])
+  const tradingViewSymbol = useMemo(() => getTradingViewSymbol(chartPair[0], chartPair[1]), [chartPair])
 
   return (
     <Container >
@@ -1404,7 +1404,7 @@ export default function Professional() {
 
             <InputWrapper redesignFlag={redesignFlagEnabled}>
               <PairInput
-                onPairSelect={selectPair}
+                onPairSelect={handleSelectPair}
                 pairList={pairs}
                 placeholder={currencyOut}
                 topLabel={<PanelLabelPair color='green' text='Open' trade={trade} />}
@@ -1597,26 +1597,14 @@ export default function Professional() {
         </SwapPanel>
         <CartAndTableContainer >
           <CurrencySelectionRow>
-            <Dropdown label={<DropdownLabel asset={chartCurrencyIn} />}>
-              {assets.map((a, i) =>
-                <AssetRow asset={a} onSelect={handleSetChartCcyIn} key={a} />
-              )}
-            </Dropdown>
-
-            <Dropdown label={<DropdownLabel asset={chartCurrencyOut} />}>
-              {assets.map((a, i) =>
-                <AssetRow asset={a} onSelect={handleSetChartCcyOut} key={a} />
-              )}
-            </Dropdown>
-            <PriceRow>
-              {!isMobile && <PriceText>
-                Oracle:
-              </PriceText>}
-              <PriceText>
-                {(chartPrices[1] / chartPrices[0]).toLocaleString()}
-              </PriceText>
-            </PriceRow>
+            <PairSearchDropdown
+              selectedOption={chartPair}
+              options={pairs}
+              onSelect={setChartPair}
+              placeholder={String(chartPair)}
+            />
           </CurrencySelectionRow>
+
           <ChartContainer>
             <TradingViewWidget
               symbol={tradingViewSymbol}
@@ -1626,6 +1614,9 @@ export default function Professional() {
               interval={'30'}
               hide_volume={true}
               style={'2'}
+              withdateranges={true}
+              save_image={false}
+              details={true}
             />
           </ChartContainer>
           <PositionTable
