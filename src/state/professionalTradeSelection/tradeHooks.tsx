@@ -269,7 +269,6 @@ export function useDerivedSwapInfoClientSideProfessional(
 
 // from the current swap inputs, compute the best trade and return it.
 export function useDerivedSwapInfoMargin(
-  inCurrency: Currency | null | undefined,
   inAmount: CurrencyAmount<Token | NativeCurrency> | undefined,
   outCurrency: Currency | null | undefined,
 ): {
@@ -282,7 +281,7 @@ export function useDerivedSwapInfoMargin(
   allowedSlippage: Percent
 } {
   const { account } = useWeb3React()
-
+  const inCurrency = inAmount?.currency
   const currencies: { [field in Field]?: Currency | null } = useMemo(
     () => ({
       [Field.INPUT]: inCurrency,
@@ -298,7 +297,7 @@ export function useDerivedSwapInfoMargin(
   const recipientLookup = recipient ?? undefined
   const to: string | null = (recipient === null ? account : recipientLookup ?? null) ?? null
 
-  const isExactIn: boolean = independentField === Field.INPUT
+  const isExactIn = true
   const parsedAmount = inAmount
 
   const tradeRaw = useClientSideV3Professional(

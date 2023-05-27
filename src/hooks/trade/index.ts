@@ -401,11 +401,9 @@ export const useCurrencyAmounts = (
             const [assetIn, assetOut, currencyIn, currencyOut] = switchOpen
               ? [asset1, asset0, token1, token0]
               : [asset0, asset1, token0, token1]
-            console.log(assetIn, assetOut, account)
             const cTokenBal = ethers.BigNumber.from(
               assetOut?.compoundData[chainId].userData[account ?? '']?.balanceOf ?? '0'
             )
-            console.log(cTokenBal)
             const underlyingDeposited = cTokenBal
               .mul(assetOut?.compoundData[chainId].reserveData.exchangeRateCurrent ?? '0')
               .div(ONE_18)

@@ -13,7 +13,7 @@ export const getTokenAddresses = (chainId: number, protocol = LendingProtocol.AA
   if (MAINNET_CHAINS.includes(chainId)) {
     return Object.assign(
       {},
-      ...getSupportedAssets(chainId, protocol).filter(a => a !== SupportedAssets.ETH).map((asset) => {
+      ...getSupportedAssets(chainId, protocol).filter(a => (a !== SupportedAssets.ETH && a !== SupportedAssets.MATIC)).map((asset) => {
         return { [asset]: addressesTokens[asset][chainId] }
       })
     )

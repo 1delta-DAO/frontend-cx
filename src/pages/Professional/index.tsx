@@ -14,7 +14,7 @@ import {
   Asset
 } from "types/1delta";
 import Dropdown from "../../components/Dropdown/dropdown";
-import { TOKEN_SVGS, ZERO_BN, getSupportedAssets } from "constants/1delta";
+import { TOKEN_SVGS, ZERO_BN, getSupportedAssets, ETHEREUM_CHAINS, POLYGON_CHAINS } from "constants/1delta";
 import { useNetworkState } from "state/globalNetwork/hooks";
 import { LendingProtocol, set1DeltaAccount, switchLendingProtocol } from "state/1delta/actions";
 import { AutoColumn } from "components/Column";
@@ -108,6 +108,9 @@ import GeneralCurrencyInputPanel from "components/CurrencyInputPanel/GeneralInpu
 import { useCurrency, useCurrencyWithFallback } from "hooks/Tokens";
 import { getTokenAddresses } from "hooks/1delta/addressGetter";
 import DepositTypeDropdown, { DepositMode } from "components/Dropdown/depositTypeDropdown";
+import { USDC_POLYGON } from "constants/tokens";
+import useDebounce from "hooks/useDebounce";
+import { UniswapTrade } from "utils/Types";
 
 
 export const ArrowWrapper = styled.div<{ clickable: boolean; redesignFlag: boolean }>`
@@ -430,8 +433,10 @@ enum ProTradeType {
 }
 
 const assetToId = (asset: Asset, chainId: number, protocol: LendingProtocol) => {
-  if (asset.id === SupportedAssets.ETH || asset.id === SupportedAssets.MATIC)
+  if (asset.id === SupportedAssets.ETH && ETHEREUM_CHAINS.includes(chainId))
     return 'ETH'
+  else if (asset.id === SupportedAssets.MATIC && POLYGON_CHAINS.includes(chainId))
+    return 'MATIC'
   else {
     try {
       return getTokenAddresses(chainId, protocol)[String(asset.id)]
@@ -511,13 +516,11 @@ export default function Professional() {
 
   const [repeater, setRepeater] = useState(0)
 
-  const [accountsToBeLoaded, setAccountsToBeLoaded] = useState(false)
-
   useEffect(() => {
     if (account) {
-      // if (accountsToBeLoaded && chainId !== SupportedChainId.MAINNET && userAccountData) {
+      // if ( && chainId !== SupportedChainId.MAINNET && userAccountData) {
       //   dispatch(fetch1DeltaUserAccountDataAsync({ chainId, account }))
-      //   setAccountsToBeLoaded(false)
+      //   set(false)
       // }
 
       // if (chainId === SupportedChainId.POLYGON_MUMBAI)
@@ -552,7 +555,7 @@ export default function Professional() {
       dispatch(fetchUserBalances({ chainId, account, lendingProtocol: currentProtocol }))
     }
     setTimeout(() => setRepeater((prevState) => prevState + 1), 10000)
-  }, [repeater, deltaState?.userMeta?.[chainId]?.loaded, accountsToBeLoaded, chainId])
+  }, [repeater, deltaState?.userMeta?.[chainId]?.loaded, chainId])
 
 
   const filteredAssets = useMemo(() => {
@@ -643,16 +646,17 @@ export default function Professional() {
     }),
     [currencyAmounts]
   )
-  const [selectedCurrencyOutside, setCurrencyOutside] = useState<string | undefined>(SupportedAssets.USDC)
+  const [selectedCurrencyOutside, setCurrencyOutside] = useState<Currency>(USDC_POLYGON)
 
+  const selectedIsAsset = assets.filter(a => a.toUpperCase() === selectedCurrencyOutside.symbol)
 
-  const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRecipient } = useMoneyMarketActionHandlers()
+  const { onCurrencySelection, onUserInput, onChangeRecipient } = useMoneyMarketActionHandlers()
 
   const handleCcyInputSelect = useCallback(
     (inputCurrency: Currency) => {
       setApprovalSubmitted(false) // reset 2 step UI for approvals
       onCurrencySelection(Field.INPUT, inputCurrency)
-      setCurrencyOutside(inputCurrency.symbol)
+      setCurrencyOutside(inputCurrency)
     },
     [onCurrencySelection]
   )
@@ -665,12 +669,18 @@ export default function Professional() {
     [onCurrencySelection]
   )
 
-
   const { typedValue, independentField, recipient } = useMoneyMarketState()
 
-
-
   const [depositMode, setDepositMode] = useState(DepositMode.TO_COLLATERAL)
+
+  const selectedAsset = selectedIsAsset ? selectedCurrencyOutside.symbol as SupportedAssets : undefined
+
+  useEffect(() => {
+    if (depositMode == DepositMode.DIRECT && !selectedIsAsset)
+      setDepositMode(DepositMode.TO_COLLATERAL)
+  },
+    [depositMode, selectedIsAsset]
+  )
 
   const depositAsset = useMemo(() => {
     if (depositMode === DepositMode.DIRECT) {
@@ -682,6 +692,33 @@ export default function Professional() {
     [pair, depositMode]
   )
 
+  const availableDepoModes = useMemo(() => {
+    // deposit = USDC -> don't show to_usdc
+    if (selectedAsset === SupportedAssets.USDC) {
+      if (pair[0] === SupportedAssets.USDC) {
+        // case usdc to usdc
+        return [DepositMode.DIRECT]
+      } else {
+        // case usdc to collateral
+        return [DepositMode.TO_COLLATERAL, DepositMode.DIRECT]
+      }
+    } else {
+      if (pair[0] === SupportedAssets.USDC) {
+        if (selectedIsAsset)
+          return [DepositMode.DIRECT, DepositMode.TO_COLLATERAL]
+        else return [DepositMode.TO_COLLATERAL]
+      } else {
+        if (selectedIsAsset)
+          return [DepositMode.DIRECT, DepositMode.TO_COLLATERAL, DepositMode.TO_USDC]
+        else return [DepositMode.TO_COLLATERAL, DepositMode.TO_USDC]
+      }
+    }
+  }
+    ,
+    [selectedAsset, pair]
+  )
+
+  const selectedPrice = usePrices(selectedIsAsset ? [selectedCurrencyOutside.symbol as SupportedAssets] : [], chainId)
   const prices = usePrices([...pair, depositAsset], chainId)
 
   const [depositId, collateralId, debtId] = useMemo(() => {
@@ -694,7 +731,7 @@ export default function Professional() {
     [depositAsset, pair, chainId, currentProtocol]
   )
 
-  const selectedCurrency = useCurrency(selectedCurrencyOutside, currentProtocol)
+  const selectedCurrency = selectedCurrencyOutside // useCurrency(selectedCurrencyOutside, currentProtocol)
 
   const collateralCurrency = useCurrency(collateralId, currentProtocol)
   const depositCurrency = useCurrency(depositId, currentProtocol)
@@ -711,26 +748,32 @@ export default function Professional() {
     false
   )
 
+  const tradeInState = depositMode === DepositMode.DIRECT ? TradeState.VALID : tradeStateIn
 
   const depositDollarValue = useMemo(() => {
-    if (depositMode === DepositMode.DIRECT) return Number(typedValue) * prices[2]
+    if (depositMode === DepositMode.DIRECT && selectedPrice?.[0]) return Number(typedValue) * selectedPrice[0]
 
     return Number(tradeIn?.outputAmount.toExact()) * prices[2]
   },
-    [deltaAssets]
+    [typedValue, Boolean(tradeIn?.outputAmount), depositMode, Boolean(prices[2]), Boolean(selectedPrice?.[0])]
   )
 
   const borrowAmount = useMemo(() => {
-    if (!debtCurrency || !prices[2]) return undefined
+    if (!debtCurrency || !prices[1]) return undefined
     try {
-      return CurrencyAmount.fromRawAmount(debtCurrency, parseUnits(String(depositDollarValue / prices[2] * (leverage - 1)), debtCurrency?.decimals).toString())
+      const multi = Math.pow(10, debtCurrency.decimals)
+      const numberValue = BigNumber.from(Math.round((depositDollarValue / prices[1] * leverage) * multi))
+      return CurrencyAmount.fromRawAmount(debtCurrency, numberValue.toString())
     }
     catch (e) {
       return undefined
     }
   },
-    [prices, debtCurrency, leverage]
+    [typedValue, debtCurrency, leverage, depositDollarValue, Boolean(tradeIn?.outputAmount.currency)]
   )
+
+
+  const debouncedBorrowAmount = useDebounce(borrowAmount, 400)
 
   const {
     trade: { state: tradeState, trade },
@@ -738,10 +781,10 @@ export default function Professional() {
     parsedAmount,
     inputError: swapInputError,
   } = useDerivedSwapInfoMargin(
-    debtCurrency,
-    borrowAmount,
+    debouncedBorrowAmount,
     collateralCurrency,
   )
+
 
   const {
     wrapType,
@@ -1324,6 +1367,7 @@ export default function Professional() {
                 topLabel={<PanelLabel
                   color='green'
                   text='Pay'
+                  options={availableDepoModes}
                   selectedOption={depositMode}
                   onSelect={setDepositMode} />
                 }
@@ -1363,7 +1407,7 @@ export default function Professional() {
                 onPairSelect={selectPair}
                 pairList={pairs}
                 placeholder={currencyOut}
-                topLabel={<PanelLabelPair color='green' text='Open' />}
+                topLabel={<PanelLabelPair color='green' text='Open' trade={trade} />}
                 isPlus={true}
                 providedTokenList={restrictedTokenList}
                 value={formattedAmounts[Field.OUTPUT]}
@@ -1603,16 +1647,17 @@ interface LabelProps {
 
 interface TopLabelProps extends LabelProps {
   selectedOption: DepositMode
+  options: DepositMode[]
   onSelect: (opt: DepositMode) => void
 }
 
 
-const PanelLabel = ({ color, text, selectedOption, onSelect }: TopLabelProps) => {
+const PanelLabel = ({ color, text, selectedOption, onSelect, options }: TopLabelProps) => {
   return <PanelContainer>
     <div style={{ color, fontSize: '14px', marginLeft: '10px' }}>
       {text}
     </div>
-    <DepositTypeDropdown selectedOption={selectedOption} onSelect={onSelect}></DepositTypeDropdown>
+    <DepositTypeDropdown selectedOption={selectedOption} onSelect={onSelect} options={options}></DepositTypeDropdown>
   </PanelContainer>
 }
 
@@ -1624,15 +1669,34 @@ const PanelContainer = styled.div`
   justify-content: space-between;
 `
 
-const PanelLabelPair = ({ color, text }: LabelProps) => {
+const CurrencyValueBox = styled.div`
+  color: ${({ theme }) => theme.textSecondary};
+  font-size: 14px;
+  text-align: center;
+  width: 100%;
+  margin-right: 10px;
+`
+
+interface PanelLabelPairProps extends LabelProps {
+  trade: UniswapTrade | undefined
+}
+
+const PanelLabelPair = ({ color, text, trade }: PanelLabelPairProps) => {
+  const [showCollateral, setShowCollateral] = useState(true)
   return <PanelContainer>
     <div style={{ color, fontSize: '14px', marginLeft: '10px' }}>
       {text}
     </div>
-    <>
-      value
-    </>
-  </PanelContainer>
+    {trade && (
+      <div onClick={() => setShowCollateral(!showCollateral)}>
+        {showCollateral ? <CurrencyValueBox >
+          Size: {trade.inputAmount.toFixed(4)} {trade.inputAmount.currency.symbol}
+        </CurrencyValueBox>
+          : <CurrencyValueBox >
+            Size:  {trade.outputAmount.toFixed(4)} {trade.outputAmount.currency.symbol}
+          </CurrencyValueBox>}
+      </div>)
+    } </PanelContainer>
 }
 
 

@@ -132,8 +132,7 @@ const PairSearchDropdown: React.FC<DropdownProps> = ({ selectedOption, options, 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = event.target.value;
     const filteredOptions = options.filter((option) =>
-      option[0].toLowerCase().includes(inputValue.toLowerCase()) ||
-      option[1].toLowerCase().includes(inputValue.toLowerCase())
+      parsePairString(option).toLowerCase().includes(inputValue.toLowerCase())
     );
     setInputValue(inputValue);
     setFilteredOptions(filteredOptions);

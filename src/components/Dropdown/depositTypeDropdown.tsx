@@ -38,11 +38,12 @@ const DropdownBg = styled.div`
 `;
 
 const DropdownButton = styled.button`
-  background-color: ${({ theme }) => theme.deprecated_bg3};
-  color: white;
+  border: 2px solid ${({ theme }) => theme.deprecated_bg3};
+  background: none;
+  color: ${({ theme }) => theme.textSecondary};
+  height: 25px;
   border-radius: 4px;
-  font-size: 16px;
-  border: none;
+  font-size: 14px;
   cursor: pointer;
 `;
 
@@ -73,16 +74,17 @@ const DropdownItem = styled.a`
   min-width: 160px;
   display: block;
   color: ${({ theme }) => theme.textSecondary};
-  &:hover {background-color: #ddd;}
+  &:hover {border-left: 7px solid ${({ theme }) => theme.deprecated_bg2};}
   z-index: ${Z_INDEX.modal}
 `;
 
 interface DepositTypeSelectionProps {
   selectedOption: DepositMode
+  options: DepositMode[]
   onSelect: (option: DepositMode) => void
 }
 
-const DepositTypeDropdown = ({ selectedOption, onSelect }: DepositTypeSelectionProps) => {
+const DepositTypeDropdown = ({ selectedOption, onSelect, options }: DepositTypeSelectionProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -92,7 +94,7 @@ const DepositTypeDropdown = ({ selectedOption, onSelect }: DepositTypeSelectionP
       </DropdownButton>
       <DropdownContent isOpen={isOpen}>
         <DropdownBg />
-        {Object.values(DepositMode).filter(x => x !== selectedOption).map(option => (
+        {options.filter(x => x !== selectedOption).map(option => (
           <DropdownItem key={option} onClick={() => {
             onSelect(option);
             setIsOpen(false);
