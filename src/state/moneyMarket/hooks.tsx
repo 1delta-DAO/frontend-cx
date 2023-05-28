@@ -388,7 +388,7 @@ export function useDerivedMoneyMarketTradeInfo(
 } {
   const { account } = useWeb3React()
 
-  const { independentField, typedValue, recipient } = useMoneyMarketState()
+  const { typedValue, recipient } = useMoneyMarketState()
 
   const currencies: { [field in Field]?: Currency | null } = useMemo(
     () => ({
@@ -402,11 +402,6 @@ export function useDerivedMoneyMarketTradeInfo(
   const outputCurrency = outCurrency
 
   const to: string | null = (recipient === null ? account : recipient) ?? null
-
-  const relevantTokenBalances = useCurrencyBalances(
-    account ?? undefined,
-    useMemo(() => [inputCurrency ?? undefined, outputCurrency ?? undefined], [inputCurrency, outputCurrency])
-  )
 
   const isExactIn = true
   const parsedAmount = useMemo(

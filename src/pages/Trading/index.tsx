@@ -797,7 +797,10 @@ export default function Professional() {
   )
 
   const [routeNotFound, routeIsLoading, routeIsSyncing] = useMemo(
-    () => [!trade?.swaps, TradeState.LOADING === tradeState, TradeState.SYNCING === tradeState || TradeState.SYNCING === tradeInState],
+    () => [
+      !trade?.swaps,
+      TradeState.LOADING === tradeState || TradeState.LOADING === tradeInState,
+      TradeState.SYNCING === tradeState || TradeState.SYNCING === tradeInState],
     [trade, tradeState]
   )
 

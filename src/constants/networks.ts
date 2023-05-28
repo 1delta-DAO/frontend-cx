@@ -50,6 +50,7 @@ export const FALLBACK_URLS: { [chainId: number]: string[] } = {
     // "Safe" URLs
     typeof QUICKNODE_RPC_URL === 'undefined' ? 'https://polygon-rpc.com/' : QUICKNODE_RPC_URL,
     'https://rpc.ankr.com/polygon',
+    'https://polygon.llamarpc.com',
     'https://polygon-mainnet.public.blastapi.io',
     // typeof INFURA_KEY === 'undefined' ?
     //   'https://rpc.ankr.com/polygon' : `https://polygon-mainnet.infura.io/v3/${INFURA_KEY}`,

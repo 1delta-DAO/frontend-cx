@@ -24,23 +24,11 @@ export function useBestMoneyMarketTradeBroker(
   state: TradeState
   trade: InterfaceTrade<Currency, Currency, TradeType> | undefined
 } {
-  const autoRouterSupported = useAutoRouterSupported()
-  const isWindowVisible = useIsWindowVisible()
-
   const [debouncedAmount, debouncedOtherCurrency] = useDebounce(
     useMemo(() => [amountSpecified, otherCurrency], [amountSpecified, otherCurrency]),
     200
   )
 
-  const [clientSideRouter] = useClientSideRouter()
-  const routingAPITrade = useRoutingAPITrade(
-    tradeType,
-    autoRouterSupported && isWindowVisible ? debouncedAmount : undefined,
-    debouncedOtherCurrency,
-    clientSideRouter ? RouterPreference.CLIENT : RouterPreference.API
-  )
-
-  const isLoading = routingAPITrade.state === TradeState.LOADING
   const useFallback = true // !autoRouterSupported || routingAPITrade.state === TradeState.NO_ROUTE_FOUND
 
   // only use client side router if routing api trade failed or is not supported
@@ -53,9 +41,8 @@ export function useBestMoneyMarketTradeBroker(
   // only return gas estimate from api if routing api trade is used
   return useMemo(
     () => ({
-      ...(useFallback ? bestV3Trade : routingAPITrade),
-      ...(isLoading ? { state: TradeState.LOADING } : {}),
+      ...bestV3Trade
     }),
-    [bestV3Trade, isLoading, routingAPITrade, useFallback]
+    [bestV3Trade, useFallback]
   )
 }
