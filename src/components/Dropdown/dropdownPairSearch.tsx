@@ -24,8 +24,8 @@ const DropdownWrapper = styled.div`
 
 
 const DropdownInput = styled.input`
-  width: 120px;
-  font-size: 16px;
+  width: 100px;
+  font-size: 14px;
   border: none;
   background-color: transparent;
   color: ${({ theme }) => theme.deprecated_text1};
@@ -161,8 +161,8 @@ const PairSearchDropdown: React.FC<DropdownProps> = ({ selectedOption, options, 
   return (
     <DropdownWrapper ref={ref} onClick={() => setShowAll(!showAll)}>
       <Row key={String(selectedOption)}>
-        <Image src={TOKEN_SVGS[selectedOption?.[0] ?? placeholder]} />
-        <Image src={TOKEN_SVGS[selectedOption?.[1] ?? placeholder]} style={{ marginLeft: '-10px' }} />
+        <Image src={TOKEN_SVGS[selectedOption?.[0] ?? placeholder]} style={{ width: '25px' }} />
+        <Image src={TOKEN_SVGS[selectedOption?.[1] ?? placeholder]} style={{ marginLeft: '-10px', width: '25px' }} />
         <DropdownInput
           type="text"
           value={inputValue}

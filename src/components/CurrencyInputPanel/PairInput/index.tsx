@@ -3,17 +3,17 @@ import { loadingOpacityMixin } from 'components/Loader/styled'
 import { isSupportedChain } from 'constants/chains'
 import { RedesignVariant, useRedesignFlag } from 'featureFlags/flags/redesign'
 import { darken } from 'polished'
-import { ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
 import styled, { useTheme } from 'styled-components/macro'
 import { ReactComponent as DropDown } from '../../../assets/images/dropdown.svg'
 import { ThemedText } from '../../../theme'
 import { Input as NumericalInput } from '../../NumericalInput'
-import { RowBetween, RowFixed } from '../../Row'
-import { FiatValue } from '../FiatValue'
 import { useChainIdAndAccount } from 'state/globalNetwork/hooks'
 import { SupportedAssets } from 'types/1delta'
 import PairSearchDropdown from 'components/Dropdown/dropdownPairSearch'
 import { ButtonGray } from 'components/Button'
+import { UniswapTrade } from 'utils/Types'
+import { TOKEN_SVGS } from 'constants/1delta'
 
 const InputPanel = styled.div<{ hideInput?: boolean; redesignFlag: boolean }>`
   ${({ theme }) => theme.flexColumnNoWrap}
@@ -121,12 +121,8 @@ const PairSelect = styled(ButtonGray) <{
   margin-left: ${({ hideInput }) => (hideInput ? '0' : '12px')};
 
   &:hover {
-    background-color: ${({ selected, theme, redesignFlag }) =>
-    redesignFlag
-      ? theme.stateOverlayHover
-      : selected
-        ? darken(0.05, theme.deprecated_primary1)
-        : theme.deprecated_bg3};
+    background-color: ${({ theme }) =>
+    theme.stateOverlayHover};
   }
 
   &:active {
@@ -158,19 +154,25 @@ const SimpleRow = styled.div`
 `
 
 const StyledDropDown = styled(DropDown) <{ selected: boolean; redesignFlag: boolean }>`
-  margin: 0 0.25rem 0 0.35rem;
+  margin: 0 0.0rem 0 0.0rem;
   height: 35%;
-  margin-left: ${({ redesignFlag }) => redesignFlag && '8px'};
 
   path {
     stroke: ${({ selected, theme }) => (selected ? theme.deprecated_text1 : theme.deprecated_white)};
-    stroke-width: ${({ redesignFlag }) => (redesignFlag ? '2px' : '1.5px')};
+    stroke-width: 2px;
   }
+`
+
+const Image = styled.img`
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
 `
 
 
 interface PairInputProps {
   placeholder: SupportedAssets
+  trade?: UniswapTrade
   pairList: [SupportedAssets, SupportedAssets][]
   onPairSelect: (pair: [SupportedAssets, SupportedAssets]) => void
   providedTokenList: { [address: string]: Token }
@@ -182,14 +184,11 @@ interface PairInputProps {
   currency?: Currency | null
   pair?: [SupportedAssets, SupportedAssets]
   hideBalance?: boolean
-  providedCurrencyBalance?: CurrencyAmount<Currency> | null
-  balanceText?: string
   hideInput?: boolean
   otherCurrency?: Currency | null
   fiatValue?: CurrencyAmount<Token> | null
   priceImpact?: Percent
   id: string
-  showCommonBases?: boolean
   showCurrencyAmount?: boolean
   disableNonToken?: boolean
   renderBalance?: (amount: CurrencyAmount<Currency>) => ReactNode
@@ -205,6 +204,7 @@ export default function PairInput({
   placeholder,
   providedTokenList,
   pairList,
+  trade,
   onPairSelect,
   value,
   onUserInput,
@@ -214,15 +214,12 @@ export default function PairInput({
   pair,
   otherCurrency,
   id,
-  showCommonBases,
   showCurrencyAmount,
   disableNonToken,
   renderBalance,
   fiatValue,
   priceImpact,
   hideBalance = false,
-  providedCurrencyBalance,
-  balanceText = 'Balance',
   topLabel = undefined,
   hideInput = false,
   locked = false,
@@ -236,33 +233,45 @@ export default function PairInput({
   const { account, chainId } = useChainIdAndAccount()
   const redesignFlag = useRedesignFlag()
   const redesignFlagEnabled = redesignFlag === RedesignVariant.Enabled
-  const selectedCurrencyBalance = providedCurrencyBalance
   const theme = useTheme()
-
   const chainAllowed = isSupportedChain(chainId)
+  const [showCollateral, setShowCollateral] = useState(true)
+  const color = 'green'
 
   return (
     <InputPanel id={id} hideInput={hideInput} {...rest} redesignFlag={redesignFlagEnabled}>
       <SimpleRow>
-        {topLabel && topLabel}
+        <PanelContainer>
+          <div style={{ color, fontSize: '14px', marginLeft: '10px' }}>
+            Open{trade && `@`}
+          </div>
+          {trade && pair && (
+            <div onClick={() => setShowCollateral(!showCollateral)}>
+              {!showCollateral ? <CurrencyValueBox style={{ color }}>
+                {trade.executionPrice.toFixed(6)} {pair[0]}/{pair[1]}
+              </CurrencyValueBox>
+                : <CurrencyValueBox style={{ color }}>
+                  {trade.executionPrice.invert().toFixed(6)} {pair[1]}/{pair[0]}
+                </CurrencyValueBox>}
+            </div>)
+          } </PanelContainer>
         {topRightLabel && topRightLabel}
       </SimpleRow>
       <Container hideInput={hideInput} disabled={!chainAllowed} redesignFlag={redesignFlagEnabled}>
-
         <InputRow
           style={hideInput ? { padding: '0', borderRadius: '8px' } : {}}
           selected={!onPairSelect}
           redesignFlag={redesignFlagEnabled}
         >
+          {trade && pair && <Image src={TOKEN_SVGS[showCollateral ? pair[0] : pair[1]]} onClick={() => setShowCollateral(!showCollateral)} />}
           {!hideInput && (
             <StyledNumericalInput
               className="token-amount-input"
-              value={value}
+              value={(showCollateral ? trade?.outputAmount.toFixed(4) : trade?.inputAmount.toFixed(4)) ?? '0.0'}
               onUserInput={onUserInput}
-              disabled={!chainAllowed}
+              disabled
               $loading={loading}
               redesignFlag={redesignFlagEnabled}
-              prependSymbol={isPlus ? '+' : '-'}
               style={{ marginRight: '5px' }}
             />
           )}
@@ -277,44 +286,25 @@ export default function PairInput({
             <PairSearchDropdown selectedOption={pair} options={pairList} onSelect={onPairSelect} placeholder={placeholder} />
             <StyledDropDown selected={!!currency} redesignFlag={redesignFlagEnabled} />
           </PairSelect>
-          {/* </div> */}
         </InputRow>
-        {/* {!hideInput && !hideBalance && currency && (
-          <FiatRow redesignFlag={redesignFlagEnabled}>
-            <RowBetween>
-              <LoadingOpacityContainer $loading={loading}>
-                <FiatValue fiatValue={fiatValue} priceImpact={priceImpact} />
-              </LoadingOpacityContainer>
-              {account ? (
-                <RowFixed style={{ height: '17px' }}>
-                  <ThemedText.DeprecatedSmall
-                    color={redesignFlag ? theme.textSecondary : theme.deprecated_text3}
-                    fontWeight={redesignFlag ? 400 : 500}
-                    fontSize={14}
-                    style={{ display: 'inline', opacity: 0.5 }}
-                  >
-                    {!hideBalance && currency && selectedCurrencyBalance ? (
-                      <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', fontSize: '12px' }}>
-                        {balanceText}: <div style={{ color: balanceSignIsPlus ? 'green' : 'red', marginLeft: '10px' }}>
-                          {balanceSignIsPlus ? '+' : '-'}{formatCurrencyAmount(selectedCurrencyBalance, 4)}
-
-                        </div>
-                      </div>
-                    ) : null}
-                  </ThemedText.DeprecatedSmall>
-                  {showMaxButton && selectedCurrencyBalance ? (
-                    <StyledBalanceMax onClick={onMax} redesignFlag={redesignFlagEnabled}>
-                      <Trans>Max</Trans>
-                    </StyledBalanceMax>
-                  ) : null}
-                </RowFixed>
-              ) : (
-                <span />
-              )}
-            </RowBetween>
-          </FiatRow>
-        )} */}
       </Container>
     </InputPanel >
   )
 }
+
+const PanelContainer = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+`
+const CurrencyValueBox = styled.div`
+  color: ${({ theme }) => theme.textSecondary};
+  font-size: 14px;
+  text-align: left;
+  width: 100%;
+  margin-right: 10px;
+  cursor: pointer;
+  font-weight: bold;
+`

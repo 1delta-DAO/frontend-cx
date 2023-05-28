@@ -408,7 +408,7 @@ export function useDerivedMoneyMarketTradeInfo(
     useMemo(() => [inputCurrency ?? undefined, outputCurrency ?? undefined], [inputCurrency, outputCurrency])
   )
 
-  const isExactIn: boolean = independentField === Field.INPUT
+  const isExactIn = true
   const parsedAmount = useMemo(
     () => tryParseCurrencyAmount(typedValue, (isExactIn ? inputCurrency : outputCurrency) ?? undefined),
     [inputCurrency, isExactIn, outputCurrency, typedValue]

@@ -153,19 +153,18 @@ const Aligner = styled.span`
 `
 
 const StyledDropDown = styled(DropDown) <{ selected: boolean; redesignFlag: boolean }>`
-  margin: 0 0.25rem 0 0.35rem;
+  margin: 0 0.0rem 0 0.0rem;
   height: 35%;
-  margin-left: ${({ redesignFlag }) => redesignFlag && '8px'};
 
   path {
     stroke: ${({ selected, theme }) => (selected ? theme.deprecated_text1 : theme.deprecated_white)};
-    stroke-width: ${({ redesignFlag }) => (redesignFlag ? '2px' : '1.5px')};
+    stroke-width: 2px;
   }
 `
 
 const StyledTokenName = styled.span<{ active?: boolean; redesignFlag: boolean }>`
   ${({ active }) => (active ? '  margin: 0 0.25rem 0 0.25rem;' : '  margin: 0 0.25rem 0 0.25rem;')}
-  font-size:  ${({ active }) => (active ? '18px' : '18px')};
+  font-size: 14px;
   font-weight: ${({ redesignFlag }) => (redesignFlag ? '600' : '500')};
 `
 

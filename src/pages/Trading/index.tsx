@@ -100,6 +100,9 @@ import { USDC_POLYGON } from "constants/tokens";
 import useDebounce from "hooks/useDebounce";
 import { UniswapTrade } from "utils/Types";
 import PairSearchDropdown from "components/Dropdown/dropdownPairSearch";
+import { parseUnits } from "ethers/lib/utils";
+import tryParseCurrencyAmount from "lib/utils/tryParseCurrencyAmount";
+import { addressesTokens } from "hooks/1delta/addressesTokens";
 
 
 export const ArrowWrapper = styled.div<{ clickable: boolean; redesignFlag: boolean }>`
@@ -421,16 +424,18 @@ enum ProTradeType {
 
 }
 
-const assetToId = (asset: Asset, chainId: number, protocol: LendingProtocol) => {
-  if (asset.id === SupportedAssets.ETH && ETHEREUM_CHAINS.includes(chainId))
+const assetToId = (asset: SupportedAssets, chainId: number, protocol: LendingProtocol) => {
+  if (asset === SupportedAssets.ETH && ETHEREUM_CHAINS.includes(chainId))
     return 'ETH'
-  else if (asset.id === SupportedAssets.MATIC && POLYGON_CHAINS.includes(chainId))
+  else if (asset === SupportedAssets.MATIC && POLYGON_CHAINS.includes(chainId))
     return 'MATIC'
   else {
     try {
-      return getTokenAddresses(chainId, protocol)[String(asset.id)]
+      if (MAINNET_CHAINS.includes(chainId))
+        return addressesTokens[String(asset)][chainId]
+      return getTokenAddresses(chainId, protocol)[String(asset)]
     } catch (err) {
-      console.log(err)
+      console.log("failed to get token address:", err)
       return 'ETH'
     }
   }
@@ -665,8 +670,11 @@ export default function Professional() {
   useEffect(() => {
     if (depositMode == DepositMode.DIRECT && !selectedIsAsset)
       setDepositMode(DepositMode.TO_COLLATERAL)
+
+    if (pair[0] === SupportedAssets.USDC && selectedAsset === SupportedAssets.USDC)
+      setDepositMode(DepositMode.DIRECT)
   },
-    [depositMode, selectedIsAsset]
+    [depositMode, selectedIsAsset, pair]
   )
 
   const depositAsset = useMemo(() => {
@@ -712,12 +720,12 @@ export default function Professional() {
 
   const [depositId, collateralId, debtId] = useMemo(() => {
     return [
-      assetToId(deltaAssets[depositAsset], chainId, currentProtocol),
-      assetToId(deltaAssets[pair[0]], chainId, currentProtocol),
-      assetToId(deltaAssets[pair[1]], chainId, currentProtocol)
+      assetToId(depositAsset, chainId, currentProtocol),
+      assetToId(pair[0], chainId, currentProtocol),
+      assetToId(pair[1], chainId, currentProtocol)
     ]
   },
-    [depositAsset, pair, chainId, currentProtocol]
+    [depositAsset, pair, chainId, currentProtocol, depositMode]
   )
 
   const selectedCurrency = selectedCurrencyOutside // useCurrency(selectedCurrencyOutside, currentProtocol)
@@ -736,31 +744,32 @@ export default function Professional() {
     depositCurrency,
     false
   )
-
   const tradeInState = depositMode === DepositMode.DIRECT ? TradeState.VALID : tradeStateIn
 
   const depositDollarValue = useMemo(() => {
-    if (depositMode === DepositMode.DIRECT && selectedPrice?.[0]) return Number(typedValue) * selectedPrice[0]
-
+    // case direct depo
+    if (depositMode === DepositMode.DIRECT && selectedPrice?.[0]) return Number(parsedAmountIn?.toExact()) * selectedPrice[0]
+    // case swap to usdc or collateral
     return Number(tradeIn?.outputAmount.toExact()) * prices[2]
   },
-    [typedValue, Boolean(tradeIn?.outputAmount), depositMode, Boolean(prices[2]), Boolean(selectedPrice?.[0])]
+    [parsedAmountIn, Boolean(tradeIn?.outputAmount), depositMode, Boolean(prices[2]), Boolean(selectedPrice?.[0]), pair]
   )
 
   const borrowAmount = useMemo(() => {
     if (!debtCurrency || !prices[1]) return undefined
     try {
-      const multi = Math.pow(10, debtCurrency.decimals)
-      const numberValue = BigNumber.from(Math.round((depositDollarValue / prices[1] * leverage) * multi))
+      const stringValue = String(depositDollarValue / prices[1] * leverage)
+      const finalVal = stringValue.substring(0, stringValue.indexOf('.') + debtCurrency.decimals + 1)
+      const numberValue = parseUnits(finalVal, String(debtCurrency.decimals))
       return CurrencyAmount.fromRawAmount(debtCurrency, numberValue.toString())
     }
     catch (e) {
+      console.log("Error determining borrow amount:", e)
       return undefined
     }
   },
-    [typedValue, debtCurrency, leverage, depositDollarValue, Boolean(tradeIn?.outputAmount.currency)]
+    [typedValue, debtCurrency, leverage, depositDollarValue, Boolean(tradeIn), parsedAmountIn, pair, Boolean(prices[0])]
   )
-
 
   const debouncedBorrowAmount = useDebounce(borrowAmount, 400)
 
@@ -774,27 +783,17 @@ export default function Professional() {
     collateralCurrency,
   )
 
-
-  const {
-    wrapType,
-    execute: onWrap,
-    inputError: wrapInputError,
-  } = useWrapCallback(currencies[Field.INPUT], currencies[Field.OUTPUT], typedValue)
-  const showWrap: boolean = wrapType !== WrapType.NOT_APPLICABLE
   const recipientAddress = recipient
 
   const parsedAmounts = useMemo(
-    () =>
-      showWrap
-        ? {
-          [Field.INPUT]: parsedAmount,
-          [Field.OUTPUT]: parsedAmount,
-        }
-        : {
-          [Field.INPUT]: independentField === Field.INPUT ? parsedAmount : trade?.inputAmount,
-          [Field.OUTPUT]: independentField === Field.OUTPUT ? parsedAmount : trade?.outputAmount,
-        },
-    [independentField, parsedAmount, showWrap, trade]
+    () => {
+      return {
+        [Field.INPUT]: parsedAmount,
+        [Field.OUTPUT]: parsedAmount,
+      }
+    }
+    ,
+    [independentField, parsedAmount, trade]
   )
 
   const [routeNotFound, routeIsLoading, routeIsSyncing] = useMemo(
@@ -843,11 +842,9 @@ export default function Professional() {
   const formattedAmounts = useMemo(
     () => ({
       [independentField]: typedValue,
-      [dependentField]: showWrap
-        ? parsedAmounts[independentField]?.toExact() ?? ''
-        : parsedAmounts[dependentField]?.toSignificant(6) ?? '',
+      [dependentField]: parsedAmounts[dependentField]?.toSignificant(6) ?? '',
     }),
-    [dependentField, independentField, currencyAmounts, showWrap, typedValue, parsedAmounts]
+    [dependentField, independentField, currencyAmounts, typedValue, parsedAmounts]
   )
 
   const userHasSpecifiedInputOutput = Boolean(
@@ -1201,30 +1198,6 @@ export default function Professional() {
     })
   }, [assets])
 
-
-
-
-  const handleTradeTypeMargin = useCallback(() => {
-    setMarginTradeType(MarginTradeType.Open)
-    dispatch(setTradeType({ tradeType: OneDeltaTradeType.MarginSwap }))
-    setProTradeType(ProTradeType.MarginOpen)
-    selectCurrencyIn(borrowableAssets[0])
-    setSelectableAssets({
-      assetsIn: borrowableAssets,
-      assetsOut: assets
-    })
-  },
-    [dispatch, assetData]
-  )
-
-  const [isSwapModalVisible, setSwapModalVisible] = useState(false)
-
-  const interaction = useSingleInteraction()
-
-  const handleSwapModelDismissed = () => {
-    setSwapModalVisible(false)
-  }
-
   const [appprovalMessagRequest, approvalMessage] = useMemo(() => {
     switch (marginTradeType) {
       case MarginTradeType.Trim: {
@@ -1257,51 +1230,7 @@ export default function Professional() {
       marginTradeType
     ]
   )
-
-  const [chartCurrencyIn, setChartCurrencyIn] = useState(currencyIn)
-  const [chartCurrencyOut, setChartCurrencyOut] = useState(currencyOut)
-
-
-  const handleSetChartCcyIn = useCallback((target: SupportedAssets) => {
-    if (chartCurrencyOut === target) {
-      setChartCurrencyOut(chartCurrencyIn)
-      setChartCurrencyIn(target)
-    } else
-      setChartCurrencyIn(target)
-
-  }, [chartCurrencyIn, chartCurrencyOut])
-
-  const handleSetChartCcyOut = useCallback((target: SupportedAssets) => {
-    if (chartCurrencyIn === target) {
-      setChartCurrencyIn(chartCurrencyOut)
-      setChartCurrencyOut(target)
-    } else
-      setChartCurrencyOut(target)
-
-  }, [chartCurrencyIn, chartCurrencyOut])
-
-  const handleSetCurrencyIn = useCallback((target: SupportedAssets) => {
-    if (currencyOut === target) {
-      selectCurrencyOut(currencyIn)
-      selectCurrencyIn(target)
-    } else {
-      selectCurrencyIn(target)
-    }
-    handleSetChartCcyIn(target)
-  }, [currencyIn, currencyOut])
-
-  const handleSetCurrencyOut = useCallback((target: SupportedAssets) => {
-    if (currencyIn === target) {
-      selectCurrencyIn(currencyOut)
-      selectCurrencyOut(target)
-    } else {
-      selectCurrencyOut(target)
-    }
-    handleSetChartCcyOut(target)
-  }, [currencyIn, currencyOut])
-
-
-  const chartPrices = usePrices([chartCurrencyIn, chartCurrencyOut], chainId)
+  const chartPrices = usePrices(chartPair, chainId)
 
   const tradingViewSymbol = useMemo(() => getTradingViewSymbol(chartPair[0], chartPair[1]), [chartPair])
 
@@ -1338,14 +1267,7 @@ export default function Professional() {
                   selectedOption={depositMode}
                   onSelect={setDepositMode} />
                 }
-                label={
-                  independentField === Field.OUTPUT && !showWrap ? (
-                    <>From (at most)</>
-                  ) : (
-                    <>From</>
-                  )
-                }
-                value={formattedAmounts[Field.INPUT]}
+                value={typedValue}
                 showMaxButton={showMaxButton}
                 currency={selectedCurrency}
                 onUserInput={handleTypeInput}
@@ -1374,13 +1296,13 @@ export default function Professional() {
                 onPairSelect={handleSelectPair}
                 pairList={pairs}
                 placeholder={currencyOut}
-                topLabel={<PanelLabelPair color='green' text='Open' trade={trade} />}
+                trade={trade}
                 isPlus={true}
                 providedTokenList={restrictedTokenList}
                 value={formattedAmounts[Field.OUTPUT]}
                 onUserInput={() => null}
                 label={
-                  independentField === Field.INPUT && !showWrap ? (
+                  independentField === Field.INPUT ? (
                     <>To (at least)</>
                   ) : (
                     <>To</>
@@ -1393,19 +1315,15 @@ export default function Professional() {
                 priceImpact={stablecoinPriceImpact}
                 currency={currencyAmounts[Field.OUTPUT]?.currency}
                 pair={pair}
-                providedCurrencyBalance={currencyAmounts[Field.OUTPUT]}
-                balanceText={textBottom}
-                // onCurrencySelect={null}
                 otherCurrency={null}
-                showCommonBases={true}
-                id={'CURRENCY_OUTPUT_PANEL'}
+                id={'CURRENCY_PAIR_PANEL'}
                 loading={independentField === Field.INPUT && routeIsSyncing}
                 balanceSignIsPlus={plusBottom}
                 topRightLabel={<PairSwap onSwitch={handlePairSwap} />}
               />
             </InputWrapper>
           </InputPanelContainer>
-          {recipient !== null && !showWrap ? (
+          {recipient !== null ? (
             <>
               <AutoRow justify="space-between" style={{ padding: '0 1rem' }}>
                 <ArrowWrapper clickable={false} redesignFlag={redesignFlagEnabled}>
@@ -1435,16 +1353,6 @@ export default function Professional() {
               <ButtonLight onClick={toggleWalletModal} redesignFlag={redesignFlagEnabled}>
                 <Trans>Connect Wallet</Trans>
               </ButtonLight>
-            ) : showWrap ? (
-              <ButtonPrimary disabled={Boolean(wrapInputError)} onClick={onWrap}>
-                {wrapInputError ? (
-                  <WrapErrorText wrapInputError={wrapInputError} />
-                ) : wrapType === WrapType.WRAP ? (
-                  <Trans>Wrap</Trans>
-                ) : wrapType === WrapType.UNWRAP ? (
-                  <Trans>Unwrap</Trans>
-                ) : null}
-              </ButtonPrimary>
             ) : routeNotFound && userHasSpecifiedInputOutput && !routeIsLoading && !routeIsSyncing ? (
               <GreyCard style={{ textAlign: 'center' }}>
                 <ThemedText.DeprecatedMain mb="4px">
@@ -1550,7 +1458,7 @@ export default function Professional() {
             )}
             {isExpertMode && swapErrorMessage ? <SwapCallbackError error={swapErrorMessage} /> : null}
           </div>
-          {!showWrap && userHasSpecifiedInputOutput && (trade || routeIsLoading || routeIsSyncing) && (
+          {userHasSpecifiedInputOutput && (trade || routeIsLoading || routeIsSyncing) && (
             <SwapDetailsDropdown
               trade={trade}
               syncing={routeIsSyncing}
@@ -1627,48 +1535,17 @@ const PanelContainer = styled.div`
   justify-content: space-between;
 `
 
-const CurrencyValueBox = styled.div`
-  color: ${({ theme }) => theme.textSecondary};
-  font-size: 14px;
-  text-align: center;
-  width: 100%;
-  margin-right: 10px;
-`
-
-interface PanelLabelPairProps extends LabelProps {
-  trade: UniswapTrade | undefined
-}
-
-const PanelLabelPair = ({ color, text, trade }: PanelLabelPairProps) => {
-  const [showCollateral, setShowCollateral] = useState(true)
-  return <PanelContainer>
-    <div style={{ color, fontSize: '14px', marginLeft: '10px' }}>
-      {text}
-    </div>
-    {trade && (
-      <div onClick={() => setShowCollateral(!showCollateral)}>
-        {showCollateral ? <CurrencyValueBox >
-          Size: {trade.inputAmount.toFixed(4)} {trade.inputAmount.currency.symbol}
-        </CurrencyValueBox>
-          : <CurrencyValueBox >
-            Size:  {trade.outputAmount.toFixed(4)} {trade.outputAmount.currency.symbol}
-          </CurrencyValueBox>}
-      </div>)
-    } </PanelContainer>
-}
-
-
-
 
 const SwitchButton = styled(ButtonSecondary)`
   width: 80px;
-  height: 18px;
+  height: 32px;
   font-size: 12px;
+  border-radius: 10px;
+  border: 1px solid ${({ theme }) => theme.accentActiveSoft};
   display: flex;
   font-weight: 200;
   flex-direction: row;
   align-items: space-between;
-  border-radius: 5px;
   justify-content: space-between;
   padding: 5px;
 `
@@ -1680,7 +1557,7 @@ interface PairSwitchProps {
 
 const PairSwap = ({ onSwitch }: PairSwitchProps) => {
   return <SwitchButton onClick={onSwitch}>
-    Switch
+    Invert Pair
     <SwitchCircle size={13} />
   </SwitchButton>
 }

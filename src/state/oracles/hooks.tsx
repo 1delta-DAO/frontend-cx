@@ -317,7 +317,7 @@ export function usePrices(assets: SupportedAssets[], chainId: number): number[] 
       }
     }
     return prices
-  }, [aave, chainLink])
+  }, [aave, chainLink, assets])
 }
 
 
