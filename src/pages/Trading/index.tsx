@@ -58,7 +58,6 @@ import { computeFiatValuePriceImpact } from '../../utils/computeFiatValuePriceIm
 import { maxAmountSpend } from '../../utils/maxAmountSpend'
 import { computeRealizedPriceImpact, warningSeverity } from '../../utils/prices'
 import { largerPercentValue } from 'utils/1delta/generalFormatters'
-import { calculateAaveRiskChange, useGetAaveRiskParameters } from 'hooks/riskParameters/useAaveParameters'
 import { AaveMarginTrader, AaveSweeper, Sweeper } from 'abis/types'
 import { calculateGasMargin } from 'utils/calculateGasMargin'
 import { TransactionType } from 'state/transactions/types'
@@ -90,7 +89,6 @@ import { fetchAAVEAggregatorDataAsync } from "state/oracles/fetchAaveAggregatorD
 import { fetchUserBalances } from "state/1delta/fetchAssetBalances";
 import { ArrowDotted } from "./components/Arrow";
 import { getTradingViewSymbol } from "constants/chartMapping";
-import { useGetRiskParameters, useRiskChange } from "hooks/riskParameters/useRiskParameters";
 import { useDerivedMoneyMarketTradeInfo, useMoneyMarketState, useMoneyMarketActionHandlers } from "state/moneyMarket/hooks";
 import GeneralCurrencyInputPanel from "components/CurrencyInputPanel/GeneralInputPanel/GeneralCurrencyInputPanel";
 import { useCurrency, useCurrencyWithFallback } from "hooks/Tokens";
@@ -100,9 +98,10 @@ import { USDC_POLYGON } from "constants/tokens";
 import useDebounce from "hooks/useDebounce";
 import { UniswapTrade } from "utils/Types";
 import PairSearchDropdown from "components/Dropdown/dropdownPairSearch";
-import { parseUnits } from "ethers/lib/utils";
+import { formatEther, parseUnits } from "ethers/lib/utils";
 import tryParseCurrencyAmount from "lib/utils/tryParseCurrencyAmount";
 import { addressesTokens } from "hooks/1delta/addressesTokens";
+import { calculateCompoundRiskChangeSlot, useGetCompoundRiskParameters, useGetCompoundRiskParametersSlot } from "hooks/riskParameters/useCompoundParameters";
 
 
 export const ArrowWrapper = styled.div<{ clickable: boolean; redesignFlag: boolean }>`
@@ -771,7 +770,7 @@ export default function Professional() {
     [typedValue, debtCurrency, leverage, depositDollarValue, Boolean(tradeIn), parsedAmountIn, pair, Boolean(prices[0])]
   )
 
-  const debouncedBorrowAmount = useDebounce(borrowAmount, 400)
+  const debouncedBorrowAmount = useDebounce(borrowAmount, 200)
 
   const {
     trade: { state: tradeState, trade },
@@ -783,6 +782,36 @@ export default function Professional() {
     collateralCurrency,
   )
 
+  const riskParams = useGetCompoundRiskParametersSlot(chainId, oracleState.data[chainId].chainLink)
+
+  const riksParamsChange = useMemo(() => {
+
+    if (!borrowAmount) {
+      return undefined
+
+    }
+    return calculateCompoundRiskChangeSlot(
+      {
+        asset: depositAsset,
+        delta: depositMode === DepositMode.DIRECT ? BigNumber.from(parsedAmount?.quotient.toString()) : BigNumber.from(tradeIn?.outputAmount?.quotient.toString() ?? '0'),
+        side: PositionSides.Collateral
+      },
+      {
+        asset: pair[0],
+        delta: BigNumber.from(trade?.outputAmount.quotient.toString() ?? '0'),
+        side: PositionSides.Collateral
+      },
+      {
+        asset: pair[1],
+        delta: BigNumber.from(borrowAmount.quotient.toString()),
+        side: PositionSides.Borrow
+      },
+      riskParams
+    )
+  },
+    [borrowAmount, depositAsset, trade, tradeIn, pair])
+
+  // console.log("RISK", formatEther(riksParamsChange?.healthFactorNew ?? '0'))
   const recipientAddress = recipient
 
   const parsedAmounts = useMemo(
@@ -1068,138 +1097,27 @@ export default function Professional() {
     }
   }, [hasStableRateIn, hasStableRateOut])
 
-  const riskParameters = useGetRiskParameters(chainId, currentProtocol, account)
-
-  const { riskChange, tradeImpact } = useRiskChange(
-    assetIn,
-    assetOut,
-    currentProtocol,
-    riskParameters,
-    marginTradeType,
-    trade,
-    sourceBorrowInterestMode,
-    targetBorrowInterestMode
-  )
-
-  const [riskErrorText, hasRiskError, hf] = useGeneralRiskValidation(riskChange, marginTradeType, isExpertMode)
-
-
-  const [balanceErrorText, hasBalanceError] = useGeneralBalanceValidation(
-    account,
-    currencyAmounts,
-    parsedAmount,
-    marginTradeType,
-    trade
-  )
 
   const [validatedSwapText, buttonDisabled,] = useMemo(() => {
     if (hasNoImplementation) return ['Coming Soon!', true]
 
     if (Boolean(account)) {
-
-      if (balanceErrorText) return [balanceErrorText, true]
-      if (swapInputError) return [swapInputError, true]
-      if (riskErrorText && hf < 1.05) {
-        if (hf >= 1) {
-          return [riskErrorText, false]
-        }
-        // for a critical violation we disable the button
-        return [riskErrorText, true]
-      }
-      if (routeIsSyncing || routeIsLoading) return [<Dots key={'loadingMS'}>Calculating Trade</Dots>, true]
-
-      if (priceImpactSeverity > 2) return ['Swap Anyway', false]
-
-      if (priceImpactTooHigh) return ['Price Impact Too High', true]
-
-      switch (marginTradeType) {
-        case MarginTradeType.Trim: {
-          return ['Trim Position', false]
-        }
-        case MarginTradeType.Open: {
-          return ['Build Position', false]
-        }
-        case MarginTradeType.Collateral: {
-          return ['Swap Collaterals', false]
-        }
-        case MarginTradeType.Debt: {
-          return ['Swap Debts', false]
-        }
-      }
+      return ['Coming Soon!', true]
     }
 
-    return ['Create a 1delta Account to trade!', true]
+    return ['Connect', true]
   }, [
     routeIsLoading,
     routeIsSyncing,
     priceImpactTooHigh,
-    priceImpactSeverity,
-    riskErrorText,
-    balanceErrorText,
-    hf,
+    priceImpactSeverity
   ])
-
-
-  const { supply, borrow, healthFactor, ltv, collateral, hasBalance } = useRiskParameters(
-    chainId,
-    oracleState,
-    userAccount,
-    account,
-    currentProtocol,
-    deltaState.userState.aaveTotals
-  )
-
-  const [collateralValue, typeCollateral] = useState(String(collateral))
-
-  const currentLeverage = useMemo(() => supply / (supply - borrow), [supply, borrow])
-
-  useEffect(() => {
-    if (account && collateral > 0) {
-      typeCollateral(String(collateral))
-      setLeverage(currentLeverage)
-    }
-
-  }, [account, collateral > 0])
-
-
-  const onSliderChange = useCallback(
-    (n: number) => {
-      setLeverage(n)
-      handleTypeInput(String((n * collateral).toFixed(6)))
-    }, [collateral])
-
-
-
 
   const handlePairSwap = useCallback(() => handleSelectPair([pair[1], pair[0]]), [pair])
 
 
   const { aprData, assetData, balanceData } = usePrepareAssetData(currentProtocol, chainId, account)
 
-
-  const [collateralAssets, debtAssets, borrowableAssets] = useMemo(() => {
-    if (account)
-      return [
-        assetData.filter(x => x.hasPosition && assets.includes(x.assetId)).map(x => x.assetId),
-        assetData.filter(x => x.hasBorrowPosition && assets.includes(x.assetId)).map(x => x.assetId),
-        assetData.filter(x => x.borrowEnabled && assets.includes(x.assetId)).map(x => x.assetId)
-      ]
-    return [
-      assets,
-      assets,
-      assetData.filter(x => x.borrowEnabled && assets.includes(x.assetId)).map(x => x.assetId)
-    ]
-  },
-    [assetData, assets, account])
-
-  const [selectableAssets, setSelectableAssets] = useState({ assetsIn: assets, assetsOut: assets })
-
-  useEffect(() => {
-    setSelectableAssets({
-      assetsIn: assets,
-      assetsOut: assets
-    })
-  }, [assets])
 
   const [appprovalMessagRequest, approvalMessage] = useMemo(() => {
     switch (marginTradeType) {
@@ -1240,9 +1158,9 @@ export default function Professional() {
   return (
     <Container >
       <ConfirmSwapModal
-        riskMessage={riskErrorText}
-        hasRiskError={hasRiskError}
-        healthFactor={hf}
+        riskMessage={"riskErrorText"}
+        hasRiskError={false}
+        healthFactor={1}
         isOpen={showConfirm}
         trade={trade}
         originalTrade={tradeToConfirm}
@@ -1498,7 +1416,7 @@ export default function Professional() {
             />
           </ChartContainer>
           <PositionTable
-            tradeImpact={tradeImpact}
+            tradeImpact={{}}
             isMobile={isMobile}
             assetData={assetData}
           />

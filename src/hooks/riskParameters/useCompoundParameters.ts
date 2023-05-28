@@ -165,6 +165,140 @@ export function calculateCompoundRiskChange(
 }
 
 
+export function useGetCompoundRiskParametersSlot(
+  chainId: number,
+  oracles: { [key: string]: ChainLinkData } | undefined
+): LtvParams | undefined {
+  const assetData = useAppSelector((state) => state.delta.assets)
+
+  return useMemo(() => {
+    // return nothing if not connected
+    if (!oracles) return undefined
+
+    const compoundData: { [key: string]: LtvAssetParams } = {}
+    const keys = Object.keys(assetData).map((a) => a as SupportedAssets)
+
+    // we iterate through all assets and calculate collateral, debt and record process and liquidation thresholds
+    for (let i = 0; i < keys.length; i++) {
+      const name = keys[i] as SupportedAssets
+      const priceParams = getPriceParams(oracles, name)
+
+      // threshold is a basis point value 100% = 1e18
+      const liquidationThreshold =
+        assetData[name]?.compoundData[chainId].reserveData?.collateralFactorMantissa ?? ONE_18
+
+      compoundData[name] = {
+        priceParams,
+        liquidationThreshold: ethers.BigNumber.from(liquidationThreshold),
+        collateral: ZERO_BN,
+        debt: ZERO_BN,
+      }
+    }
+
+    return {
+      assetData: compoundData,
+      collateral: ZERO_BN,
+      rawCollateral: ZERO_BN,
+      debt: ZERO_BN,
+      currentLtv: ZERO_BN,
+      healthFactor: ethers.constants.MaxUint256
+    }
+  }, [oracles, assetData])
+}
+
+
+/**
+ * Calculates the universal risk change for an trade on top of Compound V2
+ * @param assetChange0 change of asset0
+ * @param assetChange1 change in asset1
+ * @param assetChange2 change in asset2
+ * @param tradeParams existing risk parameters
+ * @returns trade impact information
+ */
+export function calculateCompoundRiskChangeSlot(
+  assetChange0?: ChangeInformation,
+  assetChange1?: ChangeInformation,
+  assetChange2?: ChangeInformation,
+  tradeParams?: LtvParams
+): TradeImpact {
+  if (
+    (!assetChange0?.asset && !assetChange1?.asset) ||
+    (!tradeParams?.assetData[assetChange0?.asset ?? ''] && !tradeParams?.assetData[assetChange1?.asset ?? ''])
+  )
+    return {
+      ltv: ZERO_BN,
+      ltvNew: ZERO_BN,
+      ltvDelta: ZERO_BN,
+      healthFactor: ZERO_BN,
+      healthFactorNew: ZERO_BN,
+      healthFactorDelta: ZERO_BN,
+      marginImpact: ZERO_BN,
+      deltaBorrow: ZERO_BN,
+      deltaCollateral: ZERO_BN
+    }
+
+
+  let effectiveDeltaCollateral = ZERO_BN;
+  let effectiveDeltaBorrow = ZERO_BN;
+
+  let deltaCollateral = ZERO_BN;
+
+  if (assetChange0)
+    if (assetChange0.side === PositionSides.Collateral) {
+      [deltaCollateral, effectiveDeltaCollateral] = calculateDeltaCollateral(assetChange0, tradeParams.assetData[assetChange0.asset])
+    } else {
+      effectiveDeltaBorrow = calculateDeltaBorrow(assetChange0, tradeParams.assetData[assetChange0.asset])
+    }
+
+  if (assetChange1)
+    if (assetChange1.side === PositionSides.Collateral) {
+      const [newCollat, effectiveNewCollat] = calculateDeltaCollateral(assetChange1, tradeParams.assetData[assetChange1.asset])
+      effectiveDeltaCollateral = effectiveDeltaCollateral.add(
+        effectiveNewCollat
+      )
+      deltaCollateral = deltaCollateral.add(newCollat)
+    } else {
+      effectiveDeltaBorrow = effectiveDeltaBorrow.add(
+        calculateDeltaBorrow(assetChange1, tradeParams.assetData[assetChange1.asset])
+      )
+    }
+
+  if (assetChange2)
+    if (assetChange2.side === PositionSides.Collateral) {
+      const [newCollat, effectiveNewCollat] = calculateDeltaCollateral(assetChange2, tradeParams.assetData[assetChange2.asset])
+      effectiveDeltaCollateral = effectiveDeltaCollateral.add(
+        effectiveNewCollat
+      )
+      deltaCollateral = deltaCollateral.add(newCollat)
+    } else {
+      effectiveDeltaBorrow = effectiveDeltaBorrow.add(
+        calculateDeltaBorrow(assetChange2, tradeParams.assetData[assetChange2.asset])
+      )
+    }
+
+  // new values are created by adding the deltas
+  const newCollateral = tradeParams.collateral.add(effectiveDeltaCollateral)
+  const newBorrow = tradeParams.debt.add(effectiveDeltaBorrow)
+
+  // the new ltv is the quotient
+  const ltvNew = newCollateral.gt(0) ? newBorrow.mul(ONE_18).div(newCollateral) : ZERO_BN
+  const healthFactorNew = newBorrow.gt(0)
+    ? newCollateral.mul(ONE_18).div(newBorrow)
+    : ethers.constants.MaxUint256
+  return {
+    ltv: tradeParams.currentLtv,
+    ltvNew,
+    ltvDelta: ltvNew.sub(tradeParams.currentLtv),
+    healthFactor: tradeParams.healthFactor,
+    healthFactorNew,
+    healthFactorDelta: healthFactorNew.sub(tradeParams.healthFactor),
+    marginImpact: effectiveDeltaBorrow.add(effectiveDeltaCollateral),
+    deltaBorrow: effectiveDeltaBorrow,
+    deltaCollateral
+  }
+}
+
+
 function calculateDeltaCollateral(
   assetChange: ChangeInformation,
   tradeParams: LtvAssetParams
