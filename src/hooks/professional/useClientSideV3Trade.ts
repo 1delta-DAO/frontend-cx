@@ -10,15 +10,8 @@ import { InterfaceTrade, TradeState } from 'state/routing/types'
 import { isCelo } from '../../constants/tokens'
 import { useAllV3RoutesProfessional } from './useAllV3Routes'
 import { useQuoter } from '../useContract'
+import { QUOTE_GAS_OVERRIDES } from 'constants/1delta'
 
-const QUOTE_GAS_OVERRIDES: { [chainId: number]: number } = {
-  [SupportedChainId.ARBITRUM_ONE]: 25_000_000,
-  [SupportedChainId.ARBITRUM_RINKEBY]: 25_000_000,
-  [SupportedChainId.CELO]: 50_000_000,
-  [SupportedChainId.CELO_ALFAJORES]: 50_000_000,
-  [SupportedChainId.POLYGON]: 50_000_000,
-  [SupportedChainId.POLYGON_MUMBAI]: 50_000_000,
-}
 
 const DEFAULT_GAS_QUOTE = 2_000_000
 
@@ -146,16 +139,11 @@ export function useClientSideV3Professional<TTradeType extends TradeType>(
 
     const routeKey = getRouteKeyFromCCys(currencyIn, currencyOut)
     if (!bestRoute) {
-      if (!CACHED_TRADE[routeKey])
-        return {
-          state: TradeState.LOADING,
-          trade: undefined,
-        }
-      // if a trade s cached, we'll return that
       return {
-        state: TradeState.VALID,
-        trade: CACHED_TRADE[routeKey],
+        state: TradeState.LOADING,
+        trade: undefined,
       }
+
     }
 
     const trade = new InterfaceTrade({

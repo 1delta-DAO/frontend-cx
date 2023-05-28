@@ -10,15 +10,7 @@ import { InterfaceTrade, TradeState } from 'state/routing/types'
 import { isCelo } from '../../../constants/tokens'
 import { useAllV3RoutesMoneyMarket } from './useAllV3Routes'
 import { useQuoter } from '../../useContract'
-
-const QUOTE_GAS_OVERRIDES: { [chainId: number]: number } = {
-  [SupportedChainId.ARBITRUM_ONE]: 25_000_000,
-  [SupportedChainId.ARBITRUM_RINKEBY]: 25_000_000,
-  [SupportedChainId.CELO]: 50_000_000,
-  [SupportedChainId.CELO_ALFAJORES]: 50_000_000,
-  [SupportedChainId.POLYGON]: 1_000_000,
-  [SupportedChainId.POLYGON_MUMBAI]: 1_000_000,
-}
+import { QUOTE_GAS_OVERRIDES } from 'constants/1delta'
 
 const DEFAULT_GAS_QUOTE = 2_000_000
 

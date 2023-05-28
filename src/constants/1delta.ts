@@ -485,3 +485,13 @@ export const toLenderText = (lender: LendingProtocol, chainId: number) => {
     return '0VIX'
   return lender
 }
+
+
+export const QUOTE_GAS_OVERRIDES: { [chainId: number]: number } = {
+  [SupportedChainId.ARBITRUM_ONE]: 25_000_000,
+  [SupportedChainId.ARBITRUM_RINKEBY]: 25_000_000,
+  [SupportedChainId.CELO]: 50_000_000,
+  [SupportedChainId.CELO_ALFAJORES]: 50_000_000,
+  [SupportedChainId.POLYGON]: 100_000_000,
+  [SupportedChainId.POLYGON_MUMBAI]: 1_000_000,
+}
