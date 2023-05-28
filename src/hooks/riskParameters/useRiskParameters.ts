@@ -1,6 +1,6 @@
 import { AAVE_PRICE_PRECISION, BPS_BN, getSupportedAssets, LTV_PRECISION, ONE_18, TEN, TOKEN_META, ZERO_BN } from "constants/1delta"
 import { BigNumber, ethers } from "ethers"
-import { MappedSwapAmounts } from "pages/Professional/components/MarketTable"
+import { MappedSwapAmounts } from "pages/Trading/components/MarketTable"
 import { useMemo } from "react"
 import { LendingProtocol } from "state/1delta/actions"
 import { useAppSelector } from "state/hooks"

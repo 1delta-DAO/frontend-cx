@@ -81,8 +81,8 @@ import DecimalSlider from "./components/Slider";
 import { useMarginTradeApproval } from "hooks/approval";
 import { useBalanceText, useCurrencyAmounts } from "../../hooks/trade";
 import { usePrepareAssetData } from "hooks/asset/useAssetData";
-import { useGeneralRiskValidation } from "pages/Professional/hooks/riskValidation";
-import { useGeneralBalanceValidation } from "pages/Professional/hooks/balanceValidation";
+import { useGeneralRiskValidation } from "pages/Trading/hooks/riskValidation";
+import { useGeneralBalanceValidation } from "pages/Trading/hooks/balanceValidation";
 import { generateCalldata } from "utils/calldata/generateCall";
 import { SwitchCircle } from "components/Wallet";
 import { fetchChainLinkData } from "state/oracles/fetchChainLinkData";
@@ -1008,7 +1008,6 @@ export default function Professional() {
 
   // errors
   const [showInverted, setShowInverted] = useState<boolean>(false)
-  const [swapQuoteReceivedDate, setSwapQuoteReceivedDate] = useState<Date | undefined>()
 
   // warnings on the greater of fiat value price impact and execution price impact
   const { priceImpactSeverity, largerPriceImpact } = useMemo(() => {
@@ -1323,7 +1322,6 @@ export default function Professional() {
         onConfirm={handleSwap}
         swapErrorMessage={swapErrorMessage}
         onDismiss={handleConfirmDismiss}
-        swapQuoteReceivedDate={swapQuoteReceivedDate}
         fiatValueInput={fiatValueInput}
         fiatValueOutput={fiatValueOutput}
       />

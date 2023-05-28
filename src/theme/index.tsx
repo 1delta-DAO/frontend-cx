@@ -16,6 +16,7 @@ import { colors as ColorsPalette, colorsDark, colorsLight } from './colors'
 import { AllColors, Colors, ThemeColors } from './styled'
 import { opacify } from './utils'
 
+import Background_0VIX from 'assets/images/bg-0vix.png'
 export * from './components'
 
 type TextProps = Omit<TextPropsOriginal, 'css'>
@@ -383,7 +384,8 @@ export const ThemedText = {
 export const ThemedGlobalStyle = createGlobalStyle`
 html {
   color: ${({ theme }) => theme.deprecated_text1};
-  background-color: ${({ theme }) => theme.deprecated_bg1} !important;
+  background-image: url(${Background_0VIX});
+  background-size: cover;
 }
 
 a {

@@ -7,7 +7,7 @@ import { useIsDarkMode } from 'state/user/hooks'
 import styled from 'styled-components/macro'
 import { Z_INDEX } from 'theme/zIndex'
 
-import Professional from './Professional'
+import Professional from './Trading'
 import { useAnalyticsReporter } from '../components/analytics'
 import ErrorBoundary from '../components/ErrorBoundary'
 import Header from '../components/Header'
