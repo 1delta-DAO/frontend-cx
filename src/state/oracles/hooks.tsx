@@ -15,11 +15,11 @@ export function useOracleState(): AppState['oracles'] {
 }
 
 export function useOracleStateChainLink(chainId: number) {
-  return useAppSelector((state) => state.oracles.data)[chainId].chainLink
+  return useAppSelector((state) => state.oracles.data)[chainId]?.chainLink
 }
 
 export function useOracleStateAave(chainId: number) {
-  return useAppSelector((state) => state.oracles.data)[chainId].aave
+  return useAppSelector((state) => state.oracles.data)[chainId]?.aave
 }
 
 export function useOracleStateChainLinkForAsset(chainId: number, asset: SupportedAssets) {

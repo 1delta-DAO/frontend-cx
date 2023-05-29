@@ -8,8 +8,9 @@ import { useMultipleContractSingleData } from 'lib/hooks/multicall'
 import { useMemo } from 'react'
 import { useChainId } from 'state/globalNetwork/hooks'
 
-import { V3_CORE_FACTORY_ADDRESSES } from '../../../constants/addresses'
-import { IUniswapV3PoolStateInterface } from '../../../types/v3/IUniswapV3PoolState'
+import { V3_CORE_FACTORY_ADDRESSES } from 'constants/addresses'
+import { IUniswapV3PoolStateInterface } from 'types/v3/IUniswapV3PoolState'
+import { POOL_GAS_OVERRIDE } from 'constants/1delta'
 
 const POOL_STATE_INTERFACE = new Interface(IUniswapV3PoolStateABI) as IUniswapV3PoolStateInterface
 
@@ -83,7 +84,7 @@ export enum PoolState {
   INVALID,
 }
 
-export function usePoolsMarginTrade(
+export function usePoolsMoneyMarket(
   poolKeys: [Currency | undefined, Currency | undefined, FeeAmount | undefined][]
 ): [PoolState, Pool | null][] {
   const chainId = useChainId()
@@ -110,8 +111,16 @@ export function usePoolsMarginTrade(
     return poolTokens.map((value) => value && PoolCache.getPoolAddress(v3CoreFactoryAddress, ...value))
   }, [chainId, poolTokens])
 
-  const slot0s = useMultipleContractSingleData(poolAddresses, POOL_STATE_INTERFACE, 'slot0')
-  const liquidities = useMultipleContractSingleData(poolAddresses, POOL_STATE_INTERFACE, 'liquidity')
+  const slot0s = useMultipleContractSingleData(poolAddresses, POOL_STATE_INTERFACE, 'slot0', [],
+    // {
+    //   gasRequired: POOL_GAS_OVERRIDE,
+    // }
+  )
+  const liquidities = useMultipleContractSingleData(poolAddresses, POOL_STATE_INTERFACE, 'liquidity', [],
+    // {
+    //   gasRequired: POOL_GAS_OVERRIDE,
+    // }
+  )
 
   return useMemo(() => {
     return poolKeys.map((_key, index) => {
@@ -141,7 +150,7 @@ export function usePoolsMarginTrade(
   }, [liquidities, poolKeys, slot0s, poolTokens])
 }
 
-export function usePoolMarginTrade(
+export function usePoolMoneyMausePoolsMoneyMarket(
   currencyA: Currency | undefined,
   currencyB: Currency | undefined,
   feeAmount: FeeAmount | undefined
@@ -151,5 +160,5 @@ export function usePoolMarginTrade(
     [currencyA, currencyB, feeAmount]
   )
 
-  return usePoolsMarginTrade(poolKeys)[0]
+  return usePoolsMoneyMarket(poolKeys)[0]
 }

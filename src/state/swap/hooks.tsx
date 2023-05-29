@@ -1,8 +1,8 @@
 import { Trans } from '@lingui/macro'
 import { Currency, CurrencyAmount, Percent, TradeType } from '@uniswap/sdk-core'
 import { useWeb3React } from '@web3-react/core'
-import { useBestMarginTradeBroker } from 'hooks/tradeBroker/marginTrade/useBestTrade'
-import { useClientSideV3MarginTrade } from 'hooks/tradeAccount/marginTrade/useClientSideV3Trade'
+import { useClientSideV3MoneyMarket } from 'hooks/moneyMarket/useClientSideV3Trade'
+import { useClientSideV3Professional } from 'hooks/professional/useClientSideV3Trade'
 import useAutoSlippageTolerance from 'hooks/useAutoSlippageTolerance'
 import tryParseCurrencyAmount from 'lib/utils/tryParseCurrencyAmount'
 import { ParsedQs } from 'qs'
@@ -204,7 +204,7 @@ export function useDerivedSwapInfoClientSideV3ProvidedCcy(
 
   const tradeType = useSelectedTradeType()
 
-  const tradeRaw = useClientSideV3MarginTrade(
+  const tradeRaw = useClientSideV3Professional(
     isExactIn ? TradeType.EXACT_INPUT : TradeType.EXACT_OUTPUT,
     tradeType === OneDeltaTradeType.MarginSwap ? parsedAmount : undefined,
     tradeType === OneDeltaTradeType.MarginSwap ? ((isExactIn ? outputCurrency : inputCurrency) ?? undefined) : undefined
@@ -304,7 +304,7 @@ export function useDerivedSwapInfoClientSideV3ProvidedCcyBroker(currencyBalances
     [inputCurrency, isExactIn, outputCurrency, typedValue]
   )
 
-  const tradeRaw = useBestMarginTradeBroker(
+  const tradeRaw = useClientSideV3MoneyMarket(
     isExactIn ? TradeType.EXACT_INPUT : TradeType.EXACT_OUTPUT,
     parsedAmount,
     ((isExactIn ? outputCurrency : inputCurrency) ?? undefined)

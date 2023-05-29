@@ -48,10 +48,12 @@ export const FALLBACK_URLS: { [chainId: number]: string[] } = {
   // ],
   [SupportedChainId.POLYGON]: [
     // "Safe" URLs
-    typeof QUICKNODE_RPC_URL === 'undefined' ? 'https://polygon-rpc.com/' : QUICKNODE_RPC_URL,
-    'https://rpc.ankr.com/polygon',
-    'https://polygon.llamarpc.com',
+    // typeof QUICKNODE_RPC_URL === 'undefined' ? 'https://polygon-rpc.com/' : QUICKNODE_RPC_URL,
+    // 'https://rpc.ankr.com/polygon',
     'https://polygon-mainnet.public.blastapi.io',
+    'https://polygon.llamarpc.com',
+    'https://1rpc.io/matic',
+    'https://rpc.ankr.com/polygon',
     // typeof INFURA_KEY === 'undefined' ?
     //   'https://rpc.ankr.com/polygon' : `https://polygon-mainnet.infura.io/v3/${INFURA_KEY}`,
     // 'https://rpc.ankr.com/polygon',
@@ -60,6 +62,12 @@ export const FALLBACK_URLS: { [chainId: number]: string[] } = {
     // 'https://rpc-mainnet.maticvigil.com',
     // 'https://rpc-mainnet.matic.quiknode.pro',
     // 'https://matic-mainnet-full-rpc.bwarelabs.com',
+  ],
+  [SupportedChainId.POLYGON_ZK_EVM]: [
+    // "Safe" URLs
+    'https://zkevm-rpc.com',
+    'https://rpc.ankr.com/polygon_zkevm',
+    'https://rpc.polygon-zkevm.gateway.fm',
   ],
   [SupportedChainId.POLYGON_MUMBAI]: [
     // "Safe" URLs

@@ -340,6 +340,13 @@ export const WRAPPED_NATIVE_CURRENCY: { [chainId: number]: Token | undefined } =
     'WETH',
     'Wrapped Ether'
   ),
+  [SupportedChainId.POLYGON_ZK_EVM]: new Token(
+    SupportedChainId.POLYGON_ZK_EVM,
+    '0x4F9A0e7FD2Bf6067db6994CF12E4495Df938E6e9',
+    18,
+    'WETH',
+    'Wrapped Ether'
+  ),
   [SupportedChainId.POLYGON]: new Token(
     SupportedChainId.POLYGON,
     '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',

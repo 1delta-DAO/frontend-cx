@@ -2,7 +2,7 @@ import { createMulticall, ListenerOptions } from '@uniswap/redux-multicall'
 import { SupportedChainId } from 'constants/chains'
 import { useInterfaceMulticall } from 'hooks/useContract'
 import useBlockNumber from 'lib/hooks/useBlockNumber'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { combineReducers, createStore } from 'redux'
 import { useChainId } from 'state/globalNetwork/hooks'
 
@@ -21,14 +21,33 @@ function getBlocksPerFetchForChainId(chainId: number | undefined): number {
     case SupportedChainId.CELO_ALFAJORES:
       return 5
     default:
-      return 5
+      return 10
   }
 }
+
+
+const useRandomInteger = () => {
+  const [randomInteger, setRandomInteger] = useState(Math.floor(Math.random() * 4));
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setRandomInteger(Math.floor(Math.random() * 4));
+    }, 10000); // updates every 5 seconds
+
+    return () => {
+      clearInterval(intervalId); // clean up interval on component unmount
+    };
+  }, []); // empty dependency array means this effect runs once on mount and clean up on unmount
+
+  return randomInteger;
+};
+
 
 export function MulticallUpdater() {
   const chainId = useChainId()
   const latestBlockNumber = useBlockNumber()
-  const contract = useInterfaceMulticall()
+  const id = useRandomInteger()
+  const contract = useInterfaceMulticall(id)
 
   const listenerOptions: ListenerOptions = useMemo(
     () => ({

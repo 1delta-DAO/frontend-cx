@@ -10,10 +10,8 @@ import { InterfaceTrade, TradeState } from 'state/routing/types'
 import { isCelo } from '../../constants/tokens'
 import { useAllV3RoutesProfessional } from './useAllV3Routes'
 import { useQuoter } from '../useContract'
-import { QUOTE_GAS_OVERRIDES } from 'constants/1delta'
+import { DEFAULT_GAS_QUOTE, QUOTE_GAS_OVERRIDES } from 'constants/1delta'
 
-
-const DEFAULT_GAS_QUOTE = 2_000_000
 
 const CACHED_TRADE: { [key: string]: InterfaceTrade<Currency, Currency, any> } = {}
 const CACHED_ROUTES: { [key: string]: Route<Currency, Currency>[] } = {}

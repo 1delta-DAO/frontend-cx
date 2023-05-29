@@ -487,11 +487,15 @@ export const toLenderText = (lender: LendingProtocol, chainId: number) => {
 }
 
 
+export const DEFAULT_GAS_QUOTE = 2_000_000
+
+export const POOL_GAS_OVERRIDE = 100_000
+
 export const QUOTE_GAS_OVERRIDES: { [chainId: number]: number } = {
   [SupportedChainId.ARBITRUM_ONE]: 25_000_000,
   [SupportedChainId.ARBITRUM_RINKEBY]: 25_000_000,
   [SupportedChainId.CELO]: 50_000_000,
   [SupportedChainId.CELO_ALFAJORES]: 50_000_000,
-  [SupportedChainId.POLYGON]: 100_000_000,
-  [SupportedChainId.POLYGON_MUMBAI]: 1_000_000,
+  [SupportedChainId.POLYGON]: 1_000_000,
+  [SupportedChainId.POLYGON_MUMBAI]: 50_000_000,
 }

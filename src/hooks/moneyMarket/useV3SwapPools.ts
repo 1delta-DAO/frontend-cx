@@ -3,7 +3,7 @@ import { FeeAmount, Pool } from '@uniswap/v3-sdk'
 import { SupportedChainId } from 'constants/chains'
 import { useMemo } from 'react'
 import { useChainId } from 'state/globalNetwork/hooks'
-import { useAllCurrencyCombinations } from '../../useAllCurrencyCombinations'
+import { useAllCurrencyCombinations } from '../useAllCurrencyCombinations'
 import { PoolState, usePoolsMoneyMarket } from './usePools'
 
 /**

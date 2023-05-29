@@ -3,6 +3,7 @@ import { BigintIsh, Currency, Token } from '@uniswap/sdk-core'
 import { abi as IUniswapV3PoolStateABI } from '@uniswap/v3-core/artifacts/contracts/interfaces/pool/IUniswapV3PoolState.sol/IUniswapV3PoolState.json'
 import { computePoolAddress } from '@uniswap/v3-sdk'
 import { FeeAmount, Pool } from '@uniswap/v3-sdk'
+import { POOL_GAS_OVERRIDE } from 'constants/1delta'
 import JSBI from 'jsbi'
 import { useMultipleContractSingleData } from 'lib/hooks/multicall'
 import { useMemo } from 'react'
@@ -13,8 +14,6 @@ import { IUniswapV3PoolStateInterface } from '../../types/v3/IUniswapV3PoolState
 
 const POOL_STATE_INTERFACE = new Interface(IUniswapV3PoolStateABI) as IUniswapV3PoolStateInterface
 
-
-const POOL_GAS_OVERRIDE = 500_000
 
 // Classes are expensive to instantiate, so this caches the recently instantiated pools.
 // This avoids re-instantiating pools as the other pools in the same request are loaded.
@@ -113,12 +112,16 @@ export function usePoolsProfessional(
     return poolTokens.map((value) => value && PoolCache.getPoolAddress(v3CoreFactoryAddress, ...value))
   }, [chainId, poolTokens])
 
-  const slot0s = useMultipleContractSingleData(poolAddresses, POOL_STATE_INTERFACE, 'slot0', [], {
-    gasRequired: POOL_GAS_OVERRIDE,
-  })
-  const liquidities = useMultipleContractSingleData(poolAddresses, POOL_STATE_INTERFACE, 'liquidity', [], {
-    gasRequired: POOL_GAS_OVERRIDE,
-  })
+  const slot0s = useMultipleContractSingleData(poolAddresses, POOL_STATE_INTERFACE, 'slot0', [],
+    // {
+    //   gasRequired: POOL_GAS_OVERRIDE,
+    // }
+  )
+  const liquidities = useMultipleContractSingleData(poolAddresses, POOL_STATE_INTERFACE, 'liquidity', [],
+    // {
+    //   gasRequired: POOL_GAS_OVERRIDE,
+    // }
+  )
 
   return useMemo(() => {
     return poolKeys.map((_key, index) => {

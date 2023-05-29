@@ -1,18 +1,15 @@
 import { Currency, CurrencyAmount, TradeType } from '@uniswap/sdk-core'
 import { Route, SwapQuoter } from '@uniswap/v3-sdk'
-import { SupportedChainId } from 'constants/chains'
 import JSBI from 'jsbi'
 import { useSingleContractWithCallData } from 'lib/hooks/multicall'
 import { useMemo } from 'react'
 import { useChainId } from 'state/globalNetwork/hooks'
 import { InterfaceTrade, TradeState } from 'state/routing/types'
 
-import { isCelo } from '../../../constants/tokens'
+import { isCelo } from 'constants/tokens'
 import { useAllV3RoutesMoneyMarket } from './useAllV3Routes'
-import { useQuoter } from '../../useContract'
-import { QUOTE_GAS_OVERRIDES } from 'constants/1delta'
-
-const DEFAULT_GAS_QUOTE = 2_000_000
+import { useQuoter } from '../useContract'
+import { DEFAULT_GAS_QUOTE, QUOTE_GAS_OVERRIDES } from 'constants/1delta'
 
 /**
  * Returns the best v3 trade for a desired swap

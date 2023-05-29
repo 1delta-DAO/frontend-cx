@@ -290,7 +290,7 @@ export function useDerivedSwapInfoMargin(
     [inCurrency, outCurrency]
   )
 
-  const { independentField, typedValue, recipient } = useProfessionalState()
+  const { recipient } = useProfessionalState()
 
   const inputCurrency = currencies[Field.INPUT]
   const outputCurrency = currencies[Field.OUTPUT]

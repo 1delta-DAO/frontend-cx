@@ -46,7 +46,7 @@ import ConfirmSwapModal from '../../components/swap/ConfirmMarginTradeModal'
 import { Dots, PageWrapper, SwapCallbackError, SwapWrapper } from '../../components/swap/styleds'
 import { ApprovalState } from '../../hooks/useApproveCallback'
 import { useIsSwapUnsupported } from '../../hooks/useIsSwapUnsupported'
-import { useStablecoinValue } from '../../hooks/useStablecoinPrice'
+import { useDollarPriceViaOracles, useStablecoinDollarValue, useStablecoinValue } from '../../hooks/useStablecoinPrice'
 import {
   useSelectedTradeTypeProfessional,
 } from '../../state/professionalTradeSelection/hooks'
@@ -831,8 +831,11 @@ export default function Professional() {
     [trade, tradeState]
   )
 
-  const fiatValueInput = useStablecoinValue(trade?.inputAmount)
-  const fiatValueOutput = useStablecoinValue(trade?.outputAmount)
+  const fiatValueInput = useStablecoinDollarValue(trade?.inputAmount)
+  const fiatValueOutput = useStablecoinDollarValue(trade?.outputAmount)
+
+  // console.log("FV", fiatValueInput?.toExact(), fiatValueOutput?.toExact())
+
   const stablecoinPriceImpact = useMemo(
     () => (routeIsSyncing ? undefined : computeFiatValuePriceImpact(fiatValueInput, fiatValueOutput)),
     [fiatValueInput, fiatValueOutput, routeIsSyncing]

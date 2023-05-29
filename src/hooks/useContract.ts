@@ -36,6 +36,7 @@ import { useWeb3React } from '@web3-react/core'
 import { useChainId, useNetworkState } from 'state/globalNetwork/hooks'
 import { simpleRpcProvider } from 'utils/1delta/contractHelper'
 import { JsonRpcProvider, Web3Provider } from '@ethersproject/providers'
+import { getSecondaryProvider, getThirdProvider } from 'constants/providers'
 const { abi: IUniswapV2PairABI } = IUniswapV2PairJson
 const { abi: IUniswapV2Router02ABI } = IUniswapV2Router02Json
 const { abi: QuoterABI } = QuoterJson
@@ -49,28 +50,63 @@ const { abi: V2MigratorABI } = V3MigratorJson
 export function useContract<T extends Contract = Contract>(
   addressOrAddressMap: string | { [chainId: number]: string } | undefined,
   ABI: any,
-  withSignerIfPossible = true
+  withSignerIfPossible = true,
+  secondary = false
 ): T | null {
   const { provider } = useWeb3React()
   const { account, chainId, connectionIsSupported } = useNetworkState()
   let _currentProvider: JsonRpcProvider | Web3Provider | undefined = provider
-  if (!provider || !connectionIsSupported)
-    _currentProvider = simpleRpcProvider(chainId)
+  if (!provider || !connectionIsSupported || secondary)
+    _currentProvider = getThirdProvider(chainId)
 
   return useMemo(() => {
-    if (!addressOrAddressMap || !ABI || !provider || !chainId) return null
+    if (!addressOrAddressMap || !ABI || !_currentProvider || !chainId) return null
     let address: string | undefined
     if (typeof addressOrAddressMap === 'string') address = addressOrAddressMap
     else address = addressOrAddressMap[chainId]
     if (!address) return null
     try {
-      return getContract(address, ABI, provider, withSignerIfPossible && account ? account : undefined)
+      return getContract(address, ABI, _currentProvider, withSignerIfPossible && account ? account : undefined)
     } catch (error) {
       console.error('Failed to get contract', error)
       return null
     }
-  }, [addressOrAddressMap, ABI, provider, chainId, withSignerIfPossible, account]) as T
+  }, [addressOrAddressMap, ABI, _currentProvider, chainId, withSignerIfPossible, account]) as T
 }
+
+
+// returns null on errors
+export function useContractMultiProvider<T extends Contract = Contract>(
+  addressOrAddressMap: string | { [chainId: number]: string } | undefined,
+  ABI: any,
+  withSignerIfPossible = true,
+  id = 0
+): T | null {
+  const { provider } = useWeb3React()
+  const { account, chainId, connectionIsSupported } = useNetworkState()
+  let _currentProvider: JsonRpcProvider | Web3Provider | undefined = provider
+  if (id === 0) {
+    _currentProvider = simpleRpcProvider(chainId)
+  } else if (id === 1) {
+    _currentProvider = getSecondaryProvider(chainId)
+  } else {
+    _currentProvider = getThirdProvider(chainId)
+  }
+  return useMemo(() => {
+    if (!addressOrAddressMap || !ABI || !_currentProvider || !chainId) return null
+    let address: string | undefined
+    if (typeof addressOrAddressMap === 'string') address = addressOrAddressMap
+    else address = addressOrAddressMap[chainId]
+    if (!address) return null
+    try {
+      return getContract(address, ABI, _currentProvider, withSignerIfPossible && account ? account : undefined)
+    } catch (error) {
+      console.error('Failed to get contract', error)
+      return null
+    }
+  }, [addressOrAddressMap, ABI, _currentProvider, chainId, withSignerIfPossible, account]) as T
+}
+
 
 export function useV2MigratorContract() {
   return useContract<V3Migrator>(V3_MIGRATOR_ADDRESSES, V2MigratorABI, true)
@@ -121,8 +157,8 @@ export function useV2RouterContract(): Contract | null {
   return useContract(V2_ROUTER_ADDRESS, IUniswapV2Router02ABI, true)
 }
 
-export function useInterfaceMulticall() {
-  return useContract<UniswapInterfaceMulticall>(MULTICALL_ADDRESS, MulticallABI, false) as UniswapInterfaceMulticall
+export function useInterfaceMulticall(id = 0) {
+  return useContractMultiProvider<UniswapInterfaceMulticall>(MULTICALL_ADDRESS, MulticallABI, false, id) as UniswapInterfaceMulticall
 }
 
 export function useQuoter(useQuoterV2: boolean) {
