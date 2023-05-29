@@ -47,18 +47,16 @@ import { Dots, PageWrapper, SwapCallbackError, SwapWrapper } from '../../compone
 import { ApprovalState } from '../../hooks/useApproveCallback'
 import { useIsSwapUnsupported } from '../../hooks/useIsSwapUnsupported'
 import { useStablecoinValue } from '../../hooks/useStablecoinPrice'
-import useWrapCallback, { WrapErrorText, WrapType } from '../../hooks/useWrapCallback'
 import {
-  useProfessionalTradeSelectionState, useSelectedTradeTypeProfessional,
+  useSelectedTradeTypeProfessional,
 } from '../../state/professionalTradeSelection/hooks'
 import { useExpertModeManager, useIsDarkMode } from '../../state/user/hooks'
-import { ReactComponent as CloseIcon } from 'assets/images/x.svg'
 import { LinkStyledButton, ThemedText } from '../../theme'
 import { computeFiatValuePriceImpact } from '../../utils/computeFiatValuePriceImpact'
 import { maxAmountSpend } from '../../utils/maxAmountSpend'
 import { computeRealizedPriceImpact, warningSeverity } from '../../utils/prices'
 import { largerPercentValue } from 'utils/1delta/generalFormatters'
-import { AaveMarginTrader, AaveSweeper, Sweeper } from 'abis/types'
+import { AaveMarginTrader, AaveSweeper } from 'abis/types'
 import { calculateGasMargin } from 'utils/calculateGasMargin'
 import { TransactionType } from 'state/transactions/types'
 import { currencyId } from 'utils/currencyId'
