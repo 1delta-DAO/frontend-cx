@@ -1,6 +1,6 @@
 import { Trans } from '@lingui/macro'
 import { Currency, Price } from '@uniswap/sdk-core'
-import useStablecoinPrice from 'hooks/useStablecoinPrice'
+import { useDollarPriceViaOracles } from 'hooks/useStablecoinPrice'
 import { useCallback } from 'react'
 import { Text } from 'rebass'
 import styled, { useTheme } from 'styled-components/macro'
@@ -32,7 +32,7 @@ const StyledPriceContainer = styled.button`
 export default function TradePrice({ price, showInverted, setShowInverted }: TradePriceProps) {
   const theme = useTheme()
 
-  const usdcPrice = useStablecoinPrice(showInverted ? price.baseCurrency : price.quoteCurrency)
+  const usdcPrice = useDollarPriceViaOracles(showInverted ? price.baseCurrency : price.quoteCurrency)
   /*
    * calculate needed amount of decimal prices, for prices between 0.95-1.05 use 4 decimal places
    */
