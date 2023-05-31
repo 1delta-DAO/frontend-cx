@@ -21,7 +21,6 @@ import chart from './chart/reducer'
 import marginTradeSelection from './marginTradeSelection/reducer'
 import professionalTradeSelection from './professionalTradeSelection/reducer'
 import moneyMarket from './moneyMarket/reducer'
-import singleSide from './singleSide/reducer'
 import tableFilter from './tableFilter/reducer'
 
 const PERSISTED_KEYS: string[] = ['user', 'transactions', 'lists']
@@ -41,7 +40,6 @@ const store = configureStore({
     marginTradeSelection,
     professionalTradeSelection,
     moneyMarket,
-    singleSide,
     tableFilter,
     multicall: multicall.reducer,
     lists,

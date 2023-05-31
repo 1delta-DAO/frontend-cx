@@ -152,52 +152,11 @@ const CurrencySelectionRow = styled.div`
   background-color: ${({ theme }) => theme.deprecated_bg0};
 `
 
-const Close = styled.div`
-  margin-top: 6px;
-  padding: 5px;
-  color: ${({ theme }) => theme.accentActionSoft};
-  transition: 150ms ease-in;
-  &:hover {
-    color: ${({ theme }) => theme.hoverState};
-    cursor: pointer;
-  }
-`
-
-
-const ButtonRow = styled.div`
-display: flex;
-flex-direction: row;
-align-items:center;
-justify-content: space:between;
-margin-bottom: 5px;
-`
-
 const Image = styled.img`
 width: 25px;
 height: 25px;
 `
 
-const ModalContainer = styled.div<{ isMobile: boolean }>`
-  padding: ${({ isMobile }) => (isMobile ? '1px' : '10px')};
-  padding-bottom: 21px;
-  width: 100%;
-  ${({ isMobile }) => (isMobile ? `
-  height: 70%;
-  ` : '')}
-`
-
-
-const ConfigPanel = styled.div`
-  border: 1px solid;
-  border-color: ${({ theme }) => theme.backgroundInteractive};
-  background: ${({ theme }) => theme.deprecated_bg0};
-  height: 100%;
-  width: 20%;
-  min-width: 350px;
-  min-height: 400px;
-  margin: 5px;
-  border-radius: 10px;
-`
 
 const SwapPanel = styled.div`
   height: 100%;
@@ -264,33 +223,6 @@ export const ButtonLightBoring = styled(BaseButton) <{ redesignFlag?: boolean }>
 `
 
 
-const TypeButton = styled(ButtonLightBoring) <{ selected: boolean }>`
-border-radius: 0px;
-font-size: 14px;
-&:first-child {
-  border-top-left-radius: 10px;
-  padding-left: 10px;
-}
-&:last-child {
-  border-top-right-radius: 10px;
-  padding-right: 10px;
-}
-height: 40px;
-${({ theme, selected }) =>
-    selected ?
-      `
-  border: 1px solid ${({ theme }) => theme.backgroundInteractive};
-  border-bottom: none;
-  background-color: ${theme.deprecated_bg0};
-  font-weight: bold;
-  `: `
-  opacity: 0.5;
-  background-color: ${theme.deprecated_bg3};
-  `
-  }
-`
-
-
 const CartAndTableContainer = styled(AutoColumnAdjusted)`
   width: 100%;
   ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
@@ -341,13 +273,6 @@ const PriceRow = styled.div`
   width: 100px;
 `};
 `
-
-const PriceText = styled.span`
-font-size: 20px;
-color: ${({ theme }) => (theme.textSecondary)};
-${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
-font-size: 14px;
-`};`
 
 const InputPanelContainer = styled.div`
 margin: 2px;
@@ -402,16 +327,6 @@ const ChartAssetRow = styled.span`
   justify-content: space-between;
   gap: 5px;
 `
-
-const DropdownLabel = ({ asset }: DropdownLabelProps): JSX.Element => {
-
-  return <ChartAssetRow >
-    <Image src={TOKEN_SVGS[asset]} key={String(asset)} />
-    <LabelAssetText>
-      {String(asset)}
-    </LabelAssetText>
-  </ChartAssetRow>
-}
 
 enum ProTradeType {
   MarginOpen,
@@ -514,35 +429,6 @@ export default function Professional() {
   const [repeater, setRepeater] = useState(0)
 
   useEffect(() => {
-    if (account) {
-      // if ( && chainId !== SupportedChainId.MAINNET && userAccountData) {
-      //   dispatch(fetch1DeltaUserAccountDataAsync({ chainId, account }))
-      //   set(false)
-      // }
-
-      // if (chainId === SupportedChainId.POLYGON_MUMBAI)
-      //   dispatch(
-      //     fetchCometReserveDataAsync({
-      //       chainId
-      //     })
-      //   )
-
-      dispatch(
-        fetchAAVEUserReserveDataAsync({
-          chainId,
-          account,
-          assetsToQuery: getSupportedAssets(chainId, LendingProtocol.AAVE),
-        })
-      )
-      // if (chainId !== SupportedChainId.MAINNET)
-      //   dispatch(
-      //     fetchCompoundAccountDataAsync({
-      //       chainId,
-      //       accounts: convertAccountArray(userAccountData),
-      //       assetIds: getSupportedAssets(chainId, LendingProtocol.COMPOUND),
-      //     })
-      //   )
-    }
     // fetch oracle data
     dispatch(fetchChainLinkData({ chainId }))
     dispatch(fetchAAVEAggregatorDataAsync({ chainId }))
@@ -555,22 +441,12 @@ export default function Professional() {
   }, [repeater, deltaState?.userMeta?.[chainId]?.loaded, chainId])
 
 
-  const filteredAssets = useMemo(() => {
-    return Object.assign(
-      {},
-      ...getSupportedAssets(chainId, currentProtocol).map((x) => {
-        return { [x]: deltaState.assets[x] }
-      })
-    )
-  }, [deltaState, currentProtocol, chainId])
-
   const restrictedTokenList = useMemo(() => {
     return getAaveTokens(chainId)
   }, [chainId])
   const dispatch = useAppDispatch()
 
   const isMobile = useIsMobile()
-  const selectTradeType = useTradeTypeSelector()
 
   const [marginTradeType, setMarginTradeType] = useState(MarginTradeType.Open)
   const [side, setSide] = useState(PositionSides.Collateral)
@@ -588,45 +464,11 @@ export default function Professional() {
   // for expert mode
   const [isExpertMode] = useExpertModeManager()
 
-  const [selectedAsset0, selectedAsset1] = useMemo(() => {
-    return [
-      safeGetToken(chainId, currencyIn, LendingProtocol.AAVE),
-      safeGetToken(chainId, currencyOut, LendingProtocol.AAVE)
-    ]
-  },
-    [
-      chainId,
-      currencyIn,
-      currencyOut
-    ])
-
-
-  const [assetState, switchAssets] = useState<{ assetIn: SupportedAssets; assetOut: SupportedAssets }>({
-    assetIn: selectedAsset0.symbol as SupportedAssets,
-    assetOut: selectedAsset1.symbol as SupportedAssets,
-  })
-
   const deltaAssets = useDeltaAssetState()
 
   const { assetIn, assetOut } = useMemo(() => {
     return { assetIn: deltaAssets[currencyIn], assetOut: deltaAssets[currencyOut] }
   }, [currencyIn, currencyOut, deltaAssets[currencyIn], deltaAssets[currencyOut]])
-
-  const currencyAmounts = useCurrencyAmounts(
-    chainId,
-    account,
-    currentProtocol,
-    marginTradeType,
-    assetIn,
-    assetOut,
-    selectedAsset0,
-    selectedAsset1,
-    sourceBorrowInterestMode,
-    targetBorrowInterestMode,
-    undefined,
-    SupportedAssets.USDC,
-    false
-  )
 
   const { textTop, textBottom, plusTop, plusBottom, hasSwitchBottom, hasSwitchTop } = useBalanceText(
     currentProtocol,
@@ -636,13 +478,6 @@ export default function Professional() {
     targetBorrowInterestMode
   )
 
-  const currencies: { [field in Field]?: Currency | null } = useMemo(
-    () => ({
-      [Field.INPUT]: currencyAmounts[Field.INPUT]?.currency,
-      [Field.OUTPUT]: currencyAmounts[Field.OUTPUT]?.currency,
-    }),
-    [currencyAmounts]
-  )
   const [selectedCurrencyOutside, setCurrencyOutside] = useState<Currency>(USDC_POLYGON)
 
   const selectedIsAsset = assets.filter(a => a.toUpperCase() === selectedCurrencyOutside.symbol)
@@ -841,8 +676,6 @@ export default function Professional() {
     [fiatValueInput, fiatValueOutput, routeIsSyncing]
   )
 
-  const dependentField: Field = independentField === Field.INPUT ? Field.OUTPUT : Field.INPUT
-
   const [maxInput, setMaxInput] = useState(false)
   const [maxOutput, setMaxOutput] = useState(false)
 
@@ -872,18 +705,10 @@ export default function Professional() {
     txHash: undefined,
   })
 
-  const formattedAmounts = useMemo(
-    () => ({
-      [independentField]: typedValue,
-      [dependentField]: parsedAmounts[dependentField]?.toSignificant(6) ?? '',
-    }),
-    [dependentField, independentField, currencyAmounts, typedValue, parsedAmounts]
-  )
 
   const userHasSpecifiedInputOutput = Boolean(
-    currencies[Field.INPUT] && currencies[Field.OUTPUT] && parsedAmounts[independentField]?.greaterThan(JSBI.BigInt(0))
+    parsedAmountIn && parsedAmountIn?.greaterThan(JSBI.BigInt(0))
   )
-
   const marginTraderContract = useGetMarginTraderContract(chainId, relevantAccount)
 
   const {
@@ -907,21 +732,13 @@ export default function Professional() {
   )
 
   const maxInputAmount: CurrencyAmount<Currency> | undefined | null = useMemo(
-    () => currencyAmounts[Field.INPUT] && maxAmountSpend(currencyAmounts[Field.INPUT]),
-    [currencyAmounts]
-  )
-
-  const maxOutputAmount: CurrencyAmount<Currency> | undefined = useMemo(
-    () => maxAmountSpend(currencyAmounts[Field.OUTPUT]),
-    [currencyAmounts]
+    () => parsedAmountIn && maxAmountSpend(parsedAmountIn),
+    [parsedAmountIn]
   )
 
   const showMaxButton =
     !maxInput && Boolean(maxInputAmount?.greaterThan(0) && !parsedAmounts[Field.INPUT]?.equalTo(maxInputAmount)) &&
     side === PositionSides.Collateral
-  const showMaxButtonOut =
-    !maxOutput && Boolean(maxOutputAmount?.greaterThan(0) && !parsedAmounts[Field.OUTPUT]?.equalTo(maxOutputAmount)) &&
-    (side === PositionSides.Borrow || marginTradeType === MarginTradeType.Trim)
 
   const handleSwap = useCallback(async () => {
     if (!trade) {
@@ -1005,14 +822,6 @@ export default function Professional() {
                   expectedInputCurrencyAmountRaw: trade.inputAmount.quotient.toString(),
                 }
             )
-
-          dispatch(
-            fetchAAVEUserReserveDataAsync({
-              chainId,
-              account: account ?? '',
-              assetsToQuery: filterSupportedAssets(trade?.inputAmount?.currency, trade?.outputAmount?.currency),
-            })
-          )
         })
         .catch((error) => {
           setSwapState({
@@ -1058,11 +867,6 @@ export default function Professional() {
     setSwapState({ tradeToConfirm: trade, swapErrorMessage, txHash, attemptingTxn, showConfirm })
   }, [attemptingTxn, showConfirm, swapErrorMessage, trade, txHash])
 
-  const handleSwitchAssets = useCallback(() => {
-    setMaxInput(false)
-    setMaxOutput(false)
-    return switchAssets({ assetIn: assetState.assetOut, assetOut: assetState.assetIn })
-  }, [assetState])
 
   const handleMaxInput = useCallback(() => {
     maxInputAmount && onUserInput(Field.INPUT, maxInputAmount.toExact())
@@ -1071,33 +875,8 @@ export default function Professional() {
   }, [maxInputAmount, onUserInput, maxInput, maxOutput])
 
 
-  const handleMaxOutput = useCallback(() => {
-    maxOutputAmount && onUserInput(Field.OUTPUT, maxOutputAmount.toExact())
-    !maxOutput && setMaxOutput(true)
-    maxInput && setMaxInput(false)
-  }, [maxOutputAmount, onUserInput, maxInput, maxOutput])
-
-  const swapIsUnsupported = useIsSwapUnsupported(currencies[Field.INPUT], currencies[Field.OUTPUT])
-
   const priceImpactTooHigh = priceImpactSeverity > 3 && !isExpertMode
   const showPriceImpactWarning = largerPriceImpact && priceImpactSeverity > 3
-
-  const [hasStableRateIn, hasStableRateOut] = useMemo(() => {
-    return [
-      assetIn?.aaveData[chainId].reserveData?.stableBorrowRateEnabled ?? false,
-      assetOut?.aaveData[chainId].reserveData?.stableBorrowRateEnabled ?? false,
-    ]
-  }, [assetIn, assetOut, chainId])
-
-  useEffect(() => {
-    if (!hasStableRateIn) {
-      setSourceBorrowInterestMode(AaveInterestMode.VARIABLE)
-    }
-    if (!hasStableRateOut) {
-      setTargetBorrowInterestMode(AaveInterestMode.VARIABLE)
-    }
-  }, [hasStableRateIn, hasStableRateOut])
-
 
   const [validatedSwapText, buttonDisabled,] = useMemo(() => {
     if (hasNoImplementation) return ['Coming Soon!', true]
@@ -1121,34 +900,14 @@ export default function Professional() {
 
 
   const [appprovalMessagRequest, approvalMessage] = useMemo(() => {
-    switch (marginTradeType) {
-      case MarginTradeType.Trim: {
-        return [
-          `Allow withdrawing ${currencies[Field.INPUT]?.symbol}`,
-          `You can now withdraw ${currencies[Field.INPUT]?.symbol}`,
-        ]
-      }
-      case MarginTradeType.Open: {
-        return [
-          `Allow borrowing ${currencies[Field.INPUT]?.symbol}`,
-          `You can now borrow ${currencies[Field.INPUT]?.symbol}`
-        ]
-      }
-      case MarginTradeType.Collateral: {
-        return [
-          `Allow withdrawing ${currencies[Field.INPUT]?.symbol}`,
-          `You can now withdraw ${currencies[Field.INPUT]?.symbol}`
-        ]
-      }
-      default: // debt swap
-        return [
-          `Allow borrowing ${currencies[Field.INPUT]?.symbol}`,
-          `You can now borrow ${currencies[Field.INPUT]?.symbol}`
-        ]
-    }
+
+    return [
+      `Allow depositing ${parsedAmountIn?.currency.symbol}`,
+      `You can now deposit ${parsedAmountIn?.currency.symbol}`,
+    ]
   },
     [
-      currencies,
+      parsedAmountIn,
       marginTradeType
     ]
   )
@@ -1205,7 +964,6 @@ export default function Professional() {
             <ArrowWrapper clickable={isSupportedChain(chainId)} redesignFlag={redesignFlagEnabled}>
               <ArrowContainer
                 onClick={() => {
-                  handleSwitchAssets()
                   setApprovalSubmitted(false)
                 }}
               >
@@ -1221,23 +979,11 @@ export default function Professional() {
                 trade={trade}
                 isPlus={true}
                 providedTokenList={restrictedTokenList}
-                value={formattedAmounts[Field.OUTPUT]}
                 onUserInput={() => null}
-                label={
-                  independentField === Field.INPUT ? (
-                    <>To (at least)</>
-                  ) : (
-                    <>To</>
-                  )
-                }
-                showMaxButton={showMaxButtonOut}
-                onMax={handleMaxOutput}
                 hideBalance={false}
                 fiatValue={fiatValueOutput ?? undefined}
                 priceImpact={stablecoinPriceImpact}
-                currency={currencyAmounts[Field.OUTPUT]?.currency}
                 pair={pair}
-                otherCurrency={null}
                 id={'CURRENCY_PAIR_PANEL'}
                 loading={independentField === Field.INPUT && routeIsSyncing}
                 balanceSignIsPlus={plusBottom}
@@ -1265,13 +1011,7 @@ export default function Professional() {
             <DecimalSlider min={1} max={5} step={0.1} markers={[0, 1, 2, 3, 4, 5]} onChange={setLeverage} value={leverage} />
           </SliderContainer>
           <div style={{ marginTop: '10px', zIndex: 0 }}>
-            {swapIsUnsupported ? (
-              <ButtonPrimary disabled={true}>
-                <ThemedText.DeprecatedMain mb="4px">
-                  <Trans>Unsupported Asset</Trans>
-                </ThemedText.DeprecatedMain>
-              </ButtonPrimary>
-            ) : !account ? (
+            {!account ? (
               <ButtonLight onClick={toggleWalletModal} redesignFlag={redesignFlagEnabled}>
                 <Trans>Connect Wallet</Trans>
               </ButtonLight>
@@ -1314,7 +1054,7 @@ export default function Professional() {
                           text={
                             <Trans>
                               You must give the 1delta smart contracts permission to use your{' '}
-                              {currencies[Field.INPUT]?.symbol}. You only have to do this once per token.
+                              {parsedAmountIn?.currency.symbol}. You only have to do this once per token.
                             </Trans>
                           }
                         >

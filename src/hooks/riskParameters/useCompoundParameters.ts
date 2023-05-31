@@ -1,10 +1,11 @@
-import { ONE_18, TEN, TOKEN_META, ZERO_BN } from 'constants/1delta'
-import { ethers } from 'ethers'
+import { ETHEREUM_CHAINS, ONE_18, TEN, TOKEN_META, ZERO_BN } from 'constants/1delta'
+import { BigNumber, ethers } from 'ethers'
 import { useMemo } from 'react'
 import { useAppSelector } from 'state/hooks'
 import { getPriceParams } from 'state/oracles/hooks'
 import { ChainLinkData } from 'state/oracles/reducer'
 import { PositionSides, SupportedAssets } from 'types/1delta'
+import { calculateRateToNumber, TimeScale } from 'utils/tableUtils/format'
 import { LtvAssetParams, LtvParams, TradeImpact } from './types'
 import { ChangeInformation } from './types'
 
@@ -165,6 +166,18 @@ export function calculateCompoundRiskChange(
 }
 
 
+export interface CompoundV2SlotParams {
+  priceParams: {
+    price: BigNumber
+    decimals: number
+  }
+  collateral: BigNumber
+  debt: BigNumber
+  borrowRate: number
+  supplyRate: number
+  liquidationThreshold: BigNumber
+}
+
 export function useGetCompoundRiskParametersSlot(
   chainId: number,
   oracles: { [key: string]: ChainLinkData } | undefined
@@ -175,7 +188,7 @@ export function useGetCompoundRiskParametersSlot(
     // return nothing if not connected
     if (!oracles) return undefined
 
-    const compoundData: { [key: string]: LtvAssetParams } = {}
+    const compoundData: { [key: string]: CompoundV2SlotParams } = {}
     const keys = Object.keys(assetData).map((a) => a as SupportedAssets)
 
     // we iterate through all assets and calculate collateral, debt and record process and liquidation thresholds
@@ -187,11 +200,26 @@ export function useGetCompoundRiskParametersSlot(
       const liquidationThreshold =
         assetData[name]?.compoundData[chainId].reserveData?.collateralFactorMantissa ?? ONE_18
 
+
+      const apr = calculateRateToNumber(
+        assetData[name]?.compoundData[chainId]?.reserveData.supplyRatePerBlock ?? '0',
+        chainId,
+        ETHEREUM_CHAINS.includes(chainId) ? TimeScale.BLOCK : TimeScale.MS
+      )
+
+      const borrowApr = calculateRateToNumber(
+        assetData[name]?.compoundData[chainId]?.reserveData?.borrowRatePerBlock ?? '0',
+        chainId,
+        ETHEREUM_CHAINS.includes(chainId) ? TimeScale.BLOCK : TimeScale.MS
+      )
+
       compoundData[name] = {
         priceParams,
         liquidationThreshold: ethers.BigNumber.from(liquidationThreshold),
         collateral: ZERO_BN,
         debt: ZERO_BN,
+        borrowRate: borrowApr,
+        supplyRate: apr,
       }
     }
 

@@ -176,16 +176,10 @@ interface PairInputProps {
   pairList: [SupportedAssets, SupportedAssets][]
   onPairSelect: (pair: [SupportedAssets, SupportedAssets]) => void
   providedTokenList: { [address: string]: Token }
-  value: string
   onUserInput: (value: string) => void
-  onMax?: () => void
-  showMaxButton: boolean
-  label?: ReactNode
-  currency?: Currency | null
   pair?: [SupportedAssets, SupportedAssets]
   hideBalance?: boolean
   hideInput?: boolean
-  otherCurrency?: Currency | null
   fiatValue?: CurrencyAmount<Token> | null
   priceImpact?: Percent
   id: string
@@ -206,13 +200,8 @@ export default function PairInput({
   pairList,
   trade,
   onPairSelect,
-  value,
   onUserInput,
-  onMax,
-  showMaxButton,
-  currency,
   pair,
-  otherCurrency,
   id,
   showCurrencyAmount,
   disableNonToken,
@@ -277,14 +266,14 @@ export default function PairInput({
           )}
           <PairSelect
             disabled={!chainAllowed}
-            visible={currency !== undefined}
-            selected={!!currency}
+            visible
+            selected
             hideInput={hideInput}
             redesignFlag={redesignFlagEnabled}
             className="open-pair-select-button"
           >
             <PairSearchDropdown selectedOption={pair} options={pairList} onSelect={onPairSelect} placeholder={placeholder} />
-            <StyledDropDown selected={!!currency} redesignFlag={redesignFlagEnabled} />
+            <StyledDropDown selected redesignFlag={redesignFlagEnabled} />
           </PairSelect>
         </InputRow>
       </Container>
