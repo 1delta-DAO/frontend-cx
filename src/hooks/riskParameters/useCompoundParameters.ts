@@ -1,12 +1,13 @@
 import { ETHEREUM_CHAINS, ONE_18, TEN, TOKEN_META, ZERO_BN } from 'constants/1delta'
 import { BigNumber, ethers } from 'ethers'
+import { formatEther } from 'ethers/lib/utils'
 import { useMemo } from 'react'
 import { useAppSelector } from 'state/hooks'
 import { getPriceParams } from 'state/oracles/hooks'
 import { ChainLinkData } from 'state/oracles/reducer'
 import { PositionSides, SupportedAssets } from 'types/1delta'
 import { calculateRateToNumber, TimeScale } from 'utils/tableUtils/format'
-import { LtvAssetParams, LtvParams, TradeImpact } from './types'
+import { LtvAssetParams, LtvParams, TradeImpact, TradeInfo } from './types'
 import { ChangeInformation } from './types'
 
 export function useGetCompoundRiskParameters(
@@ -178,10 +179,19 @@ export interface CompoundV2SlotParams {
   liquidationThreshold: BigNumber
 }
 
+export interface SlotParams {
+  assetData: { [key: string]: CompoundV2SlotParams }
+  currentLtv: BigNumber
+  collateral: BigNumber
+  debt: BigNumber
+  healthFactor: BigNumber
+  rawCollateral: BigNumber
+}
+
 export function useGetCompoundRiskParametersSlot(
   chainId: number,
   oracles: { [key: string]: ChainLinkData } | undefined
-): LtvParams | undefined {
+): SlotParams | undefined {
   const assetData = useAppSelector((state) => state.delta.assets)
 
   return useMemo(() => {
@@ -247,34 +257,35 @@ export function calculateCompoundRiskChangeSlot(
   assetChange0?: ChangeInformation,
   assetChange1?: ChangeInformation,
   assetChange2?: ChangeInformation,
-  tradeParams?: LtvParams
-): TradeImpact {
+  tradeParams?: SlotParams
+): TradeInfo {
   if (
     (!assetChange0?.asset && !assetChange1?.asset) ||
     (!tradeParams?.assetData[assetChange0?.asset ?? ''] && !tradeParams?.assetData[assetChange1?.asset ?? ''])
   )
     return {
-      ltv: ZERO_BN,
-      ltvNew: ZERO_BN,
-      ltvDelta: ZERO_BN,
-      healthFactor: ZERO_BN,
-      healthFactorNew: ZERO_BN,
-      healthFactorDelta: ZERO_BN,
-      marginImpact: ZERO_BN,
-      deltaBorrow: ZERO_BN,
-      deltaCollateral: ZERO_BN
+      ltv: 0,
+      healthFactor: 0,
+      aprSupply: 0,
+      aprBorrow: 0,
+      collateral: 0,
+      debt: 0,
     }
 
 
   let effectiveDeltaCollateral = ZERO_BN;
   let effectiveDeltaBorrow = ZERO_BN;
-
   let deltaCollateral = ZERO_BN;
+
+  let aprIncome = 0
+  let aprLiability = 0
 
   if (assetChange0)
     if (assetChange0.side === PositionSides.Collateral) {
       [deltaCollateral, effectiveDeltaCollateral] = calculateDeltaCollateral(assetChange0, tradeParams.assetData[assetChange0.asset])
+      aprIncome += getAprContrib(deltaCollateral, tradeParams.assetData[assetChange0.asset].supplyRate)
     } else {
+      aprLiability += getAprContrib(deltaCollateral, tradeParams.assetData[assetChange0.asset].borrowRate)
       effectiveDeltaBorrow = calculateDeltaBorrow(assetChange0, tradeParams.assetData[assetChange0.asset])
     }
 
@@ -284,11 +295,13 @@ export function calculateCompoundRiskChangeSlot(
       effectiveDeltaCollateral = effectiveDeltaCollateral.add(
         effectiveNewCollat
       )
+      aprIncome += getAprContrib(newCollat, tradeParams.assetData[assetChange1.asset].supplyRate)
       deltaCollateral = deltaCollateral.add(newCollat)
     } else {
       effectiveDeltaBorrow = effectiveDeltaBorrow.add(
         calculateDeltaBorrow(assetChange1, tradeParams.assetData[assetChange1.asset])
       )
+      aprLiability += getAprContrib(effectiveDeltaBorrow, tradeParams.assetData[assetChange1.asset].borrowRate)
     }
 
   if (assetChange2)
@@ -297,11 +310,14 @@ export function calculateCompoundRiskChangeSlot(
       effectiveDeltaCollateral = effectiveDeltaCollateral.add(
         effectiveNewCollat
       )
+      aprIncome += getAprContrib(newCollat, tradeParams.assetData[assetChange2.asset].supplyRate)
       deltaCollateral = deltaCollateral.add(newCollat)
     } else {
+      const newBorrow = calculateDeltaBorrow(assetChange2, tradeParams.assetData[assetChange2.asset])
       effectiveDeltaBorrow = effectiveDeltaBorrow.add(
-        calculateDeltaBorrow(assetChange2, tradeParams.assetData[assetChange2.asset])
+        newBorrow
       )
+      aprLiability += getAprContrib(newBorrow, tradeParams.assetData[assetChange2.asset].borrowRate)
     }
 
   // new values are created by adding the deltas
@@ -314,15 +330,12 @@ export function calculateCompoundRiskChangeSlot(
     ? newCollateral.mul(ONE_18).div(newBorrow)
     : ethers.constants.MaxUint256
   return {
-    ltv: tradeParams.currentLtv,
-    ltvNew,
-    ltvDelta: ltvNew.sub(tradeParams.currentLtv),
-    healthFactor: tradeParams.healthFactor,
-    healthFactorNew,
-    healthFactorDelta: healthFactorNew.sub(tradeParams.healthFactor),
-    marginImpact: effectiveDeltaBorrow.add(effectiveDeltaCollateral),
-    deltaBorrow: effectiveDeltaBorrow,
-    deltaCollateral
+    ltv: getNumber(ltvNew),
+    healthFactor: getNumber(healthFactorNew),
+    collateral: getNumber(deltaCollateral),
+    debt: getNumber(effectiveDeltaBorrow),
+    aprBorrow: aprLiability / Number(formatEther(effectiveDeltaBorrow)),
+    aprSupply: aprIncome / Number(formatEther(effectiveDeltaBorrow))
   }
 }
 
@@ -376,4 +389,12 @@ function calculateDeltaBorrow(
     .mul(priceBorrow)
     .mul(multiplierPriceBorrow)
     .div(ONE_18)
+}
+
+const getAprContrib = (amount: BigNumber, ar: number) => {
+  return getNumber(amount) * ar
+}
+
+const getNumber = (n: BigNumber) => {
+  return Number(formatEther(n))
 }

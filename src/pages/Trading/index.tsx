@@ -623,10 +623,11 @@ export default function Professional() {
       return undefined
 
     }
+
     return calculateCompoundRiskChangeSlot(
       {
         asset: depositAsset,
-        delta: depositMode === DepositMode.DIRECT ? BigNumber.from(parsedAmount?.quotient.toString()) : BigNumber.from(tradeIn?.outputAmount?.quotient.toString() ?? '0'),
+        delta: depositMode === DepositMode.DIRECT ? BigNumber.from(parsedAmountIn?.quotient.toString()) : BigNumber.from(tradeIn?.outputAmount?.quotient.toString() ?? '0'),
         side: PositionSides.Collateral
       },
       {
@@ -642,9 +643,9 @@ export default function Professional() {
       riskParams
     )
   },
-    [borrowAmount, depositAsset, trade, tradeIn, pair])
+    [borrowAmount, depositAsset, trade, tradeIn, pair, depositMode, parsedAmountIn, riskParams])
 
-  // console.log("RISK", formatEther(riksParamsChange?.healthFactorNew ?? '0'))
+  // console.log("RISK", riksParamsChange)
   const recipientAddress = recipient
 
   const parsedAmounts = useMemo(

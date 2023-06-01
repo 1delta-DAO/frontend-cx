@@ -33,6 +33,17 @@ export interface TradeImpact {
   deltaBorrow: BigNumber
 }
 
+
+export interface TradeInfo {
+  ltv: number
+  healthFactor: number
+  aprSupply: number
+  aprBorrow: number
+  collateral: number
+  debt: number
+}
+
+
 export interface AssetChange {
   asset: SupportedAssets
   delta: BigNumber
