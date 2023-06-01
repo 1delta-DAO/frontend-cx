@@ -338,7 +338,7 @@ export default function Professional() {
 
   const [leverage, setLeverage] = useState(1)
 
-  const assets = useMemo(() => getSupportedAssets(chainId, LendingProtocol.AAVE), [chainId])
+  const assets = useMemo(() => getSupportedAssets(chainId, LendingProtocol.COMPOUND), [chainId])
 
   const pairs = useMemo(() => getPairs(assets), [assets])
 
