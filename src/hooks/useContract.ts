@@ -17,6 +17,7 @@ import ERC721_ABI from 'abis/erc721.json'
 import ERC1155_ABI from 'abis/erc1155.json'
 import { ArgentWalletDetector, EnsPublicResolver, EnsRegistrar, Erc20, Erc721, Erc1155, Weth } from 'abis/types'
 import WETH_ABI from 'abis/weth.json'
+import AlgebraMulticallAbi from 'abis/algebra/AlgebraMulticall.json'
 import {
   ARGENT_WALLET_DETECTOR_ADDRESS,
   MULTICALL_ADDRESS,
@@ -30,13 +31,14 @@ import { WRAPPED_NATIVE_CURRENCY } from 'constants/tokens'
 import { useMemo } from 'react'
 import { NonfungiblePositionManager, Quoter, QuoterV2, TickLens, UniswapInterfaceMulticall } from 'types/v3'
 import { V3Migrator } from 'types/v3/V3Migrator'
-
+import AlgebraQuoterABI from 'abis/algebra/AlgebraQuoter.json'
 import { getContract } from '../utils'
 import { useWeb3React } from '@web3-react/core'
 import { useChainId, useNetworkState } from 'state/globalNetwork/hooks'
 import { simpleRpcProvider } from 'utils/1delta/contractHelper'
 import { JsonRpcProvider, Web3Provider } from '@ethersproject/providers'
 import { getSecondaryProvider, getThirdProvider } from 'constants/providers'
+import { SupportedChainId } from 'constants/chains'
 const { abi: IUniswapV2PairABI } = IUniswapV2PairJson
 const { abi: IUniswapV2Router02ABI } = IUniswapV2Router02Json
 const { abi: QuoterABI } = QuoterJson
@@ -157,12 +159,17 @@ export function useV2RouterContract(): Contract | null {
   return useContract(V2_ROUTER_ADDRESS, IUniswapV2Router02ABI, true)
 }
 
-export function useInterfaceMulticall(id = 0) {
-  return useContractMultiProvider<UniswapInterfaceMulticall>(MULTICALL_ADDRESS, MulticallABI, false, id) as UniswapInterfaceMulticall
+export function useInterfaceMulticall(id = 0, chainId: number) {
+  return useContractMultiProvider<UniswapInterfaceMulticall>(MULTICALL_ADDRESS,
+    chainId === SupportedChainId.POLYGON_ZK_EVM ? MulticallABI : AlgebraMulticallAbi, false, id) as UniswapInterfaceMulticall
 }
 
 export function useQuoter(useQuoterV2: boolean) {
   return useContract<Quoter | QuoterV2>(QUOTER_ADDRESSES, useQuoterV2 ? QuoterV2ABI : QuoterABI)
+}
+
+export function useAlgebraQuoter(useQuoterV2: boolean) {
+  return useContract<Quoter | QuoterV2>(QUOTER_ADDRESSES, AlgebraQuoterABI)
 }
 
 export function useTickLens(): TickLens | null {

@@ -47,7 +47,7 @@ export function MulticallUpdater() {
   const chainId = useChainId()
   const latestBlockNumber = useBlockNumber()
   const id = useRandomInteger()
-  const contract = useInterfaceMulticall(id)
+  const contract = useInterfaceMulticall(id, chainId)
 
   const listenerOptions: ListenerOptions = useMemo(
     () => ({
@@ -62,6 +62,7 @@ export function MulticallUpdater() {
       latestBlockNumber={latestBlockNumber}
       contract={contract}
       listenerOptions={listenerOptions}
+      isDebug={true}
     />
   )
 }

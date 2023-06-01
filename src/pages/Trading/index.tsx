@@ -65,7 +65,7 @@ import { MarginTradingButtonText } from 'components/Styles'
 import { parseMessage } from 'constants/errors'
 import { useDeltaAssetState, useDeltaState, useGetCurrentAccount, useSelectLendingProtocol } from "state/1delta/hooks";
 import { useTradeTypeSelector } from "state/professionalTradeSelection/hooks";
-import { useDerivedSwapInfoMargin } from "state/professionalTradeSelection/tradeHooks";
+import { useDerivedSwapInfoMargin, useDerivedSwapInfoMarginAlgebra } from "state/professionalTradeSelection/tradeHooks";
 import { setTradeType } from "state/professionalTradeSelection/actions";
 import { Text } from "rebass";
 import PairInput from "components/CurrencyInputPanel/PairInput";
@@ -92,7 +92,7 @@ import GeneralCurrencyInputPanel from "components/CurrencyInputPanel/GeneralInpu
 import { useCurrency, useCurrencyWithFallback } from "hooks/Tokens";
 import { getTokenAddresses } from "hooks/1delta/addressGetter";
 import DepositTypeDropdown, { DepositMode } from "components/Dropdown/depositTypeDropdown";
-import { USDC_POLYGON } from "constants/tokens";
+import { USDC_POLYGON, USDC_POLYGON_ZK_EVM } from "constants/tokens";
 import useDebounce from "hooks/useDebounce";
 import { UniswapTrade } from "utils/Types";
 import PairSearchDropdown from "components/Dropdown/dropdownPairSearch";
@@ -100,6 +100,7 @@ import { formatEther, parseUnits } from "ethers/lib/utils";
 import tryParseCurrencyAmount from "lib/utils/tryParseCurrencyAmount";
 import { addressesTokens } from "hooks/1delta/addressesTokens";
 import { calculateCompoundRiskChangeSlot, useGetCompoundRiskParameters, useGetCompoundRiskParametersSlot } from "hooks/riskParameters/useCompoundParameters";
+import { useAlgebraClientSideV3 } from "hooks/professional/algebra/useClientSideV3Trade";
 
 
 export const ArrowWrapper = styled.div<{ clickable: boolean; redesignFlag: boolean }>`
@@ -261,18 +262,6 @@ display: flex;
 flex-direction: column;
 `};
 `
-const PriceRow = styled.div`
-  margin-left: 15px;
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: center;
-  width: 150px;
-  gap: 10px;
-  ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
-  width: 100px;
-`};
-`
 
 const InputPanelContainer = styled.div`
 margin: 2px;
@@ -296,37 +285,6 @@ interface AssetRowProps {
   onSelect: (a: SupportedAssets) => void
 }
 
-const AssetText = styled.span`
-
-`
-
-const AssetRow = ({ asset, onSelect }: AssetRowProps): JSX.Element => {
-
-  return <Row onClick={() => onSelect(asset)}>
-    <Image src={TOKEN_SVGS[asset]} key={String(asset)} />
-    <AssetText>
-      {String(asset)}
-    </AssetText>
-  </Row>
-}
-
-interface DropdownLabelProps {
-  asset: SupportedAssets
-
-}
-
-
-const LabelAssetText = styled.span`
-font-size: 12px;
-`
-
-const ChartAssetRow = styled.span`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  gap: 5px;
-`
 
 enum ProTradeType {
   MarginOpen,
@@ -368,9 +326,6 @@ export default function Professional() {
   const [sourceBorrowInterestMode, setSourceBorrowInterestMode] = useState(AaveInterestMode.VARIABLE)
 
   const [targetBorrowInterestMode, setTargetBorrowInterestMode] = useState(AaveInterestMode.VARIABLE)
-
-  const [currencyIn, selectCurrencyIn] = useState(SupportedAssets.USDC)
-  const [currencyOut, selectCurrencyOut] = useState(SupportedAssets.WETH)
 
 
   const [pair, selectPair] = useState<[SupportedAssets, SupportedAssets]>([SupportedAssets.WETH, SupportedAssets.USDC])
@@ -430,8 +385,8 @@ export default function Professional() {
 
   useEffect(() => {
     // fetch oracle data
-    dispatch(fetchChainLinkData({ chainId }))
-    dispatch(fetchAAVEAggregatorDataAsync({ chainId }))
+    dispatch(fetchChainLinkData({ chainId: 137 }))
+    dispatch(fetchAAVEAggregatorDataAsync({ chainId: 137 }))
 
     // fetch wallet balances
     if (account) {
@@ -450,8 +405,6 @@ export default function Professional() {
 
   const [marginTradeType, setMarginTradeType] = useState(MarginTradeType.Open)
   const [side, setSide] = useState(PositionSides.Collateral)
-  // const [side, setSide] = useState(PositionSides.Collateral)
-  const [proTradeType, setProTradeType] = useState(ProTradeType.MarginOpen)
 
 
   const tradeType = useSelectedTradeTypeProfessional()
@@ -464,12 +417,6 @@ export default function Professional() {
   // for expert mode
   const [isExpertMode] = useExpertModeManager()
 
-  const deltaAssets = useDeltaAssetState()
-
-  const { assetIn, assetOut } = useMemo(() => {
-    return { assetIn: deltaAssets[currencyIn], assetOut: deltaAssets[currencyOut] }
-  }, [currencyIn, currencyOut, deltaAssets[currencyIn], deltaAssets[currencyOut]])
-
   const { textTop, textBottom, plusTop, plusBottom, hasSwitchBottom, hasSwitchTop } = useBalanceText(
     currentProtocol,
     tradeType,
@@ -478,7 +425,9 @@ export default function Professional() {
     targetBorrowInterestMode
   )
 
-  const [selectedCurrencyOutside, setCurrencyOutside] = useState<Currency>(USDC_POLYGON)
+
+
+  const [selectedCurrencyOutside, setCurrencyOutside] = useState<Currency>(USDC_POLYGON_ZK_EVM)
 
   const selectedIsAsset = assets.filter(a => a.toUpperCase() === selectedCurrencyOutside.symbol)
 
@@ -547,8 +496,8 @@ export default function Professional() {
     [selectedAsset, pair]
   )
 
-  const selectedPrice = usePrices(selectedIsAsset ? [selectedCurrencyOutside.symbol as SupportedAssets] : [], chainId)
-  const prices = usePrices([...pair, depositAsset], chainId)
+  const selectedPrice = usePrices(selectedIsAsset ? [selectedCurrencyOutside.symbol as SupportedAssets] : [], SupportedChainId.POLYGON)
+  const prices = usePrices([...pair, depositAsset], SupportedChainId.POLYGON)
 
   const [depositId, collateralId, debtId] = useMemo(() => {
     return [
@@ -561,13 +510,12 @@ export default function Professional() {
   )
 
   const selectedCurrency = selectedCurrencyOutside // useCurrency(selectedCurrencyOutside, currentProtocol)
-
   const collateralCurrency = useCurrency(collateralId, currentProtocol)
   const depositCurrency = useCurrency(depositId, currentProtocol)
   const debtCurrency = useCurrency(debtId, currentProtocol)
 
   const {
-    trade: { state: tradeStateIn, trade: tradeIn },
+    trade: { state: tradeStateIn, trade: tradeInUni },
     allowedSlippage: allowedSlippageIn,
     parsedAmount: parsedAmountIn,
     inputError: swapInInputError,
@@ -576,17 +524,27 @@ export default function Professional() {
     depositCurrency,
     false
   )
+
+  const { state: agebraState, trade: algebraTradeIn } = useAlgebraClientSideV3(
+    TradeType.EXACT_INPUT,
+    parsedAmountIn,
+    depositCurrency,
+  )
+
+  console.log("algebraTradeIn", algebraTradeIn)
+
+  const tradeIn = tradeInUni ?? algebraTradeIn
+
   const tradeInState = depositMode === DepositMode.DIRECT ? TradeState.VALID : tradeStateIn
 
   const depositDollarValue = useMemo(() => {
     // case direct depo
-    if (depositMode === DepositMode.DIRECT && selectedPrice?.[0]) return Number(parsedAmountIn?.toExact()) * selectedPrice[0]
+    if (depositMode === DepositMode.DIRECT) return Number(parsedAmountIn?.toExact()) * (selectedPrice?.[0] ? selectedPrice[0] : 1)
     // case swap to usdc or collateral
-    return Number(tradeIn?.outputAmount.toExact()) * prices[2]
+    return Number(tradeIn?.outputAmount.toExact()) * (prices?.[2] ? prices[2] : 1)
   },
     [parsedAmountIn, Boolean(tradeIn?.outputAmount), depositMode, Boolean(prices[2]), Boolean(selectedPrice?.[0]), pair]
   )
-
   const borrowAmount = useMemo(() => {
     if (!debtCurrency || !prices[1]) return undefined
     try {
@@ -605,15 +563,28 @@ export default function Professional() {
 
   const debouncedBorrowAmount = useDebounce(borrowAmount, 200)
 
+
   const {
-    trade: { state: tradeState, trade },
-    allowedSlippage,
-    parsedAmount,
-    inputError: swapInputError,
+    trade: { state: tradeState, trade: tradeUni },
+    allowedSlippage: allowedSlippageUni,
+    parsedAmount: parsedAmountUni,
+    inputError: swapInputErrorUni,
   } = useDerivedSwapInfoMargin(
     debouncedBorrowAmount,
     collateralCurrency,
   )
+
+  const {
+    trade: { state: tradeStateAlgebra, trade: tradeAlgebra },
+    allowedSlippage,
+    parsedAmount: parsedAmountAlgebra,
+    inputError: swapInputErrorAlgebra,
+  } = useDerivedSwapInfoMarginAlgebra(
+    debouncedBorrowAmount,
+    collateralCurrency,
+  )
+
+  const [trade, parsedAmount] = Boolean(tradeUni) ? [tradeUni, parsedAmountUni] : [tradeAlgebra, parsedAmountAlgebra]
 
   const riskParams = useGetCompoundRiskParametersSlot(chainId, oracleState.data[chainId].chainLink)
 
@@ -728,7 +699,7 @@ export default function Professional() {
     marginTraderContract.address,
     allowedSlippage,
     sourceBorrowInterestMode,
-    assetIn.id,
+    selectedAsset,
     hasNoImplementation
   )
 
@@ -976,7 +947,7 @@ export default function Professional() {
               <PairInput
                 onPairSelect={handleSelectPair}
                 pairList={pairs}
-                placeholder={currencyOut}
+                placeholder={SupportedAssets.USDC}
                 trade={trade}
                 isPlus={true}
                 providedTokenList={restrictedTokenList}

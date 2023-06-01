@@ -114,7 +114,7 @@ export const ETHEREUM_CHAINS = [SupportedChainId.MAINNET, SupportedChainId.GOERL
 
 export const POLYGON_CHAINS = [SupportedChainId.POLYGON, SupportedChainId.POLYGON_MUMBAI]
 
-export const MAINNET_CHAINS = [SupportedChainId.POLYGON, SupportedChainId.MAINNET]
+export const MAINNET_CHAINS = [SupportedChainId.POLYGON, SupportedChainId.MAINNET, SupportedChainId.POLYGON_ZK_EVM]
 
 export const TOKEN_SVGS: { [asset: string]: string } = {
   [SupportedAssets.WETH]: wethLogoUrl,
@@ -188,6 +188,20 @@ export const getTokenIcon = (asset: SupportedAssets): string => TOKEN_SVGS[asset
 
 export const getSupportedAssets = (chainId: number, lendingProtocol = LendingProtocol.AAVE): SupportedAssets[] => {
   switch (chainId) {
+    case SupportedChainId.POLYGON_ZK_EVM: {
+      switch (lendingProtocol) {
+        case LendingProtocol.COMPOUND:
+          return [
+            SupportedAssets.ETH,
+            SupportedAssets.USDC,
+            SupportedAssets.USDT,
+            SupportedAssets.WMATIC
+          ]
+
+        default:
+          return []
+      }
+    }
     case SupportedChainId.GOERLI: {
       switch (lendingProtocol) {
         case LendingProtocol.AAVE:
@@ -457,6 +471,7 @@ export const WRAPPED_NATIVE_SYMBOL: { [key: number]: string } = {
   [SupportedChainId.GOERLI]: 'WETH',
   [SupportedChainId.MAINNET]: 'WETH',
   [SupportedChainId.POLYGON_MUMBAI]: 'WMATIC',
+  [SupportedChainId.POLYGON_ZK_EVM]: 'WETH',
 }
 
 export const NATIVE_SYMBOL: { [key: number]: string } = {
@@ -464,6 +479,7 @@ export const NATIVE_SYMBOL: { [key: number]: string } = {
   [SupportedChainId.GOERLI]: 'ETH',
   [SupportedChainId.MAINNET]: 'ETH',
   [SupportedChainId.POLYGON_MUMBAI]: 'MATIC',
+  [SupportedChainId.POLYGON_ZK_EVM]: 'ETH',
 }
 
 
@@ -498,4 +514,5 @@ export const QUOTE_GAS_OVERRIDES: { [chainId: number]: number } = {
   [SupportedChainId.CELO_ALFAJORES]: 50_000_000,
   [SupportedChainId.POLYGON]: 1_000_000,
   [SupportedChainId.POLYGON_MUMBAI]: 50_000_000,
+  [SupportedChainId.POLYGON_ZK_EVM]: 50_000_000,
 }

@@ -28,7 +28,8 @@ export const getMulticallV2Address = (chainId: number): string => {
       return '0x275617327c958bD06b5D6b871E7f491D76113dd8'
     case SupportedChainId.POLYGON_MUMBAI:
       return '0xe9939e7Ea7D7fb619Ac57f648Da7B1D425832631'
-
+    case SupportedChainId.POLYGON_ZK_EVM:
+      return '0x61530d6E1c7A47BBB3e48e8b8EdF7569DcFeE121'
     default: return MULTICALL2_ADDRESS
   }
 }

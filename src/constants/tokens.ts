@@ -75,6 +75,13 @@ export const USDC_POLYGON = new Token(
   'USDC',
   'USD//C'
 )
+export const USDC_POLYGON_ZK_EVM = new Token(
+  SupportedChainId.POLYGON_ZK_EVM,
+  '0xA8CE8aee21bC2A48a5EF670afCc9274C7bbbC035',
+  6,
+  'USDC',
+  'USD//C'
+)
 const USDC_POLYGON_MUMBAI = new Token(
   SupportedChainId.POLYGON_MUMBAI,
   '0xe11a86849d99f524cac3e7a0ec1241828e332c62',
@@ -141,6 +148,13 @@ export const WBTC_POLYGON = new Token(
 export const USDT = new Token(
   SupportedChainId.MAINNET,
   '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+  6,
+  'USDT',
+  'Tether USD'
+)
+export const USDT_POLYGON_ZK_EVM = new Token(
+  SupportedChainId.POLYGON_ZK_EVM,
+  '0x1E4a5963aBFD975d8c9021ce480b42188849D41d',
   6,
   'USDT',
   'Tether USD'
@@ -375,6 +389,13 @@ export const WRAPPED_NATIVE_CURRENCY: { [chainId: number]: Token | undefined } =
     'CELO',
     'Celo native asset'
   ),
+  [SupportedChainId.POLYGON_ZK_EVM]: new Token(
+    SupportedChainId.POLYGON_ZK_EVM,
+    '0x4F9A0e7FD2Bf6067db6994CF12E4495Df938E6e9',
+    18,
+    'WETH',
+    'Wrapped Ether'
+  )
 }
 
 export function isCelo(chainId: number): chainId is SupportedChainId.CELO | SupportedChainId.CELO_ALFAJORES {
@@ -457,5 +478,6 @@ export const TOKEN_SHORTHANDS: { [shorthand: string]: { [chainId in SupportedCha
     [SupportedChainId.RINKEBY]: USDC_RINKEBY.address,
     [SupportedChainId.KOVAN]: USDC_KOVAN.address,
     [SupportedChainId.ROPSTEN]: USDC_ROPSTEN.address,
+    [SupportedChainId.POLYGON_ZK_EVM]: USDC_POLYGON_ZK_EVM.address,
   },
 }

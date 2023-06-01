@@ -98,6 +98,10 @@ export const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
     ...Object.values(getCompoundTokens(SupportedChainId.POLYGON_MUMBAI)),
     ...Object.values(getCompoundV3Tokens(SupportedChainId.POLYGON_MUMBAI)),
   ],
+  [SupportedChainId.POLYGON_ZK_EVM]: [
+    ...WRAPPED_NATIVE_CURRENCIES_ONLY[SupportedChainId.POLYGON_ZK_EVM],
+    ...Object.values(getCompoundTokens(SupportedChainId.POLYGON_ZK_EVM)),
+  ],
 }
 export const ADDITIONAL_BASES: { [chainId: number]: { [tokenAddress: string]: Token[] } } = {
   [SupportedChainId.MAINNET]: {
@@ -197,6 +201,7 @@ export const COMMON_BASES: ChainCurrencyList = {
     CEUR_CELO_ALFAJORES,
   ],
 }
+
 
 // used to construct the list of all pairs we consider by default in the frontend
 export const BASES_TO_TRACK_LIQUIDITY_FOR: ChainTokenList = {

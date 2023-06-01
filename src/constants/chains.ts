@@ -47,7 +47,7 @@ export const chainIds = [
   SupportedChainId.GOERLI,
   SupportedChainId.POLYGON,
   SupportedChainId.POLYGON_MUMBAI,
-  // SupportedChainId.POLYGON_ZK_EVM
+  SupportedChainId.POLYGON_ZK_EVM
 ]
 
 /**

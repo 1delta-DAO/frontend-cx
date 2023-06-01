@@ -80,7 +80,7 @@ type TokenMap = { [address: string]: Token }
  * Returns null if token is loading or null was passed.
  * Returns undefined if tokenAddress is invalid or token does not exist.
  */
-export function useTokenFromMapOrNetwork(tokens: TokenMap, tokenAddress?: string | null): Token | null | undefined {
+export function useTokenFromMapOrNetwork(tokens: TokenMap, tokenAddress?: string | null): Token | undefined {
   const address = isAddress(tokenAddress)
   const _token: Token | undefined = address ? tokens[address] : undefined
   const token = !_token && address ? getAaveTokens(5)[(address as string).toLowerCase()] : _token
@@ -94,7 +94,7 @@ export function useTokenFromMapOrNetwork(tokens: TokenMap, tokenAddress?: string
  * Returns null if currency is loading or null was passed.
  * Returns undefined if currencyId is invalid or token does not exist.
  */
-export function useCurrencyFromMap(tokens: TokenMap, currencyId?: string | null): Currency | null | undefined {
+export function useCurrencyFromMap(tokens: TokenMap, currencyId?: string | null): Currency | undefined {
   const nativeCurrency = useNativeCurrency()
   const chainId = useChainId()
   const isNative = Boolean(nativeCurrency && currencyId?.toUpperCase() === 'ETH')
@@ -106,7 +106,7 @@ export function useCurrencyFromMap(tokens: TokenMap, currencyId?: string | null)
   const token = useTokenFromMapOrNetwork(tokens, isNative ? undefined : shorthandMatchAddress ?? currencyId)
 
   const supportedChain = isSupportedChain(chainId)
-  if (currencyId === null || currencyId === undefined || !supportedChain) return null
+  if (currencyId === null || currencyId === undefined || !supportedChain) return undefined
 
   // this case so we use our builtin wrapped token instead of wrapped tokens on token lists
   const wrappedNative = nativeCurrency?.wrapped

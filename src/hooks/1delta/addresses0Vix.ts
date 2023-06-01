@@ -34,22 +34,27 @@ export const oVixAddresses: AddressDictionary = {
   oWTBC: {
     [SupportedChainId.POLYGON_MUMBAI]: '0xF151CC6EE64046342D8287660596fb78D2212A23',
     [SupportedChainId.POLYGON]: '0x3B9128Ddd834cE06A60B0eC31CCfB11582d8ee18',
+    [SupportedChainId.POLYGON_ZK_EVM]: ''
   },
   oDAI: {
     [SupportedChainId.POLYGON_MUMBAI]: '0xcb9F13Cb8cCA0ECfE908AbBfa25D1fc16C1aaE6d',
     [SupportedChainId.POLYGON]: '0x2175110F2936bf630a278660E9B6E4EFa358490A',
+    [SupportedChainId.POLYGON_ZK_EVM]: ''
   },
   oWETH: {
     [SupportedChainId.POLYGON_MUMBAI]: '0xFcCea9c3bb8e2fEFE9E2c7EFa1C63890Cf6F69b6',
     [SupportedChainId.POLYGON]: '0xb2D9646A1394bf784E376612136B3686e74A325F',
+    [SupportedChainId.POLYGON_ZK_EVM]: ''
   },
   oUSDC: {
     [SupportedChainId.POLYGON_MUMBAI]: '0x4413dbCf851D73bEc0BBF50b474EA89bded11153',
     [SupportedChainId.POLYGON]: '0xEBb865Bf286e6eA8aBf5ac97e1b56A76530F3fBe',
+    [SupportedChainId.POLYGON_ZK_EVM]: '0x68d9baA40394dA2e2c1ca05d30BF33F52823ee7B'
   },
   oUSDT: {
     [SupportedChainId.POLYGON_MUMBAI]: '0x2ed82022025374fcC839D557c7a360099244e06b',
     [SupportedChainId.POLYGON]: '0x1372c34acC14F1E8644C72Dad82E3a21C211729f',
+    [SupportedChainId.POLYGON_ZK_EVM]: ''
   },
   maximillion: {
     [SupportedChainId.POLYGON_MUMBAI]: '0xe1d11e64fcD630AAa2C9216f736F9193665d0cC6',

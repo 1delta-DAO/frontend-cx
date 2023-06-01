@@ -31,41 +31,41 @@ export function useAllCurrencyCombinations(currencyA?: Currency, currencyB?: Cur
     () =>
       tokenA && tokenB
         ? [
-            // the direct pair
-            [tokenA, tokenB] as [Token, Token],
-            // token A against all bases
-            ...bases.map((base): [Token, Token] => [tokenA, base]),
-            // token B against all bases
-            ...bases.map((base): [Token, Token] => [tokenB, base]),
-            // each base against all bases
-            ...basePairs,
-          ]
-            // filter out invalid pairs comprised of the same asset (e.g. WETH<>WETH)
-            .filter(([t0, t1]) => !t0.equals(t1))
-            // filter out duplicate pairs
-            .filter(([t0, t1], i, otherPairs) => {
-              // find the first index in the array at which there are the same 2 tokens as the current
-              const firstIndexInOtherPairs = otherPairs.findIndex(([t0Other, t1Other]) => {
-                return (t0.equals(t0Other) && t1.equals(t1Other)) || (t0.equals(t1Other) && t1.equals(t0Other))
-              })
-              // only accept the first occurrence of the same 2 tokens
-              return firstIndexInOtherPairs === i
+          // the direct pair
+          [tokenA, tokenB] as [Token, Token],
+          // token A against all bases
+          ...bases.map((base): [Token, Token] => [tokenA, base]),
+          // token B against all bases
+          ...bases.map((base): [Token, Token] => [tokenB, base]),
+          // each base against all bases
+          ...basePairs,
+        ]
+          // filter out invalid pairs comprised of the same asset (e.g. WETH<>WETH)
+          .filter(([t0, t1]) => !t0.equals(t1))
+          // filter out duplicate pairs
+          .filter(([t0, t1], i, otherPairs) => {
+            // find the first index in the array at which there are the same 2 tokens as the current
+            const firstIndexInOtherPairs = otherPairs.findIndex(([t0Other, t1Other]) => {
+              return (t0.equals(t0Other) && t1.equals(t1Other)) || (t0.equals(t1Other) && t1.equals(t0Other))
             })
-            // optionally filter out some pairs for tokens with custom bases defined
-            .filter(([tokenA, tokenB]) => {
-              if (!chainId) return true
-              const customBases = CUSTOM_BASES[chainId]
+            // only accept the first occurrence of the same 2 tokens
+            return firstIndexInOtherPairs === i
+          })
+          // optionally filter out some pairs for tokens with custom bases defined
+          .filter(([tokenA, tokenB]) => {
+            if (!chainId) return true
+            const customBases = CUSTOM_BASES[chainId]
 
-              const customBasesA: Token[] | undefined = customBases?.[tokenA.address]
-              const customBasesB: Token[] | undefined = customBases?.[tokenB.address]
+            const customBasesA: Token[] | undefined = customBases?.[tokenA.address]
+            const customBasesB: Token[] | undefined = customBases?.[tokenB.address]
 
-              if (!customBasesA && !customBasesB) return true
+            if (!customBasesA && !customBasesB) return true
 
-              if (customBasesA && !customBasesA.find((base) => tokenB.equals(base))) return false
-              if (customBasesB && !customBasesB.find((base) => tokenA.equals(base))) return false
+            if (customBasesA && !customBasesA.find((base) => tokenB.equals(base))) return false
+            if (customBasesB && !customBasesB.find((base) => tokenA.equals(base))) return false
 
-              return true
-            })
+            return true
+          })
         : [],
     [tokenA, tokenB, bases, basePairs, chainId]
   )
@@ -99,41 +99,41 @@ export function useAllTokenCombinations(currencyA?: Token, currencyB?: Token): [
     () =>
       tokenA && tokenB
         ? [
-            // the direct pair
-            [tokenA, tokenB] as [Token, Token],
-            // token A against all bases
-            ...bases.map((base): [Token, Token] => [tokenA, base]),
-            // token B against all bases
-            ...bases.map((base): [Token, Token] => [tokenB, base]),
-            // each base against all bases
-            ...basePairs,
-          ]
-            // filter out invalid pairs comprised of the same asset (e.g. WETH<>WETH)
-            .filter(([t0, t1]) => !t0.equals(t1))
-            // filter out duplicate pairs
-            .filter(([t0, t1], i, otherPairs) => {
-              // find the first index in the array at which there are the same 2 tokens as the current
-              const firstIndexInOtherPairs = otherPairs.findIndex(([t0Other, t1Other]) => {
-                return (t0.equals(t0Other) && t1.equals(t1Other)) || (t0.equals(t1Other) && t1.equals(t0Other))
-              })
-              // only accept the first occurrence of the same 2 tokens
-              return firstIndexInOtherPairs === i
+          // the direct pair
+          [tokenA, tokenB] as [Token, Token],
+          // token A against all bases
+          ...bases.map((base): [Token, Token] => [tokenA, base]),
+          // token B against all bases
+          ...bases.map((base): [Token, Token] => [tokenB, base]),
+          // each base against all bases
+          ...basePairs,
+        ]
+          // filter out invalid pairs comprised of the same asset (e.g. WETH<>WETH)
+          .filter(([t0, t1]) => !t0.equals(t1))
+          // filter out duplicate pairs
+          .filter(([t0, t1], i, otherPairs) => {
+            // find the first index in the array at which there are the same 2 tokens as the current
+            const firstIndexInOtherPairs = otherPairs.findIndex(([t0Other, t1Other]) => {
+              return (t0.equals(t0Other) && t1.equals(t1Other)) || (t0.equals(t1Other) && t1.equals(t0Other))
             })
-            // optionally filter out some pairs for tokens with custom bases defined
-            .filter(([tokenA, tokenB]) => {
-              if (!chainId) return true
-              const customBases = CUSTOM_BASES[chainId]
+            // only accept the first occurrence of the same 2 tokens
+            return firstIndexInOtherPairs === i
+          })
+          // optionally filter out some pairs for tokens with custom bases defined
+          .filter(([tokenA, tokenB]) => {
+            if (!chainId) return true
+            const customBases = CUSTOM_BASES[chainId]
 
-              const customBasesA: Token[] | undefined = customBases?.[tokenA.address]
-              const customBasesB: Token[] | undefined = customBases?.[tokenB.address]
+            const customBasesA: Token[] | undefined = customBases?.[tokenA.address]
+            const customBasesB: Token[] | undefined = customBases?.[tokenB.address]
 
-              if (!customBasesA && !customBasesB) return true
+            if (!customBasesA && !customBasesB) return true
 
-              if (customBasesA && !customBasesA.find((base) => tokenB.equals(base))) return false
-              if (customBasesB && !customBasesB.find((base) => tokenA.equals(base))) return false
+            if (customBasesA && !customBasesA.find((base) => tokenB.equals(base))) return false
+            if (customBasesB && !customBasesB.find((base) => tokenA.equals(base))) return false
 
-              return true
-            })
+            return true
+          })
         : [],
     [tokenA, tokenB, bases, basePairs, chainId]
   )

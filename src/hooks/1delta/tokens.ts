@@ -48,7 +48,7 @@ export const getCompoundTokens = (chainId: number): { [assetKey: string]: Token 
   return Object.assign(
     {},
     ...getSupportedAssets(chainId, LendingProtocol.COMPOUND)
-      .filter((x) => Object.keys(x)[0] !== NATIVE_SYMBOL[chainId])
+      .filter((x) => x !== NATIVE_SYMBOL[chainId])
       .map((asset) => {
         return {
           [asset]: safeGetToken(chainId, asset, LendingProtocol.COMPOUND),

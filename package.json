@@ -118,6 +118,8 @@
   "dependencies": {
     "@amplitude/analytics-browser": "^1.1.4",
     "@coinbase/wallet-sdk": "^3.3.0",
+    "@cryptoalgebra/core": "^3.0.0",
+    "@ethersproject/solidity": "^5.7.0",
     "@fontsource/ibm-plex-mono": "^4.5.1",
     "@fontsource/inter": "^4.5.1",
     "@lingui/core": "^3.14.0",

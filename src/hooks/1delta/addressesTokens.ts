@@ -13,10 +13,12 @@ export const addressesTokens: AddressDictionary = {
   [SupportedAssets.USDC]: {
     [SupportedChainId.MAINNET]: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
     [SupportedChainId.POLYGON]: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
+    [SupportedChainId.POLYGON_ZK_EVM]: '0xA8CE8aee21bC2A48a5EF670afCc9274C7bbbC035'
   },
   [SupportedAssets.USDT]: {
     [SupportedChainId.MAINNET]: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
     [SupportedChainId.POLYGON]: '0xc2132d05d31c914a87c6611c10748aeb04b58e8f',
+    [SupportedChainId.POLYGON_ZK_EVM]: '0x1E4a5963aBFD975d8c9021ce480b42188849D41d'
   },
   [SupportedAssets.WBTC]: {
     [SupportedChainId.MAINNET]: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
@@ -92,9 +94,11 @@ export const addressesTokens: AddressDictionary = {
   },
   [SupportedAssets.WETH]: {
     [SupportedChainId.POLYGON]: '0x7ceb23fd6bc0add59e62ac25578270cff1b9f619',
+    [SupportedChainId.POLYGON_ZK_EVM]: '0x4F9A0e7FD2Bf6067db6994CF12E4495Df938E6e9'
   },
   [SupportedAssets.WMATIC]: {
     [SupportedChainId.POLYGON]: '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
+    [SupportedChainId.POLYGON_ZK_EVM]: '0xa2036f0538221a77A3937F1379699f44945018d0'
   },
   [SupportedAssets.VGHST]: {
     [SupportedChainId.POLYGON]: '0x51195e21BDaE8722B29919db56d95Ef51FaecA6C'

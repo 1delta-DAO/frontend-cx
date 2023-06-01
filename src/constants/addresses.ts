@@ -2,6 +2,7 @@ import { FACTORY_ADDRESS as V2_FACTORY_ADDRESS } from '@uniswap/v2-sdk'
 import { FACTORY_ADDRESS as V3_FACTORY_ADDRESS } from '@uniswap/v3-sdk'
 
 import { constructSameAddressMap } from '../utils/constructSameAddressMap'
+import { ALGEBRA_FACTORY, ALGEBRA_INTERFACE_MULTICALL, ALGEBRA_QUOTER } from './algebraAddresses'
 import { SupportedChainId } from './chains'
 
 type AddressMap = { [chainId: number]: string }
@@ -32,6 +33,7 @@ export const V3_CORE_FACTORY_ADDRESSES: AddressMap = {
   ]),
   [SupportedChainId.CELO]: CELO_V3_CORE_FACTORY_ADDRESSES,
   [SupportedChainId.CELO_ALFAJORES]: CELO_V3_CORE_FACTORY_ADDRESSES,
+  ...ALGEBRA_FACTORY
 }
 
 export const V3_MIGRATOR_ADDRESSES: AddressMap = {
@@ -56,7 +58,9 @@ export const MULTICALL_ADDRESS: AddressMap = {
   [SupportedChainId.ARBITRUM_RINKEBY]: '0xa501c031958F579dB7676fF1CE78AD305794d579',
   [SupportedChainId.CELO]: CELO_MULTICALL_ADDRESS,
   [SupportedChainId.CELO_ALFAJORES]: CELO_MULTICALL_ADDRESS,
+  ...ALGEBRA_INTERFACE_MULTICALL
 }
+
 
 export const SWAP_ROUTER_ADDRESSES: AddressMap = {
   ...constructSameAddressMap('0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45', [
@@ -111,6 +115,7 @@ export const QUOTER_ADDRESSES: AddressMap = {
   ]),
   [SupportedChainId.CELO]: CELO_QUOTER_ADDRESSES,
   [SupportedChainId.CELO_ALFAJORES]: CELO_QUOTER_ADDRESSES,
+  ...ALGEBRA_QUOTER
 }
 
 export const NONFUNGIBLE_POSITION_MANAGER_ADDRESSES: AddressMap = {

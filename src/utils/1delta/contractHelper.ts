@@ -2,6 +2,8 @@ import { ethers } from 'ethers'
 import { uniswapMulticallAddress } from 'hooks/1delta/addresses'
 import MultiCallAbi from 'abis/Multicall.json'
 import { RPC_PROVIDERS, getSecondaryProvider } from 'constants/providers'
+import { SupportedChainId } from 'constants/chains'
+import { ALGEBRA_INTERFACE_MULTICALL } from 'constants/algebraAddresses'
 
 export type MultiCallResponse<T> = T | null
 
@@ -21,10 +23,12 @@ const getContract = (
 }
 
 export const getMulticallContract = (chainId: number) => {
-  return getContract(chainId, MultiCallAbi, uniswapMulticallAddress[chainId], simpleRpcProvider(chainId))
+  const multicallAddress = chainId === SupportedChainId.POLYGON_ZK_EVM ? ALGEBRA_INTERFACE_MULTICALL[chainId] : uniswapMulticallAddress[chainId]
+  return getContract(chainId, MultiCallAbi, multicallAddress, simpleRpcProvider(chainId))
 }
 
 
 export const getMulticallContractSecondaryProvider = (chainId: number) => {
-  return getContract(chainId, MultiCallAbi, uniswapMulticallAddress[chainId], getSecondaryProvider(chainId))
+  const multicallAddress = chainId === SupportedChainId.POLYGON_ZK_EVM ? ALGEBRA_INTERFACE_MULTICALL[chainId] : uniswapMulticallAddress[chainId]
+  return getContract(chainId, MultiCallAbi, multicallAddress, getSecondaryProvider(chainId))
 }

@@ -187,7 +187,7 @@ export function useToken(tokenAddress?: string | null): Token | null | undefined
 export function useCurrency(
   currencyId?: string | null,
   lendingProtocol = LendingProtocol.AAVE
-): Currency | null | undefined {
+): Currency | undefined {
   const tokens = useAllTokens()
   const chainId = useChainId()
   const selection =
