@@ -92,8 +92,7 @@ const CurrencySelect = styled(ButtonGray) <{
   font-size: 24px;
   font-weight: 400;
   width: ${({ hideInput }) => (hideInput ? '100%' : 'initial')};
-  padding: ${({ selected, redesignFlag }) =>
-    redesignFlag ? (selected ? '4px 8px 4px 4px' : '6px 6px 6px 8px') : '0 8px'};
+  padding: ${({ selected }) => selected ? '4px 8px 4px 4px' : '6px 6px 6px 8px'};
   gap: ${({ redesignFlag }) => (redesignFlag ? '8px' : '0px')};
   justify-content: space-between;
   margin-left: ${({ hideInput }) => (hideInput ? '0' : '12px')};

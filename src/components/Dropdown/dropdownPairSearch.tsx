@@ -112,7 +112,7 @@ const parsePairString = (pair: [SupportedAssets, SupportedAssets] | undefined) =
   return String(pair[0]) + "/" + String(pair[1])
 }
 
-const PairSearchDropdown: React.FC<DropdownProps> = ({ selectedOption, options, onSelect, placeholder }) => {
+export const PairSearchDropdown: React.FC<DropdownProps> = ({ selectedOption, options, onSelect, placeholder }) => {
   const [showAll, setShowAll] = useState(false)
   const [inputValue, setInputValue] = useState(parsePairString(selectedOption));
   const [filteredOptions, setFilteredOptions] = useState(options);
@@ -190,4 +190,130 @@ const PairSearchDropdown: React.FC<DropdownProps> = ({ selectedOption, options, 
   );
 };
 
-export default PairSearchDropdown;
+
+const SingleDropdownList = styled(DropdownList)`
+  width: 110px;
+`;
+
+
+const SingleDropdownWrapper = styled(DropdownWrapper)`
+  width: 50px;
+`
+
+
+interface SingleDropdownProps extends DropdownProps {
+  isLong: boolean
+}
+
+export const SingleSearchDropdown: React.FC<SingleDropdownProps> = ({ isLong, selectedOption, options, onSelect, placeholder }) => {
+  const [showAll, setShowAll] = useState(false)
+
+  const [inputValue, setInputValue] = useState(selectedOption?.[isLong ? 0 : 1] ?? 'ASSET');
+
+  const optionsAvailable = options.map(o => o[isLong ? 0 : 1]).filter(a => a !== SupportedAssets.USDC && a !== SupportedAssets.ETH).filter(onlyUnique)
+  const [filteredOptions, setFilteredOptions] = useState(optionsAvailable);
+
+  useEffect(() => {
+    setFilteredOptions(optionsAvailable) // if the list updates reset the options
+    setInputValue(selectedOption?.[isLong ? 0 : 1] ?? 'ASSET')
+  }, [options, isLong, selectedOption])
+
+
+  useEffect(() => {
+    setInputValue(selectedOption?.[isLong ? 0 : 1] ?? 'ASSET')
+  }, [onSelect, selectedOption, isLong])
+
+  const [close, setClose] = useState(true);
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = event.target.value;
+    const filteredOptions = optionsAvailable.filter((option) =>
+      option.toLowerCase().includes(inputValue.toLowerCase())
+    );
+    setInputValue(inputValue);
+    setFilteredOptions(filteredOptions);
+    setClose(false)
+  };
+
+  const handleOptionSelect = (option: [SupportedAssets, SupportedAssets]) => {
+    setInputValue(parsePairString(option));
+    onSelect(option);
+    setClose(true)
+  };
+
+  const ref = useRef(null)
+  useOutsideAlerter(ref, () => {
+    setClose(true)
+    setShowAll(false)
+  })
+
+  const ref2 = useRef(null)
+  useOutsideAlerter(ref2, () => {
+    setClose(true)
+    setShowAll(false)
+  })
+
+
+  return (
+    <SingleDropdownWrapper ref={ref} onClick={() => setShowAll(!showAll)}>
+      <Row key={String(selectedOption)}>
+        <Image src={TOKEN_SVGS[selectedOption?.[isLong ? 0 : 1] ?? placeholder]} style={{ width: '25px' }} />
+        <DropdownInput
+          type="text"
+          value={inputValue}
+          onChange={handleInputChange}
+          placeholder={placeholder}
+        />
+      </Row>
+      {(showAll || !close) && <SingleDropdownList ref={ref2}>
+        {(inputValue ?
+          <>
+            {filteredOptions.map((option) => (
+              <AssetRow
+                onSelect={() => handleOptionSelect(singleAssetToPair(option, isLong))}
+                asset={singleAssetToPair(option, isLong)}
+                key={String(option[0] + option[1])}
+                isLong={isLong}
+              />
+            ))}
+          </>
+
+          : <>
+            {optionsAvailable.map((option) => (
+              <AssetRow
+                onSelect={() => handleOptionSelect(singleAssetToPair(option, isLong))}
+                asset={singleAssetToPair(option, isLong)}
+                key={String(option[0] + option[1])}
+                isLong={isLong}
+              />
+            ))
+            }
+          </>)}
+      </SingleDropdownList>}
+    </SingleDropdownWrapper>
+  );
+};
+
+function onlyUnique(value: any, index: number, array: any[]) {
+  return array.indexOf(value) === index;
+}
+const singleAssetToPair = (asset: SupportedAssets, isLong): [SupportedAssets, SupportedAssets] => {
+  return isLong ? [asset, SupportedAssets.USDC] : [SupportedAssets.USDC, asset]
+}
+
+
+interface AssetRowProps extends PairRowProps {
+  isLong: boolean
+
+}
+
+
+const AssetRow = ({ isLong, asset, onSelect }: AssetRowProps): JSX.Element => {
+  const relAsset = asset[isLong ? 0 : 1]
+  return <RowPair onClick={() => onSelect(asset)}>
+    <Image src={TOKEN_SVGS[relAsset]} key={String(relAsset)} style={{ marginRight: '10px' }} />
+    <AssetText>
+      {relAsset}
+    </AssetText>
+  </RowPair >
+}

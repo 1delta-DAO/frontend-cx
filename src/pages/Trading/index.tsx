@@ -8,12 +8,10 @@ import {
   AaveInterestMode,
   Field,
   PositionSides,
-  OneDeltaTradeType,
   SupportedAssets,
-  MarginTradeType,
-  Asset
+  MarginTradeType
 } from "types/1delta";
-import { TOKEN_SVGS, ZERO_BN, getSupportedAssets, ETHEREUM_CHAINS, POLYGON_CHAINS } from "constants/1delta";
+import { getSupportedAssets, ETHEREUM_CHAINS, POLYGON_CHAINS } from "constants/1delta";
 import { useNetworkState } from "state/globalNetwork/hooks";
 import { LendingProtocol } from "state/1delta/actions";
 import { AutoColumn } from "components/Column";
@@ -26,14 +24,13 @@ import PriceImpactWarning from 'components/swap/PriceImpactWarning'
 import SwapDetailsDropdown from 'components/swap/SwapDetailsDropdown'
 import { MouseoverTooltip } from 'components/Tooltip'
 import { MAINNET_CHAINS } from 'constants/1delta'
-import { AAVE_CHAINIDS, AAVE_VIEW_CHAINIDS, COMPOUND_CHAINIDS, COMPOUND_VIEW_CHAINIDS, SupportedChainId, isSupportedChain } from 'constants/chains'
-import { BigNumber, ethers } from 'ethers'
+import { SupportedChainId, isSupportedChain } from 'constants/chains'
+import { BigNumber } from 'ethers'
 import { RedesignVariant, useRedesignFlag } from 'featureFlags/flags/redesign'
-import { filterSupportedAssets, getAaveTokens, safeGetToken } from 'hooks/1delta/tokens'
+import { getAaveTokens } from 'hooks/1delta/tokens'
 import { useGetMarginTraderContract } from 'hooks/1delta/use1DeltaContract'
 import JSBI from 'jsbi'
 import { useIsMobile } from 'hooks/useIsMobile'
-import { fetchAAVEUserReserveDataAsync } from 'state/1delta/aave/fetchAAVEUserData'
 import { useToggleWalletModal } from 'state/application/hooks'
 import { useAppDispatch } from 'state/hooks'
 import { TradeState } from 'state/routing/types'
@@ -43,13 +40,9 @@ import { GreyCard } from '../../components/Card'
 import { AutoRow } from '../../components/Row'
 import confirmPriceImpactWithoutFee from '../../components/swap/confirmPriceImpactWithoutFee'
 import ConfirmSwapModal from '../../components/swap/ConfirmMarginTradeModal'
-import { Dots, PageWrapper, SwapCallbackError, SwapWrapper } from '../../components/swap/styleds'
+import { SwapCallbackError } from '../../components/swap/styleds'
 import { ApprovalState } from '../../hooks/useApproveCallback'
-import { useIsSwapUnsupported } from '../../hooks/useIsSwapUnsupported'
-import { useDollarPriceViaOracles, useStablecoinDollarValue, useStablecoinValue } from '../../hooks/useStablecoinPrice'
-import {
-  useSelectedTradeTypeProfessional,
-} from '../../state/professionalTradeSelection/hooks'
+import { useStablecoinDollarValue } from '../../hooks/useStablecoinPrice'
 import { useExpertModeManager, useIsDarkMode } from '../../state/user/hooks'
 import { LinkStyledButton, ThemedText } from '../../theme'
 import { computeFiatValuePriceImpact } from '../../utils/computeFiatValuePriceImpact'
@@ -58,28 +51,19 @@ import { computeRealizedPriceImpact, warningSeverity } from '../../utils/prices'
 import { largerPercentValue } from 'utils/1delta/generalFormatters'
 import { AaveMarginTrader, AaveSweeper } from 'abis/types'
 import { calculateGasMargin } from 'utils/calculateGasMargin'
-import { TransactionType } from 'state/transactions/types'
-import { currencyId } from 'utils/currencyId'
 import { useTransactionAdder } from 'state/transactions/hooks'
 import { MarginTradingButtonText } from 'components/Styles'
 import { parseMessage } from 'constants/errors'
-import { useDeltaAssetState, useDeltaState, useGetCurrentAccount, useSelectLendingProtocol } from "state/1delta/hooks";
-import { useTradeTypeSelector } from "state/professionalTradeSelection/hooks";
+import { useDeltaState, useGetCurrentAccount } from "state/1delta/hooks";
 import { useDerivedSwapInfoMargin, useDerivedSwapInfoMarginAlgebra } from "state/professionalTradeSelection/tradeHooks";
-import { setTradeType } from "state/professionalTradeSelection/actions";
 import { Text } from "rebass";
 import PairInput from "components/CurrencyInputPanel/PairInput";
 import PositionTable from "./components/MarketTable";
 import { useOracleState, usePrices } from "state/oracles/hooks";
 import { usePollLendingData } from "hooks/polling/pollData";
-import { useSingleInteraction } from "state/marginTradeSelection/hooks";
-import { useRiskParameters } from "hooks/professional/riskParameters";
 import DecimalSlider from "./components/Slider";
 import { useMarginTradeApproval } from "hooks/approval";
-import { useBalanceText, useCurrencyAmounts } from "../../hooks/trade";
 import { usePrepareAssetData } from "hooks/asset/useAssetData";
-import { useGeneralRiskValidation } from "pages/Trading/hooks/riskValidation";
-import { useGeneralBalanceValidation } from "pages/Trading/hooks/balanceValidation";
 import { generateCalldata } from "utils/calldata/generateCall";
 import { SwitchCircle } from "components/Wallet";
 import { fetchChainLinkData } from "state/oracles/fetchChainLinkData";
@@ -89,17 +73,15 @@ import { ArrowDotted } from "./components/Arrow";
 import { getTradingViewSymbol } from "constants/chartMapping";
 import { useDerivedMoneyMarketTradeInfo, useMoneyMarketState, useMoneyMarketActionHandlers } from "state/moneyMarket/hooks";
 import GeneralCurrencyInputPanel from "components/CurrencyInputPanel/GeneralInputPanel/GeneralCurrencyInputPanel";
-import { useCurrency, useCurrencyWithFallback } from "hooks/Tokens";
+import { useCurrency } from "hooks/Tokens";
 import { getTokenAddresses } from "hooks/1delta/addressGetter";
 import DepositTypeDropdown, { DepositMode } from "components/Dropdown/depositTypeDropdown";
 import { USDC_POLYGON, USDC_POLYGON_ZK_EVM } from "constants/tokens";
 import useDebounce from "hooks/useDebounce";
-import { UniswapTrade } from "utils/Types";
-import PairSearchDropdown from "components/Dropdown/dropdownPairSearch";
-import { formatEther, parseUnits } from "ethers/lib/utils";
-import tryParseCurrencyAmount from "lib/utils/tryParseCurrencyAmount";
+import { PairSearchDropdown } from "components/Dropdown/dropdownPairSearch";
+import { parseUnits } from "ethers/lib/utils";
 import { addressesTokens } from "hooks/1delta/addressesTokens";
-import { calculateCompoundRiskChangeSlot, useGetCompoundRiskParameters, useGetCompoundRiskParametersSlot } from "hooks/riskParameters/useCompoundParameters";
+import { calculateCompoundRiskChangeSlot, useGetCompoundRiskParametersSlot } from "hooks/riskParameters/useCompoundParameters";
 import { useAlgebraClientSideV3 } from "hooks/professional/algebra/useClientSideV3Trade";
 
 
@@ -179,6 +161,57 @@ const SwapPanel = styled.div`
 `};
 `
 
+const ButtonRow = styled.div`
+display: flex;
+flex-direction: row;
+align-items:center;
+justify-content: space:between;
+margin-bottom: 5px;
+`
+
+export const ButtonLightBoring = styled(BaseButton) <{ redesignFlag?: boolean }>`
+  color: ${({ theme, redesignFlag }) => (redesignFlag ? theme.accentAction : theme.deprecated_primaryText1)};
+  font-size: ${({ redesignFlag }) => (redesignFlag ? '20px' : '16px')};
+  font-weight: ${({ redesignFlag }) => (redesignFlag ? '600' : '500')};
+
+  :disabled {
+    opacity: 0.4;
+    :hover {
+      cursor: auto;
+      background-color: ${({ theme, redesignFlag }) => (redesignFlag ? 'transparent' : theme.deprecated_primary5)};
+      box-shadow: none;
+      outline: none;
+    }
+  }
+`
+
+const TypeButton = styled(ButtonLightBoring) <{ selected: boolean }>`
+  border-radius: 0px;
+  font-size: 14px;
+  &:first-child {
+    border-top-left-radius: 10px;
+    padding-left: 10px;
+  }
+  &:last-child {
+    border-top-right-radius: 10px;
+    padding-right: 10px;
+  }
+  height: 40px;
+  ${({ theme, selected }) =>
+    selected ?
+      `
+    border: 1px solid ${({ theme }) => theme.backgroundInteractive};
+    border-bottom: none;
+    background-color: ${theme.deprecated_bg0};
+    font-weight: bold;
+    `: `
+    opacity: 0.5;
+    background-color: ${theme.deprecated_bg3};
+    `
+  }
+`
+
+
 export const AutoColumnAdjusted = styled.div<{
   gap?: 'sm' | 'md' | 'lg' | string
   justify?: 'stretch' | 'center' | 'start' | 'end' | 'flex-start' | 'flex-end' | 'space-between'
@@ -204,23 +237,6 @@ const ChartContainer = styled.div`
   ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
   min-height: 400px;
 `};
-`
-
-
-export const ButtonLightBoring = styled(BaseButton) <{ redesignFlag?: boolean }>`
-  color: ${({ theme, redesignFlag }) => (redesignFlag ? theme.accentAction : theme.deprecated_primaryText1)};
-  font-size: ${({ redesignFlag }) => (redesignFlag ? '20px' : '16px')};
-  font-weight: ${({ redesignFlag }) => (redesignFlag ? '600' : '500')};
-
-  :disabled {
-    opacity: 0.4;
-    :hover {
-      cursor: auto;
-      background-color: ${({ theme, redesignFlag }) => (redesignFlag ? 'transparent' : theme.deprecated_primary5)};
-      box-shadow: none;
-      outline: none;
-    }
-  }
 `
 
 
@@ -286,11 +302,10 @@ interface AssetRowProps {
 }
 
 
-enum ProTradeType {
-  MarginOpen,
-  Liquidate,
-  CollateralSwap,
-  DebtSwap
+enum Mode {
+  LONG = 'Long',
+  SHORT = 'Short',
+  EXPERT = 'Expert',
 
 }
 
@@ -323,10 +338,7 @@ export default function Professional() {
 
   const isDark = useIsDarkMode()
 
-  const [sourceBorrowInterestMode, setSourceBorrowInterestMode] = useState(AaveInterestMode.VARIABLE)
-
-  const [targetBorrowInterestMode, setTargetBorrowInterestMode] = useState(AaveInterestMode.VARIABLE)
-
+  const [selectedMode, setSelectedMode] = useState(Mode.LONG)
 
   const [pair, selectPair] = useState<[SupportedAssets, SupportedAssets]>([SupportedAssets.WETH, SupportedAssets.USDC])
   const [chartPair, setChartPair] = useState(pair)
@@ -338,29 +350,17 @@ export default function Professional() {
 
   const [leverage, setLeverage] = useState(1)
 
-  const assets = useMemo(() => getSupportedAssets(chainId, LendingProtocol.COMPOUND), [chainId])
+
+
+  const assets = useMemo(() => getSupportedAssets(chainId, LendingProtocol.COMPOUND), [chainId]).map(x => x === SupportedAssets.ETH ? SupportedAssets.WETH : x)
 
   const pairs = useMemo(() => getPairs(assets), [assets])
 
   const hasNoImplementation = useMemo(() => MAINNET_CHAINS.includes(chainId), [chainId])
 
 
-  const [hasCompoundView, hasAaveView] = useMemo(() => [COMPOUND_VIEW_CHAINIDS.includes(chainId), AAVE_VIEW_CHAINIDS.includes(chainId)]
-    , [chainId])
-
-
   const deltaState = useDeltaState()
   const oracleState = useOracleState()
-
-  const [userAccount, userAccountData] = useMemo(() => [
-    deltaState?.userMeta?.[chainId]?.selectedAccountData,
-    deltaState?.userMeta?.[chainId]?.accounts1Delta
-  ],
-    [
-      chainId,
-      deltaState?.userMeta,
-      account
-    ])
 
   const compoundLoadingState = useMemo(() => deltaState.loadingState.compound, [deltaState.loadingState.compound])
   const aaveLoadingState = useMemo(() => deltaState.loadingState.aave, [deltaState.loadingState.aave])
@@ -368,14 +368,14 @@ export default function Professional() {
 
   usePollLendingData(
     account,
-    userAccountData,
+    undefined,
     deltaState.loadingState,
     deltaState.userMeta,
     chainId,
     connectionIsSupported,
     aaveLoadingState,
     compoundLoadingState,
-    hasAaveView,
+    false,
     currentProtocol,
     oracleLoadingState
   )
@@ -403,12 +403,6 @@ export default function Professional() {
 
   const isMobile = useIsMobile()
 
-  const [marginTradeType, setMarginTradeType] = useState(MarginTradeType.Open)
-  const [side, setSide] = useState(PositionSides.Collateral)
-
-
-  const tradeType = useSelectedTradeTypeProfessional()
-
   const theme = useTheme()
 
   // toggle wallet when disconnected
@@ -416,15 +410,6 @@ export default function Professional() {
 
   // for expert mode
   const [isExpertMode] = useExpertModeManager()
-
-  const { textTop, textBottom, plusTop, plusBottom, hasSwitchBottom, hasSwitchTop } = useBalanceText(
-    currentProtocol,
-    tradeType,
-    marginTradeType,
-    sourceBorrowInterestMode,
-    targetBorrowInterestMode
-  )
-
 
 
   const [selectedCurrencyOutside, setCurrencyOutside] = useState<Currency>(USDC_POLYGON_ZK_EVM)
@@ -695,10 +680,10 @@ export default function Professional() {
     currentProtocol,
     relevantAccount,
     trade,
-    marginTradeType,
+    MarginTradeType.Open,
     marginTraderContract.address,
     allowedSlippage,
-    sourceBorrowInterestMode,
+    AaveInterestMode.NONE,
     selectedAsset,
     hasNoImplementation
   )
@@ -709,8 +694,7 @@ export default function Professional() {
   )
 
   const showMaxButton =
-    !maxInput && Boolean(maxInputAmount?.greaterThan(0) && !parsedAmounts[Field.INPUT]?.equalTo(maxInputAmount)) &&
-    side === PositionSides.Collateral
+    !maxInput && Boolean(maxInputAmount?.greaterThan(0) && !parsedAmounts[Field.INPUT]?.equalTo(maxInputAmount))
 
   const handleSwap = useCallback(async () => {
     if (!trade) {
@@ -722,13 +706,13 @@ export default function Professional() {
 
     const { args, method, estimate, call } = generateCalldata(
       currentProtocol,
-      marginTradeType,
+      MarginTradeType.Open,
       account,
       {
         trade,
         allowedSlippage,
-        sourceBorrowInterestMode,
-        targetBorrowInterestMode,
+        sourceBorrowInterestMode: AaveInterestMode.NONE,
+        targetBorrowInterestMode: AaveInterestMode.NONE,
         isMaxIn: maxInput,
         isMaxOut: maxOutput,
         marginTraderContract: marginTraderContract as AaveMarginTrader & AaveSweeper,
@@ -767,33 +751,33 @@ export default function Professional() {
             txHash: txResponse.hash,
           })
 
-          if (trade)
-            addTransaction(
-              txResponse,
-              trade.tradeType === TradeType.EXACT_INPUT
-                ? {
-                  protocol: currentProtocol,
-                  type: TransactionType.SINGLE_SIDE,
-                  subType: side,
-                  tradeType: TradeType.EXACT_INPUT,
-                  inputCurrencyId: currencyId(trade.inputAmount.currency),
-                  inputCurrencyAmountRaw: trade.inputAmount.quotient.toString(),
-                  expectedOutputCurrencyAmountRaw: trade.outputAmount.quotient.toString(),
-                  outputCurrencyId: currencyId(trade.outputAmount.currency),
-                  minimumOutputCurrencyAmountRaw: trade.minimumAmountOut(allowedSlippage).quotient.toString(),
-                }
-                : {
-                  protocol: currentProtocol,
-                  type: TransactionType.SINGLE_SIDE,
-                  subType: side,
-                  tradeType: TradeType.EXACT_OUTPUT,
-                  inputCurrencyId: currencyId(trade.inputAmount.currency),
-                  maximumInputCurrencyAmountRaw: trade.maximumAmountIn(allowedSlippage).quotient.toString(),
-                  outputCurrencyId: currencyId(trade.outputAmount.currency),
-                  outputCurrencyAmountRaw: trade.outputAmount.quotient.toString(),
-                  expectedInputCurrencyAmountRaw: trade.inputAmount.quotient.toString(),
-                }
-            )
+          // if (trade)
+          //   addTransaction(
+          //     txResponse,
+          //     trade.tradeType === TradeType.EXACT_INPUT
+          //       ? {
+          //         protocol: currentProtocol,
+          //         type: TransactionType.SINGLE_SIDE,
+          //         subType: side,
+          //         tradeType: TradeType.EXACT_INPUT,
+          //         inputCurrencyId: currencyId(trade.inputAmount.currency),
+          //         inputCurrencyAmountRaw: trade.inputAmount.quotient.toString(),
+          //         expectedOutputCurrencyAmountRaw: trade.outputAmount.quotient.toString(),
+          //         outputCurrencyId: currencyId(trade.outputAmount.currency),
+          //         minimumOutputCurrencyAmountRaw: trade.minimumAmountOut(allowedSlippage).quotient.toString(),
+          //       }
+          //       : {
+          //         protocol: currentProtocol,
+          //         type: TransactionType.SINGLE_SIDE,
+          //         subType: side,
+          //         tradeType: TradeType.EXACT_OUTPUT,
+          //         inputCurrencyId: currencyId(trade.inputAmount.currency),
+          //         maximumInputCurrencyAmountRaw: trade.maximumAmountIn(allowedSlippage).quotient.toString(),
+          //         outputCurrencyId: currencyId(trade.outputAmount.currency),
+          //         outputCurrencyAmountRaw: trade.outputAmount.quotient.toString(),
+          //         expectedInputCurrencyAmountRaw: trade.inputAmount.quotient.toString(),
+          //       }
+          //   )
         })
         .catch((error) => {
           setSwapState({
@@ -879,8 +863,7 @@ export default function Professional() {
     ]
   },
     [
-      parsedAmountIn,
-      marginTradeType
+      parsedAmountIn
     ]
   )
   const chartPrices = usePrices(chartPair, chainId)
@@ -909,6 +892,32 @@ export default function Professional() {
       />
       <ContentContainer>
         <SwapPanel>
+          <ButtonRow>
+            <TypeButton
+              onClick={() => {
+                setSelectedMode(Mode.LONG)
+                handleSelectPair([pair[1], pair[0]])
+              }}
+              selected={selectedMode === Mode.LONG}
+            >
+              Long
+            </TypeButton>
+            <TypeButton
+              onClick={() => {
+                setSelectedMode(Mode.SHORT)
+                handleSelectPair([pair[1], pair[0]])
+              }}
+              selected={selectedMode === Mode.SHORT}
+            >
+              Short
+            </TypeButton>
+            <TypeButton
+              onClick={() => setSelectedMode(Mode.EXPERT)}
+              selected={selectedMode === Mode.EXPERT}
+            >
+              Expert
+            </TypeButton>
+          </ButtonRow>
           <InputPanelContainer>
             <InputWrapper redesignFlag={redesignFlagEnabled}>
               <GeneralCurrencyInputPanel
@@ -945,6 +954,8 @@ export default function Professional() {
 
             <InputWrapper redesignFlag={redesignFlagEnabled}>
               <PairInput
+                isLong={selectedMode === Mode.LONG}
+                simpleVersion={selectedMode !== Mode.EXPERT}
                 onPairSelect={handleSelectPair}
                 pairList={pairs}
                 placeholder={SupportedAssets.USDC}
@@ -958,7 +969,6 @@ export default function Professional() {
                 pair={pair}
                 id={'CURRENCY_PAIR_PANEL'}
                 loading={independentField === Field.INPUT && routeIsSyncing}
-                balanceSignIsPlus={plusBottom}
                 topRightLabel={<PairSwap onSwitch={handlePairSwap} />}
               />
             </InputWrapper>
@@ -1122,7 +1132,7 @@ export default function Professional() {
               autosize={true}
               interval={'30'}
               hide_volume={true}
-              style={'2'}
+              style={'1'}
               withdateranges={true}
               save_image={false}
               details={true}

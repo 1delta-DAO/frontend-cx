@@ -10,7 +10,7 @@ import { ThemedText } from '../../../theme'
 import { Input as NumericalInput } from '../../NumericalInput'
 import { useChainIdAndAccount } from 'state/globalNetwork/hooks'
 import { SupportedAssets } from 'types/1delta'
-import PairSearchDropdown from 'components/Dropdown/dropdownPairSearch'
+import { PairSearchDropdown, SingleSearchDropdown } from 'components/Dropdown/dropdownPairSearch'
 import { ButtonGray } from 'components/Button'
 import { UniswapTrade } from 'utils/Types'
 import { TOKEN_SVGS } from 'constants/1delta'
@@ -92,6 +92,7 @@ const PairSelect = styled(ButtonGray) <{
   hideInput?: boolean
   disabled?: boolean
   redesignFlag: boolean
+  wideMode: boolean
 }>`
   align-items: center;
   background-color: ${({ selected, theme, redesignFlag }) =>
@@ -113,12 +114,10 @@ const PairSelect = styled(ButtonGray) <{
   border: none;
   font-size: 24px;
   font-weight: 400;
-  width: ${({ hideInput }) => (hideInput ? '100%' : 'initial')};
-  padding: ${({ selected, redesignFlag }) =>
-    redesignFlag ? (selected ? '4px 8px 4px 4px' : '6px 6px 6px 8px') : '0 8px'};
-  gap: ${({ redesignFlag }) => (redesignFlag ? '8px' : '0px')};
+  width: ${({ wideMode }) => (wideMode ? '160px' : '100%')};
+  ${({ wideMode }) => wideMode ? '' : 'max-width: 110px;'}
+  padding: ${({ selected }) => selected ? '4px 8px 4px 4px' : '6px 6px 6px 8px'};
   justify-content: space-between;
-  margin-left: ${({ hideInput }) => (hideInput ? '0' : '12px')};
 
   &:hover {
     background-color: ${({ theme }) =>
@@ -183,6 +182,8 @@ interface PairInputProps {
   fiatValue?: CurrencyAmount<Token> | null
   priceImpact?: Percent
   id: string
+  simpleVersion: boolean
+  isLong: boolean
   showCurrencyAmount?: boolean
   disableNonToken?: boolean
   renderBalance?: (amount: CurrencyAmount<Currency>) => ReactNode
@@ -216,6 +217,8 @@ export default function PairInput({
   isPlus = true,
   balanceSignIsPlus = true,
   topRightLabel = null,
+  simpleVersion = false,
+  isLong = true,
   ...rest
 }: PairInputProps) {
 
@@ -265,6 +268,7 @@ export default function PairInput({
             />
           )}
           <PairSelect
+            wideMode={!simpleVersion}
             disabled={!chainAllowed}
             visible
             selected
@@ -272,7 +276,8 @@ export default function PairInput({
             redesignFlag={redesignFlagEnabled}
             className="open-pair-select-button"
           >
-            <PairSearchDropdown selectedOption={pair} options={pairList} onSelect={onPairSelect} placeholder={placeholder} />
+            {simpleVersion ? <SingleSearchDropdown selectedOption={pair} options={pairList} onSelect={onPairSelect} placeholder={placeholder} isLong={isLong} />
+              : <PairSearchDropdown selectedOption={pair} options={pairList} onSelect={onPairSelect} placeholder={placeholder} />}
             <StyledDropDown selected redesignFlag={redesignFlagEnabled} />
           </PairSelect>
         </InputRow>
