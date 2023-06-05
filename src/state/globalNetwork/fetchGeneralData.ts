@@ -167,25 +167,60 @@ export const fetchBlockDataAndNativeBalance: AsyncThunk<TimestampAndBalanceRespo
 
         }
       }
-      const calls: Call[] = [{
-        address: MULTICALL_ADDRESS[chainId],
-        name: 'getCurrentBlockTimestamp',
-        params: [],
-      },
-      {
-        address: getMulticallV2Address(chainId),
-        name: 'getBlockNumber',
-        params: [],
-      },
-      ]
+      if (chainId !== SupportedChainId.POLYGON_ZK_EVM) {
+        const calls: Call[] = [{
+          address: MULTICALL_ADDRESS[chainId],
+          name: 'getCurrentBlockTimestamp',
+          params: [],
+        },
+        {
+          address: getMulticallV2Address(chainId),
+          name: 'getBlockNumber',
+          params: [],
+        },
+        ]
 
-      const multicallResult = await multicallSecondary(chainId, MultiABI, calls)
+        const multicallResult = await multicallSecondary(chainId, MultiABI, calls)
 
-      return {
-        timestamp: multicallResult[0][0].toString(),
-        blockNumber: Number(multicallResult[1].blockNumber.toString()),
-        nativeBalance: undefined,
-        chainId
+        return {
+          timestamp: multicallResult[0][0].toString(),
+          blockNumber: Number(multicallResult[1].blockNumber.toString()),
+          nativeBalance: undefined,
+          chainId
+        }
+
+      } else {
+
+
+        const calls: Call[] = [{
+          address: MULTICALL_ADDRESS[chainId],
+          name: 'getCurrentBlockTimestamp',
+          params: [],
+        }
+        ]
+
+        // multicall2 on zkEVM not yet found
+        const bn = await getSecondaryProvider(chainId).getBlockNumber()
+
+        let multicallResult: any;
+        try {
+          multicallResult = await multicallSecondary(chainId, MultiABI, calls)
+        } catch (e) {
+          console.log(e)
+          return {
+            timestamp: 0,
+            nativeBalance: '0',
+            blockNumber: bn,
+            chainId
+          }
+        }
+
+        return {
+          timestamp: multicallResult[0][0].toString(),
+          nativeBalance: '0',
+          blockNumber: bn,
+          chainId
+        }
       }
 
     }

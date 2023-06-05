@@ -1128,10 +1128,9 @@ export default function Professional() {
               autosize={true}
               interval={'30'}
               hide_volume={true}
-              style={'1'}
+              style={'10'}
               withdateranges={true}
               save_image={false}
-              details={true}
             />
           </ChartContainer>
           <PositionTable

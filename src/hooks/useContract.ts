@@ -85,7 +85,7 @@ export function useContractMultiProvider<T extends Contract = Contract>(
   id = 0
 ): T | null {
   const { provider } = useWeb3React()
-  const { account, chainId, connectionIsSupported } = useNetworkState()
+  const { chainId } = useNetworkState()
   let _currentProvider: JsonRpcProvider | Web3Provider | undefined = provider
   if (id === 0) {
     _currentProvider = simpleRpcProvider(chainId)
@@ -101,12 +101,12 @@ export function useContractMultiProvider<T extends Contract = Contract>(
     else address = addressOrAddressMap[chainId]
     if (!address) return null
     try {
-      return getContract(address, ABI, _currentProvider, withSignerIfPossible && account ? account : undefined)
+      return getContract(address, ABI, _currentProvider, undefined)
     } catch (error) {
       console.error('Failed to get contract', error)
       return null
     }
-  }, [addressOrAddressMap, ABI, _currentProvider, chainId, withSignerIfPossible, account]) as T
+  }, [addressOrAddressMap, ABI, _currentProvider, chainId, withSignerIfPossible, id]) as T
 }
 
 
