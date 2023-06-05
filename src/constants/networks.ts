@@ -66,8 +66,8 @@ export const FALLBACK_URLS: { [chainId: number]: string[] } = {
   [SupportedChainId.POLYGON_ZK_EVM]: [
     // "Safe" URLs
     'https://zkevm-rpc.com',
-    'https://rpc.ankr.com/polygon_zkevm',
-    'https://rpc.polygon-zkevm.gateway.fm',
+    // 'https://rpc.ankr.com/polygon_zkevm',
+    // 'https://rpc.polygon-zkevm.gateway.fm',
   ],
   [SupportedChainId.POLYGON_MUMBAI]: [
     // "Safe" URLs

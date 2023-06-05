@@ -83,6 +83,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { addressesTokens } from "hooks/1delta/addressesTokens";
 import { calculateCompoundRiskChangeSlot, useGetCompoundRiskParametersSlot } from "hooks/riskParameters/useCompoundParameters";
 import { useAlgebraClientSideV3 } from "hooks/professional/algebra/useClientSideV3Trade";
+import { UniswapTrade } from "utils/Types";
 
 
 export const ArrowWrapper = styled.div<{ clickable: boolean; redesignFlag: boolean }>`
@@ -322,6 +323,13 @@ const assetToId = (asset: SupportedAssets, chainId: number, protocol: LendingPro
   }
 }
 
+let LAST_VALID_TRADE_IN: UniswapTrade | undefined;
+let LAST_VALID_TRADE_MT: UniswapTrade | undefined;
+
+let LAST_VALID_AMOUNT_IN: CurrencyAmount<Currency> | undefined;
+let LAST_VALID_AMOUNT_MT: CurrencyAmount<Currency> | undefined;
+let LAST_LEVERAGE = 0
+
 export default function Professional() {
   const redesignFlag = useRedesignFlag()
   const redesignFlagEnabled = redesignFlag === RedesignVariant.Enabled
@@ -512,9 +520,19 @@ export default function Professional() {
     depositCurrency,
   )
 
-  console.log("algebraTradeIn", algebraTradeIn)
+  const tradeIn = useMemo(() => {
 
-  const tradeIn = tradeInUni ?? algebraTradeIn
+    const currTrade = tradeInUni ?? algebraTradeIn
+    if (!currTrade) {
+      if (LAST_VALID_AMOUNT_IN && parsedAmountIn && LAST_VALID_AMOUNT_IN.toExact() === parsedAmountIn?.toExact())
+        return LAST_VALID_TRADE_IN
+      else return undefined
+    } else {
+      LAST_VALID_TRADE_IN = currTrade
+      LAST_VALID_AMOUNT_IN = parsedAmountIn
+      return currTrade
+    }
+  }, [tradeInUni, algebraTradeIn, parsedAmountIn])
 
   const tradeInState = depositMode === DepositMode.DIRECT ? TradeState.VALID : tradeStateIn
 
@@ -561,11 +579,31 @@ export default function Professional() {
     parsedAmount: parsedAmountAlgebra,
     inputError: swapInputErrorAlgebra,
   } = useDerivedSwapInfoMarginAlgebra(
-    debouncedBorrowAmount,
+    borrowAmount,
     collateralCurrency,
   )
 
-  const [trade, parsedAmount] = Boolean(tradeUni) ? [tradeUni, parsedAmountUni] : [tradeAlgebra, parsedAmountAlgebra]
+  const [parsedAmount, trade] = useMemo(() => {
+
+    const currTrade = tradeUni ?? tradeAlgebra
+    const isUni = Boolean(tradeUni)
+    const parsedAmount = isUni ? parsedAmountUni : parsedAmountAlgebra
+    if (!currTrade) {
+      if (LAST_LEVERAGE !== leverage) return [parsedAmount, undefined]
+      if (LAST_VALID_TRADE_MT && LAST_VALID_AMOUNT_IN && parsedAmount && LAST_VALID_AMOUNT_IN?.toFixed() === parsedAmountIn?.toFixed() && LAST_LEVERAGE === leverage)
+        return [parsedAmount, LAST_VALID_TRADE_MT]
+      else return [parsedAmount, undefined]
+    } else {
+      LAST_VALID_TRADE_MT = currTrade
+      LAST_LEVERAGE = leverage
+      LAST_VALID_AMOUNT_IN = parsedAmountIn
+      LAST_VALID_AMOUNT_MT = parsedAmount
+      return [parsedAmount, currTrade]
+    }
+  }, [tradeUni, tradeAlgebra, parsedAmountIn, leverage])
+
+
+  // const [trade, parsedAmount] = Boolean(tradeUni) ? [tradeUni, parsedAmountUni] : [tradeAlgebra, parsedAmountAlgebra]
 
   const riskParams = useGetCompoundRiskParametersSlot(chainId, oracleState.data[chainId].chainLink)
 

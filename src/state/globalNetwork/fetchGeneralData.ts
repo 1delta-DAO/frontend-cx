@@ -143,7 +143,7 @@ export const fetchBlockDataAndNativeBalance: AsyncThunk<TimestampAndBalanceRespo
           ]
 
           // multicall2 on zkEVM not yet found
-          const bn = await getSecondaryProvider(chainId).getBlockNumber()
+          const bn = await getSecondaryProvider(chainId).send('eth_blockNumber', [])
 
           let multicallResult: any;
           try {
@@ -153,7 +153,7 @@ export const fetchBlockDataAndNativeBalance: AsyncThunk<TimestampAndBalanceRespo
             return {
               timestamp: 0,
               nativeBalance: '0',
-              blockNumber: bn,
+              blockNumber: Number(bn.toString()),
               chainId
             }
           }
@@ -161,7 +161,7 @@ export const fetchBlockDataAndNativeBalance: AsyncThunk<TimestampAndBalanceRespo
           return {
             timestamp: multicallResult[0][0].toString(),
             nativeBalance: multicallResult[1].balance.toString(),
-            blockNumber: bn,
+            blockNumber: Number(bn.toString()),
             chainId
           }
 
@@ -200,7 +200,7 @@ export const fetchBlockDataAndNativeBalance: AsyncThunk<TimestampAndBalanceRespo
         ]
 
         // multicall2 on zkEVM not yet found
-        const bn = await getSecondaryProvider(chainId).getBlockNumber()
+        const bn = await getSecondaryProvider(chainId).send('eth_blockNumber', [])
 
         let multicallResult: any;
         try {
@@ -210,7 +210,7 @@ export const fetchBlockDataAndNativeBalance: AsyncThunk<TimestampAndBalanceRespo
           return {
             timestamp: 0,
             nativeBalance: '0',
-            blockNumber: bn,
+            blockNumber: Number(bn.toString()),
             chainId
           }
         }
@@ -218,7 +218,7 @@ export const fetchBlockDataAndNativeBalance: AsyncThunk<TimestampAndBalanceRespo
         return {
           timestamp: multicallResult[0][0].toString(),
           nativeBalance: '0',
-          blockNumber: bn,
+          blockNumber: Number(bn.toString()),
           chainId
         }
       }

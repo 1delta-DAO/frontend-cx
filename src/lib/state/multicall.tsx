@@ -21,7 +21,7 @@ function getBlocksPerFetchForChainId(chainId: number | undefined): number {
     case SupportedChainId.CELO_ALFAJORES:
       return 5
     case SupportedChainId.POLYGON_ZK_EVM:
-      return 30;
+      return 0.3;
     default:
       return 10
   }

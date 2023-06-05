@@ -32,3 +32,10 @@ export const getMulticallContractSecondaryProvider = (chainId: number) => {
   const multicallAddress = chainId === SupportedChainId.POLYGON_ZK_EVM ? ALGEBRA_INTERFACE_MULTICALL[chainId] : uniswapMulticallAddress[chainId]
   return getContract(chainId, MultiCallAbi, multicallAddress, getSecondaryProvider(chainId))
 }
+
+
+export const getMulticallContractTradeProvider = (chainId: number) => {
+  const multicallAddress = chainId === SupportedChainId.POLYGON_ZK_EVM ? ALGEBRA_INTERFACE_MULTICALL[chainId] : uniswapMulticallAddress[chainId]
+  return getContract(chainId, MultiCallAbi, multicallAddress, getSecondaryProvider(chainId))
+}
+

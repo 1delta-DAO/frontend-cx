@@ -122,7 +122,7 @@ export default function Polling() {
   useEffect(() => {
     // we also directly fetch the native balance if connected
     dispatch(fetchBlockDataAndNativeBalance({ chainId, account }))
-    setTimeout(() => setRepeater((prevState) => prevState + 1), 5000)
+    setTimeout(() => setRepeater((prevState) => prevState + 1), 500)
   }, [repeater, chainId, account])
 
   const blockNumber = useBlockNumber()
