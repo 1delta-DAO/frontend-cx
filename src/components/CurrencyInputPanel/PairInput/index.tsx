@@ -235,7 +235,7 @@ export default function PairInput({
       <SimpleRow>
         <PanelContainer>
           <div style={{ color, fontSize: '14px', marginLeft: '10px' }}>
-            Open{trade && `@`}
+            {simpleVersion ? isLong ? 'Long' : 'Short' : 'Open'}{trade && `@`}
           </div>
           {trade && pair && (
             <div onClick={() => setShowCollateral(!showCollateral)}>
@@ -255,11 +255,11 @@ export default function PairInput({
           selected={!onPairSelect}
           redesignFlag={redesignFlagEnabled}
         >
-          {trade && pair && <Image src={TOKEN_SVGS[showCollateral ? pair[0] : pair[1]]} onClick={() => setShowCollateral(!showCollateral)} />}
+          {trade && pair && !simpleVersion && <Image src={TOKEN_SVGS[(showCollateral ? pair[0] : pair[1])]} onClick={() => setShowCollateral(!showCollateral)} />}
           {!hideInput && (
             <StyledNumericalInput
               className="token-amount-input"
-              value={(showCollateral ? trade?.outputAmount.toFixed(4) : trade?.inputAmount.toFixed(4)) ?? '0.0'}
+              value={(simpleVersion ? (isLong ? trade?.outputAmount.toFixed(4) : trade?.inputAmount.toFixed(4)) : (showCollateral ? trade?.outputAmount.toFixed(4) : trade?.inputAmount.toFixed(4))) ?? '0.0'}
               onUserInput={onUserInput}
               disabled
               $loading={loading}
