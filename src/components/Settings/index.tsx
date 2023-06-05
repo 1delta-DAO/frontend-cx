@@ -51,7 +51,7 @@ const StyledMenuButton = styled.button<{ disabled: boolean }>`
   background-color: transparent;
   margin: 0;
   padding: 0;
-  border-radius: 0.5rem;
+  border-radius: 5px;
   height: 20px;
 
   ${({ disabled }) =>
@@ -88,7 +88,7 @@ const MenuFlyout = styled.span<{ redesignFlag: boolean }>`
   border: 1px solid ${({ theme, redesignFlag }) => (redesignFlag ? theme.backgroundOutline : theme.deprecated_bg3)};
   box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.01), 0px 4px 8px rgba(0, 0, 0, 0.04), 0px 16px 24px rgba(0, 0, 0, 0.04),
     0px 24px 32px rgba(0, 0, 0, 0.01);
-  border-radius: 12px;
+  border-radius: 5px;
   display: flex;
   flex-direction: column;
   font-size: 1rem;
@@ -190,13 +190,6 @@ export default function SettingsTab({ placeholderSlippage }: { placeholderSlippa
         aria-label={t`Transaction Settings`}
       >
         <StyledMenuIcon redesignFlag={redesignFlagEnabled} />
-        {expertMode ? (
-          <EmojiWrapper>
-            <span role="img" aria-label="wizard-icon">
-              🧙
-            </span>
-          </EmojiWrapper>
-        ) : null}
       </StyledMenuButton>
       {open && (
         <MenuFlyout redesignFlag={redesignFlagEnabled}>
@@ -205,53 +198,6 @@ export default function SettingsTab({ placeholderSlippage }: { placeholderSlippa
               <Trans>{redesignFlagEnabled ? 'Settings' : 'Transaction Settings'}</Trans>
             </Text>
             <TransactionSettings placeholderSlippage={placeholderSlippage} />
-            <Text fontWeight={600} fontSize={14}>
-              <Trans>Interface Settings</Trans>
-            </Text>
-            {isSupportedChainId(chainId) && (
-              <RowBetween>
-                <RowFixed>
-                  <ThemedText.DeprecatedBlack fontWeight={400} fontSize={14} color={theme.deprecated_text2}>
-                    <Trans>Auto Router API</Trans>
-                  </ThemedText.DeprecatedBlack>
-                  <QuestionHelper text={<Trans>Use the Uniswap Labs API to get faster quotes.</Trans>} />
-                </RowFixed>
-                <Toggle
-                  id="toggle-optimized-router-button"
-                  isActive={!clientSideRouter}
-                  toggle={() => {
-                    setClientSideRouter(!clientSideRouter)
-                  }}
-                />
-              </RowBetween>
-            )}
-            <RowBetween>
-              <RowFixed>
-                <ThemedText.DeprecatedBlack fontWeight={400} fontSize={14} color={theme.deprecated_text2}>
-                  <Trans>Expert Mode</Trans>
-                </ThemedText.DeprecatedBlack>
-                <QuestionHelper
-                  text={
-                    <Trans>Allow high price impact trades and skip the confirm screen. Use at your own risk.</Trans>
-                  }
-                />
-              </RowFixed>
-              <Toggle
-                id="toggle-expert-mode-button"
-                isActive={expertMode}
-                toggle={
-                  expertMode
-                    ? () => {
-                      toggleExpertMode()
-                      setShowConfirmation(false)
-                    }
-                    : () => {
-                      toggle()
-                      setShowConfirmation(true)
-                    }
-                }
-              />
-            </RowBetween>
           </AutoColumn>
         </MenuFlyout>
       )}

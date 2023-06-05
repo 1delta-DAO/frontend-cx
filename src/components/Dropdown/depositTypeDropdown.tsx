@@ -13,8 +13,7 @@ export enum DepositMode {
 const DropdownContainer = styled.div`
   position: relative;
   display: inline-block;
-  border-radius: 10px;
-  width: 180px;
+  width: 140px;
   z-index: 99999999;
 `;
 
@@ -38,12 +37,13 @@ const DropdownBg = styled.div`
 `;
 
 const DropdownButton = styled.button`
-  border: 2px solid ${({ theme }) => theme.deprecated_bg3};
+  border: 1px solid ${({ theme }) => theme.deprecated_bg3};;
   background: none;
   color: ${({ theme }) => theme.textSecondary};
-  height: 25px;
+  height: 20px;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 12px;
+  font-weight: 200;
   cursor: pointer;
 `;
 
@@ -53,7 +53,7 @@ const DropdownContent = styled.div<{ isOpen: boolean }>`
   position: absolute;
   min-width: 160px;
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-  z-index: ${Z_INDEX.modal}
+  z-index: ${Z_INDEX.modal};
   padding: 12px 16px;
   cursor: pointer;
 

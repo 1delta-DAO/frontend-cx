@@ -47,7 +47,7 @@ export const NewValWithArrow = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
-  align-itmens: center;
+  align-items: center;
 `
 
 

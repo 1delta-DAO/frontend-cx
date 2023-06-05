@@ -1,11 +1,11 @@
 import { Currency, CurrencyAmount, Percent, Token } from '@uniswap/sdk-core'
 import { loadingOpacityMixin } from 'components/Loader/styled'
-import { isSupportedChain } from 'constants/chains'
+import { isSupportedChain, SupportedChainId } from 'constants/chains'
 import { RedesignVariant, useRedesignFlag } from 'featureFlags/flags/redesign'
 import { darken } from 'polished'
 import { ReactNode, useState } from 'react'
 import styled, { useTheme } from 'styled-components/macro'
-import { ReactComponent as DropDown } from '../../../assets/images/dropdown.svg'
+import { ReactComponent as DropDown } from 'assets/images/dropdown.svg'
 import { Input as NumericalInput } from '../../NumericalInput'
 import { useChainIdAndAccount } from 'state/globalNetwork/hooks'
 import { SupportedAssets } from 'types/1delta'
@@ -13,100 +13,32 @@ import { PairSearchDropdown, SingleSearchDropdown } from 'components/Dropdown/dr
 import { ButtonGray } from 'components/Button'
 import { UniswapTrade } from 'utils/Types'
 import { TOKEN_SVGS } from 'constants/1delta'
-
-const InputPanel = styled.div<{ hideInput?: boolean; redesignFlag: boolean }>`
-  ${({ theme }) => theme.flexColumnNoWrap}
-  position: relative;
-  border-radius: 10px;
-  background-color: ${({ theme, redesignFlag, hideInput }) =>
-    redesignFlag
-      ? 'transparent'
-      : hideInput
-        ? 'transparent'
-        : theme.darkMode
-          ? theme.deprecated_bg2
-          : theme.deprecated_bg6};
-  border: 1px solid;
-  border-color: ${({ theme }) => theme.backgroundInteractive};
-  width: 100%;
-  transition: height 1s ease;
-  will-change: height;
-  padding: 1px;
-`
-
-
-const Container = styled.div<{ hideInput: boolean; disabled: boolean; redesignFlag: boolean }>`
-  min-height: ${({ redesignFlag }) => redesignFlag && '69px'};
-  border-radius: 10px;
-  border-top-right-radius: 1px;
-  border-top-left-radius: 1px;
-  border: 1px solid ${({ theme, redesignFlag }) => (redesignFlag ? 'transparent' : theme.deprecated_bg0)};
-  background-color: ${({ theme, redesignFlag }) => (redesignFlag ? 'transparent' : theme.deprecated_bg1)};
-  width: ${({ hideInput }) => (hideInput ? '100%' : 'initial')};
-  ${({ theme, hideInput, disabled, redesignFlag }) =>
-    !redesignFlag &&
-    !disabled &&
-    `
-    :focus,
-    :hover {
-      border: 1px solid ${hideInput ? ' transparent' : theme.deprecated_bg3};
-    }
-  `}
-`
-
-const InputRow = styled.div<{ selected: boolean; redesignFlag: boolean }>`
-  ${({ theme }) => theme.flexRowNoWrap}
-  align-items: center;
-  justify-content: space-between;
-  padding: ${({ selected, redesignFlag }) =>
-    redesignFlag ? '0px' : selected ? ' 0.1rem 0.1rem 0.3rem 0.1rem' : '0.1rem 0.1rem 0.1rem 0.5rem'};
-`
-
-const LabelRow = styled.div<{ redesignFlag: boolean }>`
-  ${({ theme }) => theme.flexRowNoWrap}
-  align-items: center;
-  color: ${({ theme, redesignFlag }) => (redesignFlag ? theme.textSecondary : theme.deprecated_text1)};
-  font-size: 0.75rem;
-  line-height: 1rem;
-  padding-bottom: 5px;
-  padding-top: 5px;
-  padding-right: 5px;
-
-  span:hover {
-    cursor: pointer;
-    color: ${({ theme }) => darken(0.2, theme.deprecated_text2)};
-  }
-`
+import { InputPanel, InputPanelContainer, InputRow } from '../GeneralInputPanel/GeneralCurrencyInputPanel'
+import { usePrices } from 'state/oracles/hooks'
+import { formatUSDValuePanel } from 'utils/tableUtils/format'
 
 const PairSelect = styled(ButtonGray) <{
   visible: boolean
   selected: boolean
   hideInput?: boolean
   disabled?: boolean
-  redesignFlag: boolean
   wideMode: boolean
 }>`
   align-items: center;
-  background-color: ${({ selected, theme, redesignFlag }) =>
-    redesignFlag
-      ? selected
-        ? theme.stateOverlayPressed
-        : theme.accentAction
-      : selected
-        ? theme.deprecated_bg2
-        : theme.deprecated_primary1};
+  background-color: #1B2127;
   opacity: ${({ disabled }) => (!disabled ? 1 : 0.4)};
   box-shadow: ${({ selected }) => (selected ? 'none' : '0px 6px 10px rgba(0, 0, 0, 0.075)')};
   color: ${({ selected, theme }) => (selected ? theme.deprecated_text1 : theme.deprecated_white)};
   cursor: pointer;
-  height: ${({ hideInput, redesignFlag }) => (redesignFlag ? 'unset' : hideInput ? '2.8rem' : '2.4rem')};
+  height: ${({ hideInput }) => hideInput ? '2.8rem' : '2.4rem'};
   border-radius: 10px;
+  border-top-right-radius: 0px;
   outline: none;
   user-select: none;
   border: none;
   font-size: 24px;
   font-weight: 400;
-  width: ${({ wideMode }) => (wideMode ? '160px' : '100%')};
+  width: ${({ wideMode }) => (wideMode ? '160px' : '100px')};
   ${({ wideMode }) => wideMode ? '' : 'max-width: 110px;'}
   padding: ${({ selected }) => selected ? '4px 8px 4px 4px' : '6px 6px 6px 8px'};
   justify-content: space-between;
@@ -117,23 +49,19 @@ const PairSelect = styled(ButtonGray) <{
   }
 
   &:active {
-    background-color: ${({ selected, theme, redesignFlag }) =>
-    redesignFlag
-      ? theme.stateOverlayPressed
-      : selected
-        ? darken(0.05, theme.deprecated_primary1)
-        : theme.deprecated_bg3};
+    background-color: ${({ selected, theme }) =>
+    selected
+      ? darken(0.05, theme.deprecated_primary1)
+      : theme.deprecated_bg3};
   }
 
   visibility: ${({ visible }) => (visible ? 'visible' : 'hidden')};
 `
 
-const StyledNumericalInput = styled(NumericalInput) <{ $loading: boolean; redesignFlag: boolean }>`
+const StyledNumericalInput = styled(NumericalInput) <{ $loading: boolean; }>`
   ${loadingOpacityMixin};
   text-align: left;
-  font-size: ${({ redesignFlag }) => redesignFlag && '36px'};
-  line-height: ${({ redesignFlag }) => redesignFlag && '44px'};
-  font-variant: ${({ redesignFlag }) => redesignFlag && 'small-caps'};
+  font-size: 24px;
 `
 
 const SimpleRow = styled.div`
@@ -144,7 +72,7 @@ const SimpleRow = styled.div`
   align-items: center;
 `
 
-const StyledDropDown = styled(DropDown) <{ selected: boolean; redesignFlag: boolean }>`
+const StyledDropDown = styled.img <{ selected: boolean; }>`
   margin: 0 0.0rem 0 0.0rem;
   height: 35%;
 
@@ -214,38 +142,41 @@ export default function PairInput({
   ...rest
 }: PairInputProps) {
 
-  const { account, chainId } = useChainIdAndAccount()
-  const redesignFlag = useRedesignFlag()
-  const redesignFlagEnabled = redesignFlag === RedesignVariant.Enabled
-  const theme = useTheme()
+  const { chainId } = useChainIdAndAccount()
+
   const chainAllowed = isSupportedChain(chainId)
   const [showCollateral, setShowCollateral] = useState(true)
-  const color = 'green'
-
+  const color = '#7C8792'
+  const price = usePrices(trade ? [trade.outputAmount.currency.symbol as SupportedAssets] : [], SupportedChainId.POLYGON)
   return (
-    <InputPanel id={id} hideInput={hideInput} {...rest} redesignFlag={redesignFlagEnabled}>
+    <InputPanel id={id} hideInput={hideInput} {...rest}>
       <SimpleRow>
         <PanelContainer>
-          <div style={{ color, fontSize: '14px', marginLeft: '10px' }}>
-            {simpleVersion ? isLong ? 'Long' : 'Short' : 'Open'}{trade && `@`}
-          </div>
-          {trade && pair && (
-            <div onClick={() => setShowCollateral(!showCollateral)}>
-              {!showCollateral ? <CurrencyValueBox style={{ color }}>
-                {trade.executionPrice.toFixed(6)} {pair[0]}/{pair[1]}
-              </CurrencyValueBox>
-                : <CurrencyValueBox style={{ color }}>
-                  {trade.executionPrice.invert().toFixed(6)} {pair[1]}/{pair[0]}
-                </CurrencyValueBox>}
-            </div>)
+          {simpleVersion && <div style={{ color, fontSize: '14px', marginLeft: '10px' }}>
+            {isLong ? 'Long' : 'Short'}{trade && price[0] && ` : ${formatUSDValuePanel(price[0] * Number(trade.outputAmount.toExact()))}`}
+          </div>}
+          {!simpleVersion && trade && pair && (
+            <>
+              <div style={{ color, fontSize: '14px', marginLeft: '10px' }}>
+                Open{trade && `@`}
+              </div>
+              <div onClick={() => setShowCollateral(!showCollateral)}>
+                {!showCollateral ? <CurrencyValueBox style={{ color }}>
+                  {trade.executionPrice.toFixed(6)} {pair[0]}/{pair[1]}
+                </CurrencyValueBox>
+                  : <CurrencyValueBox style={{ color }}>
+                    {trade.executionPrice.invert().toFixed(6)} {pair[1]}/{pair[0]}
+                  </CurrencyValueBox>}
+              </div>
+            </>
+          )
           } </PanelContainer>
         {topRightLabel && topRightLabel}
       </SimpleRow>
-      <Container hideInput={hideInput} disabled={!chainAllowed} redesignFlag={redesignFlagEnabled}>
+      <InputPanelContainer hideInput={hideInput} disabled={!chainAllowed}>
         <InputRow
-          style={hideInput ? { padding: '0', borderRadius: '8px' } : {}}
+          style={hideInput ? { padding: '0', borderRadius: '8px' } : { paddingLeft: '10px' }}
           selected={!onPairSelect}
-          redesignFlag={redesignFlagEnabled}
         >
           {trade && pair && !simpleVersion && <Image src={TOKEN_SVGS[(showCollateral ? pair[0] : pair[1])]} onClick={() => setShowCollateral(!showCollateral)} />}
           {!hideInput && (
@@ -255,8 +186,7 @@ export default function PairInput({
               onUserInput={onUserInput}
               disabled
               $loading={loading}
-              redesignFlag={redesignFlagEnabled}
-              style={{ marginRight: '5px' }}
+              style={{ marginRight: '5px', color: '#4D5966', fontWeight: 'bold' }}
             />
           )}
           <PairSelect
@@ -265,15 +195,14 @@ export default function PairInput({
             visible
             selected
             hideInput={hideInput}
-            redesignFlag={redesignFlagEnabled}
             className="open-pair-select-button"
           >
             {simpleVersion ? <SingleSearchDropdown selectedOption={pair} options={pairList} onSelect={onPairSelect} placeholder={placeholder} isLong={isLong} />
               : <PairSearchDropdown selectedOption={pair} options={pairList} onSelect={onPairSelect} placeholder={placeholder} />}
-            <StyledDropDown selected redesignFlag={redesignFlagEnabled} />
+            <DropDown />
           </PairSelect>
         </InputRow>
-      </Container>
+      </InputPanelContainer>
     </InputPanel >
   )
 }

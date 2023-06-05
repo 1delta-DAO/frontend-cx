@@ -18,7 +18,7 @@ import {
 } from 'utils/tableUtils/filters'
 import { PreparedAssetData } from 'hooks/asset/useAssetData'
 import PositionRow from './PositionRow'
-import { AssetHeaderPro, BorrowAprHeaderPro, PositionHeaderPro, TableContainerPro, TableHeaderPro, TableHeaderRowPro } from 'components/Styles/tableStylesProfessional'
+import { AssetHeaderPro, TimeHeaderPro, TableContainerPro, TableHeaderPro, TableHeaderRowPro, PnLHeaderPro, PriceHeaderPro } from 'components/Styles/tableStylesProfessional'
 import { AaveInterestMode, SupportedAssets } from 'types/1delta'
 
 const Table = styled.table`
@@ -121,35 +121,59 @@ export default function PositionTable({
           <TableHeaderRowPro>
             <AssetHeaderPro hasFilter={false}>
               <StyledText>
-                Asset
+                Symbol
               </StyledText>
             </AssetHeaderPro>
-            <PositionHeaderPro hasFilter onClick={handleUserBorrowFilter}>
+            <PnLHeaderPro hasFilter onClick={handleUserBorrowFilter}>
               <SimpleRow>
-                Position
+                PnL
                 {filterStateChevrons.filter === FilterActive.USER && (
                   <ChevronContainer>
                     {filterStateChevrons.mode === Filter.DESC ? <ChevronDown /> : <ChevronUp />}
                   </ChevronContainer>
                 )}
               </SimpleRow>
-            </PositionHeaderPro>
-            <PositionHeaderPro hasFilter onClick={handleUserBorrowFilter}>
+            </PnLHeaderPro>
+            <PriceHeaderPro hasFilter onClick={handleUserBorrowFilter}>
               <SimpleRow>
-                Position($)
+                Entry
                 {filterStateChevrons.filter === FilterActive.USER && (
                   <ChevronContainer>
                     {filterStateChevrons.mode === Filter.DESC ? <ChevronDown /> : <ChevronUp />}
                   </ChevronContainer>
                 )}
               </SimpleRow>
-            </PositionHeaderPro>
+            </PriceHeaderPro>
+            <PriceHeaderPro hasFilter onClick={handleUserBorrowFilter}>
+              <SimpleRow>
+                Market
+                {filterStateChevrons.filter === FilterActive.USER && (
+                  <ChevronContainer>
+                    {filterStateChevrons.mode === Filter.DESC ? <ChevronDown /> : <ChevronUp />}
+                  </ChevronContainer>
+                )}
+              </SimpleRow>
+            </PriceHeaderPro>
+            <PriceHeaderPro hasFilter onClick={handleUserBorrowFilter}>
+              <SimpleRow>
+                Liq. Price
+                {filterStateChevrons.filter === FilterActive.USER && (
+                  <ChevronContainer>
+                    {filterStateChevrons.mode === Filter.DESC ? <ChevronDown /> : <ChevronUp />}
+                  </ChevronContainer>
+                )}
+              </SimpleRow>
+            </PriceHeaderPro>
             <HeaderYieldItem
               filterStateChevrons={filterStateChevrons}
               protocol={lendingProtocol}
               handleAprFilter={handleAprFilter}
               handleStableAprFilter={handleStableAprFilter}
             />
+            <TimeHeaderPro hasFilter={false}>
+              Time
+            </TimeHeaderPro>
+
           </TableHeaderRowPro>
         </TableHeaderPro>
         <TableBody>
@@ -198,9 +222,9 @@ const ImageVariable = styled(BarChart2)`
 const HeaderYieldItem = ({ filterStateChevrons, protocol, handleAprFilter, handleStableAprFilter }: YieldHeaderProps) => {
   const isAave = protocol === LendingProtocol.AAVE
   return (
-    <BorrowAprHeaderPro hasFilter onClick={isAave ? () => null : handleAprFilter}>
+    <TimeHeaderPro hasFilter onClick={isAave ? () => null : handleAprFilter}>
       <SimpleRow>
-        Apr
+        Rewards
         {isAave && <>{' '}
           <ImageVariable onClick={handleAprFilter}
             style={{
@@ -219,6 +243,6 @@ const HeaderYieldItem = ({ filterStateChevrons, protocol, handleAprFilter, handl
           </ChevronContainer>
         )}
       </SimpleRow>
-    </BorrowAprHeaderPro>
+    </TimeHeaderPro>
   )
 }

@@ -2,12 +2,10 @@ import { Trans } from '@lingui/macro'
 import useScrollPosition from '@react-hook/window-scroll'
 import { useWeb3React } from '@web3-react/core'
 import { useGetNativeBalance } from 'lib/hooks/useCurrencyBalance'
-import { Moon, Sun } from 'react-feather'
 import { Text } from 'rebass'
 import { useDarkModeManager } from 'state/user/hooks'
 import styled from 'styled-components/macro'
-import { ReactComponent as LogoDark } from '../../assets/svg/logo_dark.svg'
-import { ReactComponent as LogoLight } from '../../assets/svg/logo_light.svg'
+import { ReactComponent as LogoDark } from '../../assets/svg/ovix-logo.svg'
 import Web3Status from '../Web3Status'
 import NetworkSelector from './NetworkSelector'
 
@@ -68,36 +66,13 @@ const AccountElement = styled.div<{ active: boolean }>`
   flex-direction: row;
   align-items: center;
   background-color: ${({ theme, active }) => (!active ? theme.deprecated_bg0 : theme.deprecated_bg0)};
-  border-radius: 16px;
+  border-radius: 5px;
   white-space: nowrap;
   width: 100%;
   height: 40px;
 
   :focus {
     border: 1px solid blue;
-  }
-`
-
-const UNIAmount = styled(AccountElement)`
-  color: white;
-  padding: 4px 8px;
-  height: 36px;
-  font-weight: 500;
-  background-color: ${({ theme }) => theme.deprecated_bg3};
-  background: radial-gradient(174.47% 188.91% at 1.84% 0%, #ff007a 0%, #2172e5 100%), #edeef2;
-`
-
-const UNIWrapper = styled.span`
-  width: fit-content;
-  position: relative;
-  cursor: pointer;
-
-  :hover {
-    opacity: 0.8;
-  }
-
-  :active {
-    opacity: 0.9;
   }
 `
 
@@ -121,68 +96,24 @@ const Title = styled.a`
   }
 `
 
-const UniIcon = styled.div`
-  position: relative;
-`
-
-const ToggleMenuItem = styled.button`
-  background-color: transparent;
-  margin: 0;
-  padding: 0;
-  border: none;
-  display: flex;
-  flex: 1;
-  flex-direction: row;
-  align-items: center;
-  padding: 0.5rem 0.5rem;
-  justify-content: space-between;
-  font-size: 1rem;
-  font-weight: 500;
-  color: ${({ theme }) => theme.deprecated_text2};
-  :hover {
-    color: ${({ theme }) => theme.deprecated_text1};
-    cursor: pointer;
-    text-decoration: none;
-  }
-`
-
 const StyledIconAbs = styled.div`
   position: absolute;
   display: flex;
   justify-content: center;
-  ${({ theme }) =>
-    theme.darkMode
-      ? `filter: drop-shadow(-0.1px -0.1px 2px rgba(255, 255, 255, 0.3)) 
-  drop-shadow(0.1px -0.1px 2px rgba(255, 255, 255, 0.3)) 
-  drop-shadow(0.1px 0.1px 2px rgba(255, 255, 255, 0.3))
-  drop-shadow(-0.1px 0.1px 2px rgba(255, 255, 255, 0.3));`
-      : `filter: drop-shadow(-0.1px -0.1px 2px rgba(0, 0, 0, 0.1)) 
-  drop-shadow(0.1px -0.1px 2px rgba(0, 0, 0, 0.1)) 
-  drop-shadow(0.1px 0.1px 2px rgba(0, 0, 0, 0.1))
-  drop-shadow(-0.1px 0.1px 2px rgba(0, 0, 0, 0.1));`}
   align-items: center;
 `
 
 // can't be customized under react-router-dom v6
 // so we have to persist to the default one, i.e., .active
 export default function Header() {
-  const { account, chainId } = useWeb3React()
+  const { account } = useWeb3React()
   const userEthBalance = useGetNativeBalance()
 
-  const scrollY = useScrollPosition()
-
-  const [darkMode, toggleDarkMode] = useDarkModeManager()
-
-  // work around https://github.com/remix-run/react-router/issues/8161
-  // as we can't pass function `({isActive}) => ''` to className with styled-components
-
-  const Logo = darkMode ? LogoDark : LogoLight
-
   return (
-    <HeaderFrame showBackground={scrollY > 45}>
+    <HeaderFrame showBackground>
       <Title href=".">
         <StyledIconAbs>
-          <Logo width="42px" height="100%" title="logo" />
+          <LogoDark width="120px" height="100%" title="logo" />
         </StyledIconAbs>
       </Title>
       <HeaderControls>
@@ -200,11 +131,6 @@ export default function Header() {
             ) : null}
             <Web3Status />
           </AccountElement>
-        </HeaderElement>
-        <HeaderElement>
-          <ToggleMenuItem onClick={() => toggleDarkMode()}>
-            {darkMode ? <Moon opacity={0.6} size={16} /> : <Sun opacity={0.6} size={16} />}
-          </ToggleMenuItem>
         </HeaderElement>
       </HeaderControls>
     </HeaderFrame>

@@ -1,10 +1,10 @@
 import { Box } from 'rebass/styled-components'
 import styled from 'styled-components/macro'
 
-const Card = styled(Box)<{ width?: string; padding?: string; border?: string; $borderRadius?: string }>`
+const Card = styled(Box) <{ width?: string; padding?: string; border?: string; $borderRadius?: string }>`
   width: ${({ width }) => width ?? '100%'};
   padding: ${({ padding }) => padding ?? '1rem'};
-  border-radius: ${({ $borderRadius }) => $borderRadius ?? '16px'};
+  border-radius: ${({ $borderRadius }) => $borderRadius ?? '5px'};
   border: ${({ border }) => border};
 `
 export default Card

@@ -11,6 +11,7 @@ import {
   SupportedAssets,
   MarginTradeType
 } from "types/1delta";
+import { ReactComponent as DropDown } from 'assets/images/dropdown.svg'
 import { getSupportedAssets, ETHEREUM_CHAINS, POLYGON_CHAINS } from "constants/1delta";
 import { useNetworkState } from "state/globalNetwork/hooks";
 import { LendingProtocol } from "state/1delta/actions";
@@ -37,7 +38,7 @@ import { TradeState } from 'state/routing/types'
 import AddressInputPanel from '../../components/AddressInputPanel'
 import { ButtonConfirmed, ButtonLight, ButtonPrimary } from '../../components/Button'
 import { GreyCard } from '../../components/Card'
-import { AutoRow } from '../../components/Row'
+import { AutoRow, RowFixed } from '../../components/Row'
 import confirmPriceImpactWithoutFee from '../../components/swap/confirmPriceImpactWithoutFee'
 import ConfirmSwapModal from '../../components/swap/ConfirmMarginTradeModal'
 import { SwapCallbackError } from '../../components/swap/styleds'
@@ -84,6 +85,7 @@ import { addressesTokens } from "hooks/1delta/addressesTokens";
 import { calculateCompoundRiskChangeSlot, useGetCompoundRiskParametersSlot } from "hooks/riskParameters/useCompoundParameters";
 import { useAlgebraClientSideV3 } from "hooks/professional/algebra/useClientSideV3Trade";
 import { UniswapTrade } from "utils/Types";
+import SettingsTab from "components/Settings";
 
 
 export const ArrowWrapper = styled.div<{ clickable: boolean; redesignFlag: boolean }>`
@@ -229,7 +231,6 @@ const ChartContainer = styled.div`
   width: 100%;
   box-sizing:border-box;
   -moz-box-sizing: border-box; 
-  background-color: ${({ theme }) => darken(0.01, theme.deprecated_primary5)}; 
   ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
   min-height: 400px;
 `};
@@ -265,6 +266,7 @@ const SliderValue = styled.div`
   color: ${({ theme }) => (theme.textSecondary)};
   background-color: ${({ theme }) => theme.deprecated_bg1};
   border-radius: 2px;
+  margin-left: 10px;
   padding: 2px;
 `
 
@@ -303,7 +305,6 @@ enum Mode {
   LONG = 'Long',
   SHORT = 'Short',
   EXPERT = 'Expert',
-
 }
 
 const assetToId = (asset: SupportedAssets, chainId: number, protocol: LendingProtocol) => {
@@ -953,16 +954,17 @@ export default function Professional() {
             </TypeButton>
           </ButtonRow>
           <InputPanelContainer>
+            <RowFixed style={{ width: '100%' }}>
+              <PanelLabel
+                options={availableDepoModes}
+                selectedOption={depositMode}
+                onSelect={setDepositMode}
+              />
+              <SettingsTab placeholderSlippage={allowedSlippage} />
+            </RowFixed>
             <InputWrapper redesignFlag={redesignFlagEnabled}>
               <GeneralCurrencyInputPanel
                 onCurrencySelect={handleCcyInputSelect}
-                topLabel={<PanelLabel
-                  color='green'
-                  text='Pay'
-                  options={availableDepoModes}
-                  selectedOption={depositMode}
-                  onSelect={setDepositMode} />
-                }
                 value={typedValue}
                 showMaxButton={showMaxButton}
                 currency={selectedCurrency}
@@ -1026,9 +1028,9 @@ export default function Professional() {
             </SliderValue>
             <DecimalSlider min={1.2} max={5} step={0.1} markers={[0, 1, 2, 3, 4, 5]} onChange={setLeverage} value={leverage} />
           </SliderContainer>
-          <div style={{ marginTop: '10px', zIndex: 0 }}>
+          <div style={{ marginTop: '10px', zIndex: 0, width: '80%' }}>
             {!account ? (
-              <ButtonLight onClick={toggleWalletModal} redesignFlag={redesignFlagEnabled}>
+              <ButtonLight onClick={toggleWalletModal} style={{ height: '40px' }}>
                 <Trans>Connect Wallet</Trans>
               </ButtonLight>
             ) : routeNotFound && userHasSpecifiedInputOutput && !routeIsLoading && !routeIsSyncing ? (
@@ -1150,12 +1152,15 @@ export default function Professional() {
         </SwapPanel>
         <CartAndTableContainer >
           <CurrencySelectionRow>
-            <PairSearchDropdown
-              selectedOption={chartPair}
-              options={pairs}
-              onSelect={setChartPair}
-              placeholder={String(chartPair)}
-            />
+            <PairSelectContainer>
+              <PairSearchDropdown
+                selectedOption={chartPair}
+                options={pairs}
+                onSelect={setChartPair}
+                placeholder={String(chartPair)}
+              />
+              <StyledDropDown />
+            </PairSelectContainer>
           </CurrencySelectionRow>
 
           <ChartContainer>
@@ -1169,6 +1174,7 @@ export default function Professional() {
               style={'10'}
               withdateranges={true}
               save_image={false}
+              bnackgroundColor={'#8169B0'}
             />
           </ChartContainer>
           <PositionTable
@@ -1182,32 +1188,40 @@ export default function Professional() {
   )
 }
 
-
-interface LabelProps {
-  color: string;
-  text: string;
-}
-
-interface TopLabelProps extends LabelProps {
+interface TopLabelProps {
   selectedOption: DepositMode
   options: DepositMode[]
   onSelect: (opt: DepositMode) => void
 }
 
 
-const PanelLabel = ({ color, text, selectedOption, onSelect, options }: TopLabelProps) => {
+const PanelLabel = ({ selectedOption, onSelect, options }: TopLabelProps) => {
   return <PanelContainer>
-    <div style={{ color, fontSize: '14px', marginLeft: '10px' }}>
-      {text}
-    </div>
     <DepositTypeDropdown selectedOption={selectedOption} onSelect={onSelect} options={options}></DepositTypeDropdown>
   </PanelContainer>
 }
 
 const PanelContainer = styled.div`
   width: 100%;
+  margin: 5px;
   display: flex;
   flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+`
+const StyledDropDown = styled(DropDown)`
+  margin-right: 5px;;
+  height: 35%;
+`
+
+const PairSelectContainer = styled.div`
+  width: 180px;
+  padding: 3px;
+  margin: 5px;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: row;
+  background: ${({ theme }) => theme.deprecated_bg2};
   align-items: center;
   justify-content: space-between;
 `

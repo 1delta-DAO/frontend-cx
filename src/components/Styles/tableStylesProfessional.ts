@@ -1,20 +1,20 @@
 import styled from 'styled-components/macro'
 import {
-  PROFESSIONAL_APR_CELL_WIDTH,
+  PROFESSIONAL_APR_CELL_WIDTH as PROFESSIONAL_REWARDS_CELL_WIDTH,
   PROFESSIONAL_ASSET_CELL_WIDTH,
-  PROFESSIONAL_BORROW_APR_CELL_WIDTH,
-  PROFESSIONAL_BORROW_CELL_WIDTH,
-  PROFESSIONAL_COLLATERAL_SWITCH_CELL_WIDTH,
+  PROFESSIONAL_BORROW_APR_CELL_WIDTH as PROFESSIONAL_TIME_CELL_WIDTH,
+  PROFESSIONAL_BORROW_CELL_WIDTH as PROFESSIONAL_PRICE_CELL_WIDTH,
+  PROFESSIONAL_COLLATERAL_SWITCH_CELL_WIDTH as PROFESSIONAL_PNL_CELL_WIDTH,
   PROFESSIONAL_POSITION_CELL_WIDTH,
   PROFESSIONAL_LIQUIDITY_CELL_WIDTH,
   PROFESSIONAL_SELECT_CELL_WIDTH,
   PROFESSIONAL_TOTAL_CELL_WIDTH,
   PROFESSIONAL_WALLET_CELL_WIDTH,
-  PROFESSIONAL_APR_CELL_WIDTH_MOBILE,
+  PROFESSIONAL_APR_CELL_WIDTH_MOBILE as PROFESSIONAL_REWARDS_CELL_WIDTH_MOBILE,
   PROFESSIONAL_ASSET_CELL_WIDTH_MOBILE,
-  PROFESSIONAL_BORROW_APR_CELL_WIDTH_MOBILE,
-  PROFESSIONAL_BORROW_CELL_WIDTH_MOBILE,
-  PROFESSIONAL_COLLATERAL_SWITCH_CELL_WIDTH_MOBILE,
+  PROFESSIONAL_BORROW_APR_CELL_WIDTH_MOBILE as PROFESSIONAL_TIME_CELL_WIDTH_MOBILE,
+  PROFESSIONAL_BORROW_CELL_WIDTH_MOBILE as PROFESSIONAL_PRICE_CELL_WIDTH_MOBILE,
+  PROFESSIONAL_COLLATERAL_SWITCH_CELL_WIDTH_MOBILE as PROFESSIONAL_PNL_CELL_WIDTH_MOBILE,
   PROFESSIONAL_POSITION_CELL_WIDTH_MOBILE,
   PROFESSIONAL_LIQUIDITY_CELL_WIDTH_MOBILE,
   PROFESSIONAL_SELECT_CELL_WIDTH_MOBILE,
@@ -133,47 +133,47 @@ export const PositionCellWithChangePro = styled(CellPro)`
 
 
 export const AprCellPro = styled(CellPro)`
-  width: ${PROFESSIONAL_APR_CELL_WIDTH};
+  width: ${PROFESSIONAL_REWARDS_CELL_WIDTH};
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 5px;
   font-size: 14px;
   ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
-  width: ${PROFESSIONAL_APR_CELL_WIDTH_MOBILE};
+  width: ${PROFESSIONAL_REWARDS_CELL_WIDTH_MOBILE};
   `};
 `
 
 
 export const CollateralSwitchCellPro = styled(CellPro)`
-  width: ${PROFESSIONAL_COLLATERAL_SWITCH_CELL_WIDTH};
+  width: ${PROFESSIONAL_PNL_CELL_WIDTH};
   display: flex;
   align-items: center;
   justify-content: center;
   ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
-  width: ${PROFESSIONAL_COLLATERAL_SWITCH_CELL_WIDTH_MOBILE};
+  width: ${PROFESSIONAL_PNL_CELL_WIDTH_MOBILE};
   `};
 `
 
 // debt
 
 export const BorrowAprCellPro = styled(CellPro)`
-  width: ${PROFESSIONAL_BORROW_APR_CELL_WIDTH};
+  width: ${PROFESSIONAL_TIME_CELL_WIDTH};
   display: flex;
   align-items: center;
   justify-content: center;
   ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
-  width: ${PROFESSIONAL_BORROW_APR_CELL_WIDTH_MOBILE};
+  width: ${PROFESSIONAL_TIME_CELL_WIDTH_MOBILE};
   `};
 `
 
 export const BorrowCellPro = styled(CellPro)`
-  width: ${PROFESSIONAL_BORROW_CELL_WIDTH};
+  width: ${PROFESSIONAL_PRICE_CELL_WIDTH};
   display: flex;
   align-items: center;
   justify-content: center;
   ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
-  width: ${PROFESSIONAL_BORROW_CELL_WIDTH_MOBILE};
+  width: ${PROFESSIONAL_PRICE_CELL_WIDTH_MOBILE};
   `};
 `
 
@@ -188,9 +188,9 @@ export const WalletCellPro = styled(CellPro)`
 `
 
 export const LargeAprCellPro = styled(CellPro)`
-  width: ${PROFESSIONAL_BORROW_APR_CELL_WIDTH};
+  width: ${PROFESSIONAL_TIME_CELL_WIDTH};
   ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
-  width: ${PROFESSIONAL_BORROW_APR_CELL_WIDTH_MOBILE};
+  width: ${PROFESSIONAL_TIME_CELL_WIDTH_MOBILE};
   `};
 `
 
@@ -428,45 +428,12 @@ export const AssetHeaderPro = styled(TableHeaderItem)`
   `};
 `
 
-// collateral 
-
-export const AprHeaderPro = styled(TableHeaderItem)`
-  width: ${PROFESSIONAL_APR_CELL_WIDTH};
+export const RewardsHeaderPro = styled(TableHeaderItem)`
+  width: ${PROFESSIONAL_REWARDS_CELL_WIDTH};
     ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
-  width: ${PROFESSIONAL_APR_CELL_WIDTH_MOBILE};
+  width: ${PROFESSIONAL_REWARDS_CELL_WIDTH_MOBILE};
   `};
 `
-
-export const TotalsHeaderPro = styled(TableHeaderItem)`
-  width: ${PROFESSIONAL_TOTAL_CELL_WIDTH};
-    ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
-  width: ${PROFESSIONAL_TOTAL_CELL_WIDTH_MOBILE};
-  `};
-`
-
-export const PositionHeaderPro = styled(TableHeaderItem)`
-  width: ${PROFESSIONAL_POSITION_CELL_WIDTH};
-    ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
-  width: ${PROFESSIONAL_POSITION_CELL_WIDTH_MOBILE};
-  `};
-`
-
-export const WalletHeaderPro = styled(TableHeaderItem)`
-  width: ${PROFESSIONAL_WALLET_CELL_WIDTH};
-    ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
-  width: ${PROFESSIONAL_WALLET_CELL_WIDTH_MOBILE};
-  `};
-`
-
-export const CollateralSwitchHeaderPro = styled(TableHeaderItem)`
-  width: ${PROFESSIONAL_COLLATERAL_SWITCH_CELL_WIDTH};
-    ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
-  width: ${PROFESSIONAL_COLLATERAL_SWITCH_CELL_WIDTH_MOBILE};
-  `};
-`
-
-
-// debt
 
 export const LiquidityHeaderPro = styled(TableHeaderItem)`
   width: ${PROFESSIONAL_LIQUIDITY_CELL_WIDTH};
@@ -475,19 +442,26 @@ export const LiquidityHeaderPro = styled(TableHeaderItem)`
   `};
 `
 
-export const BorrowAprHeaderPro = styled(TableHeaderItem)`
-  width: ${PROFESSIONAL_BORROW_APR_CELL_WIDTH};
+export const TimeHeaderPro = styled(TableHeaderItem)`
+  width: ${PROFESSIONAL_TIME_CELL_WIDTH};
   display: flex;
   align-items: center;
   justify-content: center;
   ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
-  width: ${PROFESSIONAL_BORROW_APR_CELL_WIDTH_MOBILE};
+  width: ${PROFESSIONAL_TIME_CELL_WIDTH_MOBILE};
   `};
 `
 
-export const DebtHeaderPro = styled(TableHeaderItem)`
-  width: ${PROFESSIONAL_BORROW_CELL_WIDTH};
+export const PriceHeaderPro = styled(TableHeaderItem)`
+  width: ${PROFESSIONAL_PRICE_CELL_WIDTH};
   ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
-  width: ${PROFESSIONAL_BORROW_CELL_WIDTH_MOBILE};
+  width: ${PROFESSIONAL_PRICE_CELL_WIDTH_MOBILE};
+  `};
+`
+
+export const PnLHeaderPro = styled(TableHeaderItem)`
+  width: ${PROFESSIONAL_PNL_CELL_WIDTH};
+    ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
+  width: ${PROFESSIONAL_PNL_CELL_WIDTH_MOBILE};
   `};
 `

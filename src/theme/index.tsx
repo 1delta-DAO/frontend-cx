@@ -147,12 +147,12 @@ function oldColors(darkMode: boolean): Colors {
     deprecated_text2: darkMode ? '#C3C5CB' : '#565A69',
     deprecated_text3: darkMode ? '#8F96AC' : '#6E727D',
     deprecated_text4: darkMode ? '#B2B9D2' : '#C3C5CB',
-    deprecated_text5: darkMode ? '#2C2F36' : '#EDEEF2',
+    deprecated_text5: darkMode ? '#13171B' : '#EDEEF2',
 
     // backgrounds / greys
-    deprecated_bg0: darkMode ? '#191B1F' : '#FFF',
-    deprecated_bg1: darkMode ? '#212429' : '#F7F8FA',
-    deprecated_bg2: darkMode ? '#2C2F36' : '#EDEEF2',
+    deprecated_bg0: darkMode ? '#060707' : '#FFF',
+    deprecated_bg1: darkMode ? '#1B2127' : '#F7F8FA',
+    deprecated_bg2: darkMode ? '#13171B' : '#EDEEF2',
     deprecated_bg3: darkMode ? '#40444F' : '#CED0D9',
     deprecated_bg4: darkMode ? '#565A69' : '#888D9B',
     deprecated_bg5: darkMode ? '#6C7284' : '#888D9B',
@@ -163,17 +163,17 @@ function oldColors(darkMode: boolean): Colors {
     deprecated_advancedBG: darkMode ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.6)',
 
     //primary colors
-    deprecated_primary1: darkMode ? '#2172E5' : '#cc54ad',
-    deprecated_primary2: darkMode ? '#3680E7' : '##e36fc5',
-    deprecated_primary3: darkMode ? '#4D8FEA' : '#e386cb',
-    deprecated_primary4: darkMode ? '#376bad70' : '#F6DDE8',
-    deprecated_primary5: darkMode ? '#153d6f70' : '#FDEAF1',
+    deprecated_primary1: darkMode ? '#8021e5' : '#cc54ad',
+    deprecated_primary2: darkMode ? '#9d36e7' : '##e36fc5',
+    deprecated_primary3: darkMode ? '#c34dea' : '#e386cb',
+    deprecated_primary4: darkMode ? '#6637ad6e' : '#F6DDE8',
+    deprecated_primary5: darkMode ? '#967CC9' : '#FDEAF1',
 
     // color text
-    deprecated_primaryText1: darkMode ? '#5090ea' : '#D50066',
+    deprecated_primaryText1: darkMode ? 'white' : '#D50066',
 
     // secondary colors
-    deprecated_secondary1: darkMode ? '#2172E5' : '#cc54ad',
+    deprecated_secondary1: darkMode ? '#967CC9' : '#cc54ad',
     deprecated_secondary2: darkMode ? '#17000b26' : '#F6DDE8',
     deprecated_secondary3: darkMode ? '#17000b26' : '#FDEAF1',
 
@@ -185,14 +185,14 @@ function oldColors(darkMode: boolean): Colors {
     deprecated_yellow1: '#E3A507',
     deprecated_yellow2: '#FF8F00',
     deprecated_yellow3: '#F3B71E',
-    deprecated_blue1: darkMode ? '#2172E5' : '#0068FC',
-    deprecated_blue2: darkMode ? '#5199FF' : '#0068FC',
+    deprecated_blue1: darkMode ? '#967CC9' : '#linear-gradient(#AC90E3, #1B1E37)',
+    deprecated_blue2: darkMode ? '#967CC9' : '#linear-gradient(#AC90E3, #1B1E37)',
     deprecated_error: darkMode ? '#FD4040' : '#DF1F38',
     deprecated_success: darkMode ? '#27AE60' : '#007D35',
     deprecated_warning: '#FF8F00',
 
     // dont wanna forget these blue yet
-    deprecated_blue4: darkMode ? '#153d6f70' : '#C4D9F8',
+    deprecated_blue4: darkMode ? 'linear-gradient(#AC90E3, #1B1E37)' : '#C4D9F8',
   }
 }
 

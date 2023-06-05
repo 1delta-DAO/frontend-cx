@@ -297,17 +297,6 @@ export default function Menu() {
                         Feature Flags <Flag opacity={0.6} size={16} />
                       </ToggleMenuItem>
                     )}
-                    {showDELTAClaimOption && (
-                      <UNIbutton
-                        onClick={openClaimModal}
-                        padding="8px 16px"
-                        width="100%"
-                        $borderRadius="12px"
-                        mt="0.5rem"
-                      >
-                        <Trans>Claim DLT</Trans>
-                      </UNIbutton>
-                    )}
                   </MenuFlyout>
                 )
             }

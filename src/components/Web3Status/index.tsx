@@ -31,7 +31,7 @@ import WalletModal from '../WalletModal'
 import { useWeb3React } from '@web3-react/core'
 
 // https://stackoverflow.com/a/31617326
-const FULL_BORDER_RADIUS = 9999
+const FULL_BORDER_RADIUS = 5
 
 const Web3StatusGeneric = styled(ButtonSecondary)`
   ${({ theme }) => theme.flexRowNoWrap}

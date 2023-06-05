@@ -68,6 +68,16 @@ export const formatSmallUSDValue = (amount?: number) => {
   return `$${(Math.round(amount * 100) / 100).toLocaleString()}`
 }
 
+
+export const formatUSDValuePanel = (amount?: number) => {
+  if (!amount) return '-'
+  const n = Number(amount)
+  if (n < 0.001) return '< 0.001 USD'
+  if (n < 0.01) return '< 0.01 USD'
+  return `${(Math.round(amount * 100) / 100).toLocaleString()} USD`
+}
+
+
 export const formatSmallUSDValueRounded = (amount?: number) => {
   if (!amount) return '-'
   const n = Number(amount)
