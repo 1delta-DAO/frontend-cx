@@ -6,7 +6,6 @@ import { darken } from 'polished'
 import { ReactNode, useState } from 'react'
 import styled, { useTheme } from 'styled-components/macro'
 import { ReactComponent as DropDown } from '../../../assets/images/dropdown.svg'
-import { ThemedText } from '../../../theme'
 import { Input as NumericalInput } from '../../NumericalInput'
 import { useChainIdAndAccount } from 'state/globalNetwork/hooks'
 import { SupportedAssets } from 'types/1delta'
@@ -77,13 +76,6 @@ const LabelRow = styled.div<{ redesignFlag: boolean }>`
     cursor: pointer;
     color: ${({ theme }) => darken(0.2, theme.deprecated_text2)};
   }
-`
-
-const FiatRow = styled(LabelRow) <{ redesignFlag: boolean }>`
-  justify-content: flex-end;
-  min-height: ${({ redesignFlag }) => redesignFlag && '32px'};
-  padding: ${({ redesignFlag }) => redesignFlag && '8px 0px'};
-  height: ${({ redesignFlag }) => !redesignFlag && '24px'};
 `
 
 const PairSelect = styled(ButtonGray) <{

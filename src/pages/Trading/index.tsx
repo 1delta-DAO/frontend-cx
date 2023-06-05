@@ -344,7 +344,7 @@ export default function Professional() {
     setChartPair(p)
   }
 
-  const [leverage, setLeverage] = useState(1)
+  const [leverage, setLeverage] = useState(1.2)
 
 
 
@@ -965,7 +965,7 @@ export default function Professional() {
                 pair={pair}
                 id={'CURRENCY_PAIR_PANEL'}
                 loading={independentField === Field.INPUT && routeIsSyncing}
-                topRightLabel={<PairSwap onSwitch={handlePairSwap} />}
+                topRightLabel={selectedMode === Mode.EXPERT ? <PairSwap onSwitch={handlePairSwap} /> : null}
               />
             </InputWrapper>
           </InputPanelContainer>
@@ -986,7 +986,7 @@ export default function Professional() {
             <SliderValue>
               {leverage}x
             </SliderValue>
-            <DecimalSlider min={1} max={5} step={0.1} markers={[0, 1, 2, 3, 4, 5]} onChange={setLeverage} value={leverage} />
+            <DecimalSlider min={1.2} max={5} step={0.1} markers={[0, 1, 2, 3, 4, 5]} onChange={setLeverage} value={leverage} />
           </SliderContainer>
           <div style={{ marginTop: '10px', zIndex: 0 }}>
             {!account ? (
