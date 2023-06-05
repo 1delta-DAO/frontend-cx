@@ -135,19 +135,13 @@ const CurrencySelectionRow = styled.div`
   background-color: ${({ theme }) => theme.deprecated_bg0};
 `
 
-const Image = styled.img`
-width: 25px;
-height: 25px;
-`
-
-
 const SwapPanel = styled.div`
   height: 100%;
   min-height: 600px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  aign-items: center;
+  align-items: center;
   margin: 5px;
   border-radius: 10px;
   min-width: 350px;
@@ -162,11 +156,12 @@ const SwapPanel = styled.div`
 `
 
 const ButtonRow = styled.div`
-display: flex;
-flex-direction: row;
-align-items:center;
-justify-content: space:between;
-margin-bottom: 5px;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items:center;
+  justify-content: space-between;
+  margin-bottom: 5px;
 `
 
 export const ButtonLightBoring = styled(BaseButton) <{ redesignFlag?: boolean }>`
@@ -257,7 +252,7 @@ const SliderContainer = styled.div`
   width: 100%;
   display: flex;
   flex-direction: row;
-  padding 2px;
+  padding: 2px;
   align-items: center;
   justify-content: center;
   margin-left: 10px;
@@ -265,7 +260,7 @@ const SliderContainer = styled.div`
 `
 const SliderValue = styled.div`
   width: 40px;
-  padding 2px;
+  padding: 2px;
   color: ${({ theme }) => (theme.textSecondary)};
   background-color: ${({ theme }) => theme.deprecated_bg1};
   border-radius: 2px;
@@ -280,7 +275,8 @@ flex-direction: column;
 `
 
 const InputPanelContainer = styled.div`
-margin: 2px;
+  width: 90%;
+  margin: 2px;
 `
 
 const getPairs = (assets: SupportedAssets[]): [SupportedAssets, SupportedAssets][] => {

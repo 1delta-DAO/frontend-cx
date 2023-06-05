@@ -1,4 +1,5 @@
 import { ButtonGray } from 'components/Button';
+import { ScrollBar } from 'components/Styles/Lists';
 import { darken } from 'polished';
 import React, { useState } from 'react';
 import { ChevronDown } from 'react-feather';
@@ -11,8 +12,7 @@ const DropdownContainer = styled.div`
 `;
 
 
-const DropdownContent = styled.div`
-  display: none;
+const DropdownContent = styled(ScrollBar)`
   border-radius: 10px;
   position: absolute;
   min-width: 160px;

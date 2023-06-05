@@ -123,7 +123,7 @@ export type SupportedL2ChainId = typeof L2_CHAIN_IDS[number]
 
 export const FALLBACK_CHAINID = SupportedChainId.GOERLI
 
-export const DEFAULT_CHAINID = SupportedChainId.POLYGON
+export const DEFAULT_CHAINID = SupportedChainId.POLYGON_ZK_EVM
 
 export const COMPOUND_CHAINIDS = [SupportedChainId.POLYGON, SupportedChainId.POLYGON_MUMBAI, SupportedChainId.GOERLI]
 

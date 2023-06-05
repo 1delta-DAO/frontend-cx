@@ -1,3 +1,4 @@
+import { ScrollBar } from "components/Styles/Lists";
 import { TOKEN_SVGS } from "constants/1delta";
 import { useOutsideAlerter } from "hooks/useOutsideClick";
 import React, { useEffect, useRef, useState } from "react";
@@ -19,7 +20,6 @@ interface DropdownProps {
 const DropdownWrapper = styled.div`
   position: relative;
   display: inline-block;
-  z-index: 1;
 `;
 
 
@@ -31,7 +31,7 @@ const DropdownInput = styled.input`
   color: ${({ theme }) => theme.deprecated_text1};
 `;
 
-const DropdownList = styled.div`
+const DropdownList = styled(ScrollBar)`
   position: absolute;
   top: 30px;
   left: 0;
@@ -170,7 +170,6 @@ export const PairSearchDropdown: React.FC<DropdownProps> = ({ selectedOption, op
           placeholder={placeholder}
         />
       </Row>
-      {/* <DropdownListBg /> */}
       {(showAll || !close) && <DropdownList ref={ref2}>
         {(inputValue ?
           <>
