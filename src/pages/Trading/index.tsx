@@ -186,13 +186,15 @@ export const ButtonLightBoring = styled(BaseButton) <{ redesignFlag?: boolean }>
 const TypeButton = styled(ButtonLightBoring) <{ selected: boolean }>`
   border-radius: 0px;
   font-size: 14px;
+  width: 33%;
   &:first-child {
-    border-top-left-radius: 10px;
+    border-top-left-radius: 8px;
     padding-left: 10px;
   }
   &:last-child {
-    border-top-right-radius: 10px;
+    border-top-right-radius: 8px;
     padding-right: 10px;
+    width: 34%;
   }
   height: 40px;
   ${({ theme, selected }) =>
@@ -1232,7 +1234,8 @@ const PairSelectContainer = styled.div`
 const SwitchButton = styled(ButtonSecondary)`
   width: 80px;
   height: 28px;
-  font-size: 12px;
+  font-size: 10px;
+  font-weight: 250;
   border-radius: 10px;
   display: flex;
   font-weight: 200;
@@ -1241,9 +1244,14 @@ const SwitchButton = styled(ButtonSecondary)`
   justify-content: space-between;
   color: ${({ theme }) => theme.textSecondary};
   background: ${({ theme }) => theme.deprecated_bg3};
+  opacity: 0.7;
   border: none;
   padding: 5px;
   margin: 2px;
+  &:hover{
+    opacity: 0.4;
+    border: none;
+  }
 `
 
 interface PairSwitchProps {
