@@ -247,7 +247,7 @@ const CartAndTableContainer = styled(AutoColumnAdjusted)`
 
 const Container = styled.div`
   width: 95vw;
-  max-width: 2000px;
+  max-width: 1600px;
 `
 
 const SliderContainer = styled.div`
