@@ -245,7 +245,7 @@ export default function GeneralCurrencyInputPanel({
       <SimpleRow>
         <PanelContainer conn={Boolean(account)}>
           <div style={{ color, fontSize: '14px', marginLeft: '10px' }}>
-            Pay{currency && value && price[0] && ` : ${formatUSDValuePanel(price[0] * Number(tryParseCurrencyAmount(value, currency)?.toExact()))}`}
+            Pay{currency && value && price[0] && `: ${formatUSDValuePanel(price[0] * Number(tryParseCurrencyAmount(value, currency)?.toExact()))}`}
           </div>
 
           {!hideInput && !hideBalance && currency && (

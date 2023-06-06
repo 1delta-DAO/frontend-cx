@@ -22,7 +22,6 @@ const SliderInput = styled.input<{ fillPercent: number }>`
 
 
   &::-webkit-slider-thumb {
-    -webkit-appearance: none;
     appearance: none;
     width: 10px;
     height: 10px;
@@ -44,17 +43,12 @@ const SliderInput = styled.input<{ fillPercent: number }>`
     cursor: pointer;
   }
 
-  &::-ms-thumb {
-  margin: 0; /* Reset margin in Edge since it supports -webkit-slider-thumb as well */
-}
-
   &::-webkit-slider-runnable-track {
     background: linear-gradient(
-      to right,
-      #1B1E37 10%,
-      #AC90E3 100%
+      to right, 
+      #1B1E37 0%, #AC90E3 ${({ fillPercent }) => fillPercent}%, 
+      #1B2126 ${({ fillPercent }) => fillPercent}%, #1B2126 100%
     );
-    width: 100% ;
     border-radius: 5px;
     height: 6px;
   }

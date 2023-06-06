@@ -1231,16 +1231,19 @@ const PairSelectContainer = styled.div`
 
 const SwitchButton = styled(ButtonSecondary)`
   width: 80px;
-  height: 32px;
+  height: 28px;
   font-size: 12px;
   border-radius: 10px;
-  border: 1px solid ${({ theme }) => theme.accentActiveSoft};
   display: flex;
   font-weight: 200;
   flex-direction: row;
   align-items: space-between;
   justify-content: space-between;
+  color: ${({ theme }) => theme.textSecondary};
+  background: ${({ theme }) => theme.deprecated_bg3};
+  border: none;
   padding: 5px;
+  margin: 2px;
 `
 
 interface PairSwitchProps {

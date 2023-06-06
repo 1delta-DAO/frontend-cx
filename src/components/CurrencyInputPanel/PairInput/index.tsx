@@ -153,7 +153,7 @@ export default function PairInput({
       <SimpleRow>
         <PanelContainer>
           {simpleVersion && <div style={{ color, fontSize: '14px', marginLeft: '10px' }}>
-            {isLong ? 'Long' : 'Short'}{trade && price[0] && ` : ${formatUSDValuePanel(price[0] * Number(trade.outputAmount.toExact()))}`}
+            {isLong ? 'Long' : 'Short'}{trade && price[0] && `: ${formatUSDValuePanel(price[0] * Number(trade.outputAmount.toExact()))}`}
           </div>}
           {!simpleVersion && pair && (
             <>
