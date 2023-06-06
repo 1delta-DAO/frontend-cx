@@ -954,7 +954,7 @@ export default function Professional() {
             </TypeButton>
           </ButtonRow>
           <InputPanelContainer>
-            <RowFixed style={{ width: '100%' }}>
+            <RowFixed style={{ width: '100%', zIndex: 5, paddingRight: '5px' }}>
               <PanelLabel
                 options={availableDepoModes}
                 selectedOption={depositMode}
@@ -1208,6 +1208,7 @@ const PanelContainer = styled.div`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
+  z-index: 5;
 `
 const StyledDropDown = styled(DropDown)`
   margin-right: 5px;;

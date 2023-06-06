@@ -14,7 +14,7 @@ const DropdownContainer = styled.div`
   position: relative;
   display: inline-block;
   width: 120px;
-  z-index: 99999999;
+  z-index: 1;
 `;
 
 
@@ -69,6 +69,7 @@ const DropdownContent = styled.div<{ isOpen: boolean }>`
   border-radius: 4px;
   width: 120px;
   font-size: 12px;
+  height: 25px;
   font-weight: 200;
   cursor: pointer;
   backdrop-filter: blur(10px);
@@ -91,11 +92,15 @@ const DropdownContent = styled.div<{ isOpen: boolean }>`
 
 const DropdownItem = styled.div`
   width: 120px;
-  padding: 4px;
+  margin-top: 5px;
+
+  margin-left: 10px;
   display: block;
   color: ${({ theme }) => theme.textSecondary};
   border-top-right-radius: 0px;
   border-top-left-radius: 0px;
+  font-size: 12px;
+  font-weight: 200;
     border-top: none;
   &:last-child {
     border-bottom: none;
