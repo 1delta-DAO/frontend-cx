@@ -390,8 +390,8 @@ export default function Professional() {
 
   useEffect(() => {
     // fetch oracle data
-    dispatch(fetchChainLinkData({ chainId: 137 }))
-    dispatch(fetchAAVEAggregatorDataAsync({ chainId: 137 }))
+    dispatch(fetchChainLinkData({ chainId: SupportedChainId.POLYGON }))
+    dispatch(fetchAAVEAggregatorDataAsync({ chainId: SupportedChainId.POLYGON }))
 
     // fetch wallet balances
     if (account) {
@@ -400,10 +400,6 @@ export default function Professional() {
     setTimeout(() => setRepeater((prevState) => prevState + 1), 10000)
   }, [repeater, deltaState?.userMeta?.[chainId]?.loaded, chainId])
 
-
-  const restrictedTokenList = useMemo(() => {
-    return getAaveTokens(chainId)
-  }, [chainId])
   const dispatch = useAppDispatch()
 
   const isMobile = useIsMobile()
@@ -1003,7 +999,7 @@ export default function Professional() {
                 placeholder={SupportedAssets.USDC}
                 trade={trade}
                 isPlus={true}
-                providedTokenList={restrictedTokenList}
+                providedTokenList={{}}
                 onUserInput={() => null}
                 hideBalance={false}
                 fiatValue={fiatValueOutput ?? undefined}

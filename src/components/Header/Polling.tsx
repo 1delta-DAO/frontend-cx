@@ -96,7 +96,7 @@ const Spinner = styled.div<{ warning: boolean }>`
   top: -3px;
 `
 
-const DEFAULT_MS_BEFORE_WARNING = ms`100m`
+const DEFAULT_MS_BEFORE_WARNING = ms`200m`
 const NETWORK_HEALTH_CHECK_MS = ms`100s`
 
 export default function Polling() {

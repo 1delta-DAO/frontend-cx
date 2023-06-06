@@ -155,19 +155,19 @@ export default function PairInput({
           {simpleVersion && <div style={{ color, fontSize: '14px', marginLeft: '10px' }}>
             {isLong ? 'Long' : 'Short'}{trade && price[0] && ` : ${formatUSDValuePanel(price[0] * Number(trade.outputAmount.toExact()))}`}
           </div>}
-          {!simpleVersion && trade && pair && (
+          {!simpleVersion && pair && (
             <>
               <div style={{ color, fontSize: '14px', marginLeft: '10px' }}>
                 Open{trade && `@`}
               </div>
-              <div onClick={() => setShowCollateral(!showCollateral)}>
+              {trade && <div onClick={() => setShowCollateral(!showCollateral)}>
                 {!showCollateral ? <CurrencyValueBox style={{ color }}>
                   {trade.executionPrice.toFixed(6)} {pair[0]}/{pair[1]}
                 </CurrencyValueBox>
                   : <CurrencyValueBox style={{ color }}>
                     {trade.executionPrice.invert().toFixed(6)} {pair[1]}/{pair[0]}
                   </CurrencyValueBox>}
-              </div>
+              </div>}
             </>
           )
           } </PanelContainer>
@@ -216,7 +216,10 @@ const PanelContainer = styled.div`
 `
 const CurrencyValueBox = styled.div`
   color: ${({ theme }) => theme.textSecondary};
-  font-size: 14px;
+  font-size: 12px;
+  font-weight: 250;
+  display: flex;
+  align-items: center;
   text-align: left;
   width: 100%;
   margin-right: 10px;

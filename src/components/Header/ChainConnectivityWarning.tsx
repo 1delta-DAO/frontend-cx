@@ -6,6 +6,7 @@ import { AlertOctagon, AlertTriangle } from 'react-feather'
 import { useChainId } from 'state/globalNetwork/hooks'
 import styled from 'styled-components/macro'
 import { ExternalLink, MEDIA_WIDTHS } from 'theme'
+import { Z_INDEX } from 'theme/zIndex'
 
 const BodyRow = styled.div<{ $redesignFlag?: boolean }>`
   color: ${({ theme, $redesignFlag }) => ($redesignFlag ? theme.textPrimary : theme.black)};
@@ -48,6 +49,7 @@ const Wrapper = styled.div<{ redesignFlag?: boolean }>`
   padding: 16px 20px;
   position: fixed;
   right: 16px;
+  z-index: ${Z_INDEX.modal};
   @media screen and (min-width: ${MEDIA_WIDTHS.deprecated_upToMedium}px) {
     display: block;
   }
@@ -64,20 +66,20 @@ export function ChainConnectivityWarning() {
       <TitleRow>
         {redesignFlag ? <CautionTriangle /> : <CautionOctagon />}
         <TitleText redesignFlag={redesignFlag}>
-          <Trans>Network Warning</Trans>
+          <>Network Warning</>
         </TitleText>
       </TitleRow>
       <BodyRow $redesignFlag={redesignFlag}>
         {chainId === SupportedChainId.MAINNET ? (
-          <Trans>You may have lost your network connection.</Trans>
+          <>You may have lost your network connection.</>
         ) : (
-          <Trans>{label} might be down right now, or you may have lost your network connection.</Trans>
+          <>{label} might be down right now, or you may have lost your network connection.</>
         )}{' '}
         {(info as L2ChainInfo).statusPage !== undefined && (
           <span>
-            <Trans>Check network status</Trans>{' '}
+            <>Check network status</>{' '}
             <Link href={(info as L2ChainInfo).statusPage || ''}>
-              <Trans>here.</Trans>
+              <>here.</>
             </Link>
           </span>
         )}

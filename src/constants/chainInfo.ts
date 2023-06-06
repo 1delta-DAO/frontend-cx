@@ -2,6 +2,7 @@ import celoCircleLogoUrl from 'assets/images/celoCircle.png'
 import ethereumLogoUrl from 'assets/images/ethereum-logo.png'
 import optimismCircleLogoUrl from 'assets/images/optimismCircle.png'
 import polygonCircleLogoUrl from 'assets/images/polygonCircle.png'
+import zkLogo from 'assets/svg/zk-evm-logo.svg'
 import { default as arbitrumCircleLogoUrl, default as arbitrumLogoUrl } from 'assets/svg/arbitrum_logo.svg'
 import celoLogo from 'assets/svg/celo_logo.svg'
 import optimismLogoUrl from 'assets/svg/optimistic_ethereum.svg'
@@ -198,7 +199,7 @@ const CHAIN_INFO: ChainInfoMap = {
     explorer: 'https://zkevm.polygonscan.com/',
     infoLink: 'https://info.uniswap.org/#/polygon/',
     label: 'Polygon zkEVM',
-    logoUrl: polygonMaticLogo,
+    logoUrl: zkLogo,
     circleLogoUrl: polygonCircleLogoUrl,
     nativeCurrency: { name: 'zkETH', symbol: 'ETH', decimals: 18 },
     color: colorsDark.chain_137,

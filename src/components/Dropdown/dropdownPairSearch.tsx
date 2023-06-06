@@ -28,6 +28,7 @@ const DropdownInput = styled.input`
   border: none;
   background-color: transparent;
   color: ${({ theme }) => theme.deprecated_text1};
+  max-width: 160px;
 `;
 
 const DropdownList = styled(ScrollBar)`
@@ -45,6 +46,7 @@ const DropdownList = styled(ScrollBar)`
   border-top: none;
   border-radius: 5px;
   z-index: ${Z_INDEX.modal};
+  max-width: 180px;
 `;
 
 
@@ -53,10 +55,12 @@ const Row = styled.div`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
+  max-width: 160px;
 `
 
 const RowPair = styled.div`
   padding: 1px;
+  margin-left: 4px;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -76,11 +80,25 @@ interface PairRowProps {
 const AssetText = styled.span`
   margin-right: 5px;
   font-size: 15px;
+  font-weight: 300;
+  width: 200px;
+  text-align: left;
 `
+
+const AssetTextPair = styled(AssetText)`
+  font-size: 12px;
+`
+
 
 const Image = styled.img`
   width: 25px;
   height: 25px;
+`
+
+
+const ImageSmaller = styled.img`
+  width: 20px;
+  height: 20px;
 `
 
 const ImageContainer = styled.div`
@@ -97,12 +115,12 @@ const PairRow = ({ asset, onSelect }: PairRowProps): JSX.Element => {
 
   return <RowPair onClick={() => onSelect(asset)}>
     <ImageContainer>
-      <Image src={TOKEN_SVGS[asset[0]]} key={String(asset[0])} />
-      <Image src={TOKEN_SVGS[asset[1]]} key={String(asset[1])} style={{ marginLeft: '-10px' }} />
+      <ImageSmaller src={TOKEN_SVGS[asset[0]]} key={String(asset[0])} />
+      <ImageSmaller src={TOKEN_SVGS[asset[1]]} key={String(asset[1])} style={{ marginLeft: '-10px' }} />
     </ImageContainer>
-    <AssetText>
+    <AssetTextPair>
       {String(asset[0]) + "/" + String(asset[1])}
-    </AssetText>
+    </AssetTextPair>
   </RowPair>
 }
 
@@ -163,6 +181,7 @@ export const PairSearchDropdown: React.FC<DropdownProps> = ({ selectedOption, op
         <Image src={TOKEN_SVGS[selectedOption?.[0] ?? placeholder]} style={{ width: '25px' }} />
         <Image src={TOKEN_SVGS[selectedOption?.[1] ?? placeholder]} style={{ marginLeft: '-10px', width: '25px' }} />
         <DropdownInput
+          style={{ maxWidth: '100px' }}
           type="text"
           value={inputValue}
           onChange={handleInputChange}
