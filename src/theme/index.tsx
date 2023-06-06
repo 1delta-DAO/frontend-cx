@@ -386,6 +386,8 @@ html {
   color: ${({ theme }) => theme.deprecated_text1};
   background-image: url(${Background_0VIX});
   background-size: cover;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 }
 
 a {
