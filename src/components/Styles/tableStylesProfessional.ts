@@ -74,22 +74,6 @@ export const CellPro = styled.td`
 
 
 // collateral
-export const CheckboxCellPro = styled(CellPro)`
-  width: ${PROFESSIONAL_SELECT_CELL_WIDTH};
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
-  width: ${PROFESSIONAL_SELECT_CELL_WIDTH_MOBILE};
-  `};
-`
-
-export const AssetCellPro = styled(CellPro)`
-  width: ${PROFESSIONAL_ASSET_CELL_WIDTH};
-  ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
-  width: ${PROFESSIONAL_ASSET_CELL_WIDTH_MOBILE};
-  `};
-`
 
 export const TotalCellPro = styled(CellPro)`
   width: ${PROFESSIONAL_TOTAL_CELL_WIDTH};
@@ -97,15 +81,6 @@ export const TotalCellPro = styled(CellPro)`
   align-items: center;
   ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
   width: ${PROFESSIONAL_TOTAL_CELL_WIDTH_MOBILE};
-  `};
-`
-
-export const LiquidityCellPro = styled(CellPro)`
-  width: ${PROFESSIONAL_LIQUIDITY_CELL_WIDTH};
-  display: flex;
-  align-items: center;
-  ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
-  width: ${PROFESSIONAL_LIQUIDITY_CELL_WIDTH_MOBILE};
   `};
 `
 
@@ -460,6 +435,60 @@ export const PriceHeaderPro = styled(TableHeaderItem)`
 `
 
 export const PnLHeaderPro = styled(TableHeaderItem)`
+  width: ${PROFESSIONAL_PNL_CELL_WIDTH};
+    ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
+  width: ${PROFESSIONAL_PNL_CELL_WIDTH_MOBILE};
+  `};
+`
+
+
+export const CheckboxCellPro = styled(CellPro)`
+  max-width: 100px;
+  width: ${PROFESSIONAL_SELECT_CELL_WIDTH};
+  ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
+  width: ${PROFESSIONAL_SELECT_CELL_WIDTH_MOBILE};
+  `};
+`
+
+export const AssetCellPro = styled(CellPro)`
+  width: ${PROFESSIONAL_ASSET_CELL_WIDTH};
+    ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
+  width: ${PROFESSIONAL_SELECT_CELL_WIDTH_MOBILE};
+  `};
+`
+
+export const RewardsCellPro = styled(CellPro)`
+  width: ${PROFESSIONAL_REWARDS_CELL_WIDTH};
+    ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
+  width: ${PROFESSIONAL_REWARDS_CELL_WIDTH_MOBILE};
+  `};
+`
+
+export const LiquidityCellPro = styled(CellPro)`
+  width: ${PROFESSIONAL_LIQUIDITY_CELL_WIDTH};
+  ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
+  width: ${PROFESSIONAL_LIQUIDITY_CELL_WIDTH_MOBILE};
+  `};
+`
+
+export const TimeCellPro = styled(CellPro)`
+  width: ${PROFESSIONAL_TIME_CELL_WIDTH};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
+  width: ${PROFESSIONAL_TIME_CELL_WIDTH_MOBILE};
+  `};
+`
+
+export const PriceCellPro = styled(CellPro)`
+  width: ${PROFESSIONAL_PRICE_CELL_WIDTH};
+  ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
+  width: ${PROFESSIONAL_PRICE_CELL_WIDTH_MOBILE};
+  `};
+`
+
+export const PnLCellPro = styled(CellPro)`
   width: ${PROFESSIONAL_PNL_CELL_WIDTH};
     ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
   width: ${PROFESSIONAL_PNL_CELL_WIDTH_MOBILE};

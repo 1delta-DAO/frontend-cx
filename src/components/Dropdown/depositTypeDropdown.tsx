@@ -13,7 +13,7 @@ export enum DepositMode {
 const DropdownContainer = styled.div`
   position: relative;
   display: inline-block;
-  width: 110px;
+  width: 120px;
   z-index: 99999999;
 `;
 
@@ -23,7 +23,7 @@ const DropdownBg = styled.div`
   display: none;
   border-radius: 10px;
   position: absolute;
-  min-width: 110px;
+  min-width: 120px;
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   z-index: 1;
   padding: 12px 16px;
@@ -31,8 +31,8 @@ const DropdownBg = styled.div`
   background: ${({ theme }) => theme.deprecated_bg2};
   backdrop-filter: blur(10px);
   ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
-  max-width: 110px;
-  min-width: 110px;
+  max-width: 120px;
+  min-width: 120px;
 `};
 `;
 
@@ -43,7 +43,7 @@ const DropdownButton = styled.button<{ isOpen: boolean }>`
   height: 20px;
   border-radius: 4px;
   font-size: 12px;
-  width: 110px;
+  width: 120px;
   font-weight: 200;
   cursor: pointer;
   :hover & {
@@ -67,7 +67,7 @@ const DropdownContent = styled.div<{ isOpen: boolean }>`
   color: ${({ theme }) => theme.textSecondary};
   height: 20px;
   border-radius: 4px;
-  width: 110px;
+  width: 120px;
   font-size: 12px;
   font-weight: 200;
   cursor: pointer;
@@ -90,7 +90,7 @@ const DropdownContent = styled.div<{ isOpen: boolean }>`
 `;
 
 const DropdownItem = styled.div`
-  width: 110px;
+  width: 120px;
   padding: 4px;
   display: block;
   color: ${({ theme }) => theme.textSecondary};

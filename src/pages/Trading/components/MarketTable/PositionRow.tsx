@@ -19,7 +19,7 @@ import { MouseoverTooltip } from 'components/Tooltip'
 
 import { LendingProtocol } from 'state/1delta/actions'
 import { PreparedAssetData } from 'hooks/asset/useAssetData'
-import { AssetCellPro, PositionCellPro, PositionCellWithChangePro, PositionRowPro } from 'components/Styles/tableStylesProfessional'
+import { AssetCellPro, AssetHeaderPro, PnLCellPro, PnLHeaderPro, PositionCellPro, PositionCellWithChangePro, PositionRowPro, PriceCellPro, TimeCellPro, TimeHeaderPro } from 'components/Styles/tableStylesProfessional'
 import { AaveInterestMode } from 'types/1delta'
 
 
@@ -61,6 +61,13 @@ const ImageVariable = styled(BarChart2)`
   width: 12px;
   height: 12px;
   margin-left: 5px;
+`
+
+const SimpleRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
 `
 
 const ResponsiveCheck = styled(Check)``
@@ -131,96 +138,30 @@ export default function PositionRow(props: PositionProps) {
       <AssetCellPro>
         <AnimatedTokenPositionIcon asset={props.assetId} isMobile={props.isMobile} />
       </AssetCellPro>
-      {account &&
-        (hasChange ?
-          <PositionCellWithChangePro>
-            <RowWithChange
-              isMobile={props.isMobile}
-              amount={props.userBalance}
-              newAmount={valPlusChange}
-              hasChange={Boolean(props?.change && (props.change.type === AaveInterestMode.NONE))}
-              positive
-            />
-            <RowWithChange
-              isMobile={props.isMobile}
-              amount={props.userBorrow}
-              newAmount={valPlusChange}
-              hasChange={Boolean(props?.change && (props.change.type === AaveInterestMode.VARIABLE))}
-              positive={false}
-            />
-            <RowWithChange
-              isMobile={props.isMobile}
-              amount={props.userBorrowStable}
-              newAmount={valPlusChange}
-              hasChange={Boolean(props?.change && (props.change.type === AaveInterestMode.STABLE))}
-              positive={false}
-            />
-          </PositionCellWithChangePro>
-          :
-          <PositionCellPro>
-            {props.userBalanceUsd > 0 && <ValueText positive={true}>
-              +{formatSmallValue(props.userBalance)}</ValueText>
-            }
-            {props.userBorrow > 0 && <ValueText positive={false}>
-              {formatSmallGeneralValue(-props.userBorrow, props.isMobile)}
-            </ValueText>}
-            {props.userBorrowStableUsd > 0 && <ValueText positive={false}>
-              {formatSmallGeneralValue(-props.userBorrowStable, props.isMobile)}
-            </ValueText>}
-          </PositionCellPro>
-        )
-      }
-      {account &&
-        (hasChange ?
-          <PositionCellWithChangePro>
-            <RowWithChangeUsd
-              isMobile={props.isMobile}
-              amountUsd={props.userBalanceUsd}
-              newAmountUsd={valPlusChangeUsd}
-              hasChange={Boolean(props?.change && (props.change.type === AaveInterestMode.NONE))}
-              positive
-            />
-            <RowWithChangeUsd
-              isMobile={props.isMobile}
-              amountUsd={props.userBorrowUsd}
-              newAmountUsd={valPlusChangeUsd}
-              hasChange={Boolean(props?.change && (props.change.type === AaveInterestMode.VARIABLE))}
-              positive={false}
-            />
-            <RowWithChangeUsd
-              isMobile={props.isMobile}
-              amountUsd={props.userBorrowStableUsd}
-              newAmountUsd={valPlusChangeUsd}
-              hasChange={Boolean(props?.change && (props.change.type === AaveInterestMode.STABLE))}
-              positive={false}
-            />
-          </PositionCellWithChangePro>
-          :
-
-          <PositionCellPro>
-            {props.userBalanceUsd > 0 && <ValueText positive={true}>
-              +{formatSmallGeneralUSDValue(props.userBalanceUsd)}
-            </ValueText>}
-            {props.userBorrowUsd > 0 && <ValueText positive={false}>
-              {formatSmallGeneralUSDValue(-props.userBorrowUsd)}
-            </ValueText>}
-            {props.userBorrowStable > 0 && <ValueText positive={false}>{formatSmallGeneralUSDValue(-props.userBorrowStableUsd)}</ValueText>}
-          </PositionCellPro>
-        )
-      }
-      <PositionCellPro>
-        <APRComp
-          hasChange={Boolean(props?.change)}
-          changeType={props?.change?.type}
-          aprDeposit={aprSupply}
-          isLong={isLong}
-          apr={isLong ? aprSupply : aprBorrow}
-          aprStable={aprBorrowStable}
-          hasStable={props.userBorrowStableUsd > 0}
-          hasVariable={props.userBorrowUsd > 0}
-        />
-      </PositionCellPro>
-    </PositionRowPro>
+      <PnLCellPro  >
+        <SimpleRow>
+          PnL
+        </SimpleRow>
+      </PnLCellPro>
+      <PriceCellPro  >
+        <SimpleRow>
+          Entry
+        </SimpleRow>
+      </PriceCellPro>
+      <PriceCellPro  >
+        <SimpleRow>
+          Market
+        </SimpleRow>
+      </PriceCellPro>
+      <PriceCellPro  >
+        <SimpleRow>
+          Liq. Price
+        </SimpleRow>
+      </PriceCellPro>
+      <TimeCellPro >
+        Time
+      </TimeCellPro>
+    </PositionRowPro >
   )
 }
 

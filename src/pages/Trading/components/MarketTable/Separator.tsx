@@ -52,7 +52,7 @@ export const Button = styled(ButtonErrorStyle)`
   width: 170px;
   max-height: 15px;
   border-radius: 30px;
-  text-color: ${({ theme }) => theme.accentAction};
+  color: ${({ theme }) => theme.accentAction};
   align-items: center;
   justify-content: space-around;
   text-align:center;

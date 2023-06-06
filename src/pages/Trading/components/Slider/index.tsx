@@ -28,8 +28,10 @@ const SliderInput = styled.input<{ fillPercent: number }>`
     height: 10px;
     border-radius: 50%;
     background: #AC90E3;  // Thumb color
-    border: 3px solid #1B2126;
+    border: 2px solid #1B2126;
     cursor: pointer;
+    vertical-align: baseline;
+    margin-top: -2px; /* alignment fix for Chrome */
   }
 
   &::-moz-range-thumb {
@@ -41,6 +43,10 @@ const SliderInput = styled.input<{ fillPercent: number }>`
     border: 3px solid #1B2126;
     cursor: pointer;
   }
+
+  &::-ms-thumb {
+  margin: 0; /* Reset margin in Edge since it supports -webkit-slider-thumb as well */
+}
 
   &::-webkit-slider-runnable-track {
     background: linear-gradient(
