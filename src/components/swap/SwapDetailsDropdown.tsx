@@ -22,7 +22,7 @@ import SwapRoute from './SwapRoute'
 import TradePrice from './TradePrice'
 
 const Wrapper = styled(Row)`
-  width: 100%;
+  width: 90%;
   justify-content: center;
 `
 
@@ -47,7 +47,7 @@ const StyledHeaderRow = styled(RowBetween) <{ disabled: boolean; open: boolean; 
   margin-top: ${({ redesignFlag }) => redesignFlag && '8px'};
   cursor: ${({ disabled }) => (disabled ? 'initial' : 'pointer')};
   min-height: 40px;
-  border-radius: ${({ redesignFlag }) => !redesignFlag && '12px'};
+  border-radius: 5px;
 `
 
 const RotatingArrow = styled(ChevronDown) <{ open?: boolean }>`

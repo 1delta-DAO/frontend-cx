@@ -164,12 +164,11 @@ export default function PositionTable({
                 )}
               </SimpleRow>
             </PriceHeaderPro>
-            <HeaderYieldItem
-              filterStateChevrons={filterStateChevrons}
-              protocol={lendingProtocol}
-              handleAprFilter={handleAprFilter}
-              handleStableAprFilter={handleStableAprFilter}
-            />
+            <TimeHeaderPro hasFilter onClick={handleAprFilter}>
+              <SimpleRow>
+                Rewards
+              </SimpleRow>
+            </TimeHeaderPro>
             <TimeHeaderPro hasFilter={false}>
               Time
             </TimeHeaderPro>
@@ -191,58 +190,5 @@ export default function PositionTable({
         </TableBody>
       </Table>
     </TableContainerPro>
-  )
-}
-
-interface YieldHeaderProps {
-  filterStateChevrons: {
-    filter: FilterActive;
-    mode: Filter;
-  }
-  protocol: LendingProtocol
-  handleAprFilter: () => any
-  handleStableAprFilter: () => any
-}
-
-
-
-const ImageStable = styled(Anchor)`
-  width: 20px;
-  height: 20px;
-  margin-left: 5px;
-`
-
-const ImageVariable = styled(BarChart2)`
-  width: 20px;
-  height: 20px;
-  margin-left: 5px;
-`
-
-
-const HeaderYieldItem = ({ filterStateChevrons, protocol, handleAprFilter, handleStableAprFilter }: YieldHeaderProps) => {
-  const isAave = protocol === LendingProtocol.AAVE
-  return (
-    <TimeHeaderPro hasFilter onClick={isAave ? () => null : handleAprFilter}>
-      <SimpleRow>
-        Rewards
-        {isAave && <>{' '}
-          <ImageVariable onClick={handleAprFilter}
-            style={{
-              strokeWidth: `${filterStateChevrons.filter === FilterActive.APR ? 2 : 1}px`,
-            }}
-          /> /
-          <ImageStable onClick={handleStableAprFilter}
-            style={{
-              strokeWidth: `${filterStateChevrons.filter === FilterActive.APR_STABLE ? 2 : 1}px`,
-            }}
-          />
-        </>}
-        {(filterStateChevrons.filter === FilterActive.APR || filterStateChevrons.filter === FilterActive.APR_STABLE) && (
-          <ChevronContainer>
-            {filterStateChevrons.mode === Filter.DESC ? <ChevronDown /> : <ChevronUp />}
-          </ChevronContainer>
-        )}
-      </SimpleRow>
-    </TimeHeaderPro>
   )
 }

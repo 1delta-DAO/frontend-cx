@@ -505,7 +505,7 @@ export default function Professional() {
   const debtCurrency = useCurrency(debtId, currentProtocol)
 
   const {
-    trade: { state: tradeStateIn, trade: tradeInUni },
+    trade: { state: tradeStateInUni, trade: tradeInUni },
     allowedSlippage: allowedSlippageIn,
     parsedAmount: parsedAmountIn,
     inputError: swapInInputError,
@@ -515,7 +515,7 @@ export default function Professional() {
     false
   )
 
-  const { state: agebraState, trade: algebraTradeIn } = useAlgebraClientSideV3(
+  const { state: agebraStateIn, trade: algebraTradeIn } = useAlgebraClientSideV3(
     TradeType.EXACT_INPUT,
     parsedAmountIn,
     depositCurrency,
@@ -535,7 +535,6 @@ export default function Professional() {
     }
   }, [tradeInUni, algebraTradeIn, parsedAmountIn])
 
-  const tradeInState = depositMode === DepositMode.DIRECT ? TradeState.VALID : tradeStateIn
 
   const depositDollarValue = useMemo(() => {
     // case direct depo
@@ -565,7 +564,7 @@ export default function Professional() {
 
 
   const {
-    trade: { state: tradeState, trade: tradeUni },
+    trade: { state: tradeStateUni, trade: tradeUni },
     allowedSlippage: allowedSlippageUni,
     parsedAmount: parsedAmountUni,
     inputError: swapInputErrorUni,
@@ -583,6 +582,13 @@ export default function Professional() {
     borrowAmount,
     collateralCurrency,
   )
+
+  const [tradeState, tradeStateIn] = Boolean(tradeUni) ?
+    [tradeStateUni,
+      depositMode === DepositMode.DIRECT ? TradeState.VALID : tradeStateInUni
+    ] : [
+      tradeStateAlgebra,
+      depositMode === DepositMode.DIRECT ? TradeState.VALID : agebraStateIn]
 
   const [parsedAmount, trade] = useMemo(() => {
 
@@ -653,8 +659,8 @@ export default function Professional() {
   const [routeNotFound, routeIsLoading, routeIsSyncing] = useMemo(
     () => [
       !trade?.swaps,
-      TradeState.LOADING === tradeState || TradeState.LOADING === tradeInState,
-      TradeState.SYNCING === tradeState || TradeState.SYNCING === tradeInState],
+      TradeState.LOADING === tradeState || TradeState.LOADING === tradeStateIn,
+      TradeState.SYNCING === tradeState || TradeState.SYNCING === tradeStateIn],
     [trade, tradeState]
   )
 
