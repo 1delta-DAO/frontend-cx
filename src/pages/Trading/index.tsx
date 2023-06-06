@@ -97,15 +97,15 @@ export const ArrowWrapper = styled.div<{ clickable: boolean; redesignFlag: boole
   height: 32px;
   width: 32px;
   position: relative;
-  margin-top: 2px;
-  margin-bottom: 2px;
+  margin-top: -10px;
+  margin-bottom: -10px;
   left: calc(50% - 16px);
   /* transform: rotate(90deg); */
   background-color: ${({ theme, redesignFlag }) => (redesignFlag ? theme.backgroundInteractive : theme.deprecated_bg1)};
-  border: 2px solid;
-  border-color: ${({ theme, redesignFlag }) => (redesignFlag ? theme.backgroundSurface : theme.deprecated_bg0)};
+  border: 1px solid;
+  border-color: #242B33;
 
-  z-index: 0;
+  z-index: 2;
   ${({ clickable }) =>
     clickable
       ? css`

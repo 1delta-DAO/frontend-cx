@@ -13,7 +13,7 @@ export enum DepositMode {
 const DropdownContainer = styled.div`
   position: relative;
   display: inline-block;
-  width: 140px;
+  width: 110px;
   z-index: 99999999;
 `;
 
@@ -23,58 +23,83 @@ const DropdownBg = styled.div`
   display: none;
   border-radius: 10px;
   position: absolute;
-  min-width: 160px;
+  min-width: 110px;
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   z-index: 1;
   padding: 12px 16px;
   cursor: pointer;
-  background: ${({ theme }) => theme.deprecated_bg6};
+  background: ${({ theme }) => theme.deprecated_bg2};
   backdrop-filter: blur(10px);
   ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
-  max-width: 160px;
-  min-width: 160px;
+  max-width: 110px;
+  min-width: 110px;
 `};
 `;
 
-const DropdownButton = styled.button`
+const DropdownButton = styled.button<{ isOpen: boolean }>`
   border: 1px solid ${({ theme }) => theme.deprecated_bg3};;
   background: none;
   color: ${({ theme }) => theme.textSecondary};
   height: 20px;
   border-radius: 4px;
   font-size: 12px;
+  width: 110px;
   font-weight: 200;
   cursor: pointer;
+  :hover & {
+    display: block;
+    border-bottom: none;
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+  }
+  ${({ isOpen }) => isOpen ? `
+  border-bottom: none;
+  border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+  ` : ''}
 `;
 
 const DropdownContent = styled.div<{ isOpen: boolean }>`
   display: ${props => props.isOpen ? 'block' : 'none'};
-  border-radius: 10px;
+  border: 1px solid ${({ theme }) => theme.deprecated_bg3};
+  background-color: #060707;
   position: absolute;
-  min-width: 160px;
-  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-  z-index: ${Z_INDEX.modal};
-  padding: 12px 16px;
+  color: ${({ theme }) => theme.textSecondary};
+  height: 20px;
+  border-radius: 4px;
+  width: 110px;
+  font-size: 12px;
+  font-weight: 200;
   cursor: pointer;
-
   backdrop-filter: blur(10px);
-  ${DropdownContainer}:hover & {
+  z-index: ${Z_INDEX.modal};
+  backdrop-filter: blur(10px);
+  :hover & {
     display: block;
+    border-top: none;
   }
+  ${({ isOpen }) => isOpen ? `
+  border-top: none;
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+  ` : ''}
   ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
   max-width: 100px;
   min-width: 100px;
 `};
 `;
 
-const DropdownItem = styled.a`
-  color: black;
-  padding: 12px 16px;
-  text-decoration: none;
-  min-width: 160px;
+const DropdownItem = styled.div`
+  width: 110px;
+  padding: 4px;
   display: block;
   color: ${({ theme }) => theme.textSecondary};
-  &:hover {border-left: 7px solid ${({ theme }) => theme.deprecated_bg2};}
+  border-top-right-radius: 0px;
+  border-top-left-radius: 0px;
+    border-top: none;
+  &:last-child {
+    border-bottom: none;
+  }
   z-index: ${Z_INDEX.modal}
 `;
 
@@ -89,11 +114,10 @@ const DepositTypeDropdown = ({ selectedOption, onSelect, options }: DepositTypeS
 
   return (
     <DropdownContainer>
-      <DropdownButton onClick={() => setIsOpen(!isOpen)}>
+      <DropdownButton onClick={() => setIsOpen(!isOpen)} isOpen={isOpen}>
         {selectedOption}
       </DropdownButton>
       <DropdownContent isOpen={isOpen}>
-        <DropdownBg />
         {options.filter(x => x !== selectedOption).map(option => (
           <DropdownItem key={option} onClick={() => {
             onSelect(option);

@@ -73,7 +73,7 @@ const CurrencySelect = styled(ButtonGray) <{
   border: none;
   font-size: 24px;
   font-weight: 400;
-  width: 100px;
+  width: 110px;
   padding: ${({ selected }) => selected ? '4px 8px 4px 4px' : '6px 6px 6px 8px'};
   gap: 0px;
   justify-content: space-between;
@@ -247,7 +247,6 @@ export default function GeneralCurrencyInputPanel({
           <div style={{ color, fontSize: '14px', marginLeft: '10px' }}>
             Pay{currency && value && price[0] && ` : ${formatUSDValuePanel(price[0] * Number(tryParseCurrencyAmount(value, currency)?.toExact()))}`}
           </div>
-
 
           {!hideInput && !hideBalance && currency && (
             <FiatRow >

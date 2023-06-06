@@ -6,21 +6,20 @@ const SliderContainer = styled.div`
   position: relative;
   display: flex;
   margin-left: 10px;
+  height: 30px;
   flex-direction: column;
   width: 75%;
   `
 const SliderInput = styled.input<{ fillPercent: number }>`
   -webkit-appearance: none;
-  --webkit-fill: ${({ fillPercent }) => fillPercent}%;
   width: 100%;
-  height: 10px;
+  height: 8px;
   padding: 0px;
   border-radius: 5px;
   background: #1B2126;
   background-color: #1B2126;
   outline: none;
-  background-color: #555;
-    box-shadow: 0 0 0.1px 1px #555;
+
 
   &::-webkit-slider-thumb {
     -webkit-appearance: none;
@@ -29,7 +28,7 @@ const SliderInput = styled.input<{ fillPercent: number }>`
     height: 10px;
     border-radius: 50%;
     background: #AC90E3;  // Thumb color
-    border: 2px solid #1B2126;
+    border: 3px solid #1B2126;
     cursor: pointer;
   }
 
@@ -39,7 +38,7 @@ const SliderInput = styled.input<{ fillPercent: number }>`
     margin-bottom: 5px;
     border-radius: 50%;
     background: #AC90E3;  // Thumb color
-    border: 2px solid #1B2126;
+    border: 3px solid #1B2126;
     cursor: pointer;
   }
 
@@ -51,7 +50,7 @@ const SliderInput = styled.input<{ fillPercent: number }>`
     );
     width: 100% ;
     border-radius: 5px;
-    height: 10px;
+    height: 6px;
   }
 
   &::-moz-range-progress {
@@ -61,7 +60,7 @@ const SliderInput = styled.input<{ fillPercent: number }>`
       #AC90E3 100%
     );  // Progress color
     border-radius: 5px;
-    height: 10px;
+    height: 6px;
   }
 
   &::-moz-range-track {
@@ -73,7 +72,7 @@ const SliderInput = styled.input<{ fillPercent: number }>`
       #1B1E37 100%
     );
     border-radius: 5px;
-    height: 10px;
+    height: 6px;
   }
 
 `;

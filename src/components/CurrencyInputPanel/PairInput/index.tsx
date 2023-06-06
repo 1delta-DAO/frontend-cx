@@ -38,7 +38,7 @@ const PairSelect = styled(ButtonGray) <{
   border: none;
   font-size: 24px;
   font-weight: 400;
-  width: ${({ wideMode }) => (wideMode ? '160px' : '100px')};
+  width: ${({ wideMode }) => (wideMode ? '160px' : '120px')};
   ${({ wideMode }) => wideMode ? '' : 'max-width: 110px;'}
   padding: ${({ selected }) => selected ? '4px 8px 4px 4px' : '6px 6px 6px 8px'};
   justify-content: space-between;

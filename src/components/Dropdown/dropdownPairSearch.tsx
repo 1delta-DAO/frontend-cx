@@ -24,7 +24,6 @@ const DropdownWrapper = styled.div`
 
 
 const DropdownInput = styled.input`
-  width: 100px;
   font-size: 14px;
   border: none;
   background-color: transparent;
@@ -258,6 +257,7 @@ export const SingleSearchDropdown: React.FC<SingleDropdownProps> = ({ isLong, se
       <Row key={String(selectedOption)}>
         <Image src={TOKEN_SVGS[selectedOption?.[isLong ? 0 : 1] ?? placeholder]} style={{ width: '25px' }} />
         <DropdownInput
+          style={{ width: '60px' }}
           type="text"
           value={inputValue}
           onChange={handleInputChange}
