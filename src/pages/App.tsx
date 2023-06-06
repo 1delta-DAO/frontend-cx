@@ -74,9 +74,6 @@ export default function App() {
   const redesignFlagEnabled = useRedesignFlag() === RedesignVariant.Enabled
 
   const { pathname } = useLocation()
-  const currentPage = getCurrentPageFromLocation(pathname)
-  const isDarkMode = useIsDarkMode()
-  const isExpertMode = useIsExpertMode()
 
   useAnalyticsReporter()
 

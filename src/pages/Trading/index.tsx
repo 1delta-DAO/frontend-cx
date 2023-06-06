@@ -1176,7 +1176,8 @@ export default function Professional() {
               style={'10'}
               withdateranges={true}
               save_image={false}
-              bnackgroundColor={'#8169B0'}
+              backgroundColor={'#000000'}
+              toolbar_bg={'#000000'}
             />
           </ChartContainer>
           <PositionTable
