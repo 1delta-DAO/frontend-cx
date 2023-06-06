@@ -119,7 +119,7 @@ const DepositTypeDropdown = ({ selectedOption, onSelect, options }: DepositTypeS
 
   return (
     <DropdownContainer>
-      <DropdownButton onClick={() => setIsOpen(!isOpen)} isOpen={isOpen}>
+      <DropdownButton onClick={() => options.length > 1 && setIsOpen(!isOpen)} isOpen={isOpen}>
         {selectedOption}
       </DropdownButton>
       <DropdownContent isOpen={isOpen}>
