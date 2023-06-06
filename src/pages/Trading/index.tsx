@@ -295,11 +295,6 @@ const getPairs = (assets: SupportedAssets[]): [SupportedAssets, SupportedAssets]
   return pairs
 }
 
-interface AssetRowProps {
-  asset: SupportedAssets
-  onSelect: (a: SupportedAssets) => void
-}
-
 
 enum Mode {
   LONG = 'Long',
@@ -435,10 +430,13 @@ export default function Professional() {
   const selectedAsset = selectedIsAsset ? selectedCurrencyOutside.symbol as SupportedAssets : undefined
 
   useEffect(() => {
-    if (depositMode == DepositMode.DIRECT && !selectedIsAsset)
+    if (depositMode === DepositMode.DIRECT && !selectedIsAsset)
       setDepositMode(DepositMode.TO_COLLATERAL)
 
     if (pair[0] === SupportedAssets.USDC && selectedAsset === SupportedAssets.USDC)
+      setDepositMode(DepositMode.DIRECT)
+
+    if (depositMode !== DepositMode.DIRECT && pair[0] === selectedAsset)
       setDepositMode(DepositMode.DIRECT)
   },
     [depositMode, selectedIsAsset, pair]

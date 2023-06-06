@@ -33,7 +33,8 @@ import {
 import { LendingProtocol } from 'state/1delta/actions'
 import { useCurrentLendingProtocol } from 'state/1delta/hooks'
 import { useChainId } from 'state/globalNetwork/hooks'
-import { TESTNET_CHAIN_IDS } from 'constants/chains'
+import { SupportedChainId, TESTNET_CHAIN_IDS } from 'constants/chains'
+import { WRAPPED_NATIVE_CURRENCY } from 'constants/tokens'
 
 const ContentWrapper = styled(Column) <{ redesignFlag?: boolean }>`
   background-color: ${({ theme, redesignFlag }) => redesignFlag && theme.backgroundSurface};
@@ -106,10 +107,9 @@ export function CurrencySearch({
     // if(chainId === SupportedChainId.POLYGON_MUMBAI || chainId === supportedChainId)
     return {
       ...(isTestnet ? [] : validatedTokens),
-      ...(lendingProtocol === LendingProtocol.AAVE
-        ? getAaveTokensByAddress(chainId) : lendingProtocol === LendingProtocol.COMPOUNDV3
-          ? getCompoundV3TokensByAddress(chainId)
-          : getCompoundTokensByAddress(chainId)),
+      ...getCompoundTokensByAddress(chainId),
+      ...(chainId === SupportedChainId.POLYGON_ZK_EVM && WRAPPED_NATIVE_CURRENCY[chainId] ? { [WRAPPED_NATIVE_CURRENCY[SupportedChainId.POLYGON_ZK_EVM]?.address ?? '']: WRAPPED_NATIVE_CURRENCY[chainId] } : {})
+      ,
     }
   }, [chainId, lendingProtocol])
   // if they input an address, use it
@@ -275,26 +275,6 @@ export function CurrencySearch({
             <Trans>No results found.</Trans>
           </ThemedText.DeprecatedMain>
         </Column>
-      )}
-      {!redesignFlagEnabled && (
-        <Footer>
-          <Row justify="center">
-            <ButtonText
-              onClick={showManageView}
-              color={theme.deprecated_primary1}
-              className="list-token-manage-button"
-            >
-              <RowFixed>
-                <IconWrapper size="16px" marginRight="6px" stroke={theme.deprecated_primaryText1}>
-                  <Edit />
-                </IconWrapper>
-                <ThemedText.DeprecatedMain color={theme.deprecated_primaryText1}>
-                  <Trans>Manage Token Lists</Trans>
-                </ThemedText.DeprecatedMain>
-              </RowFixed>
-            </ButtonText>
-          </Row>
-        </Footer>
       )}
     </ContentWrapper>
   )
