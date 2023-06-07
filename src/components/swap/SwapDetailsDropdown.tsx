@@ -126,7 +126,7 @@ export default function SwapDetailsDropdown({
 }: SwapDetailsInlineProps) {
   const theme = useTheme()
   const chainId = useChainId()
-  const [showDetails, setShowDetails] = useState(false)
+  const [showDetails, setShowDetails] = useState(true)
   const redesignFlag = useRedesignFlag()
   const redesignFlagEnabled = redesignFlag === RedesignVariant.Enabled
 

@@ -7,9 +7,10 @@ import {
   YieldBox
 } from 'components/Styles/tableStyles'
 import {
-  AnimatedTokenPositionIcon
+  AnimatedTokenPositionIcon, PairPosition
 } from 'components/TokenDetail'
 import {
+  formatPriceString,
   formatSmallGeneralUSDValue,
   formatSmallGeneralValue,
   formatSmallValue
@@ -19,9 +20,13 @@ import { MouseoverTooltip } from 'components/Tooltip'
 
 import { LendingProtocol } from 'state/1delta/actions'
 import { PreparedAssetData } from 'hooks/asset/useAssetData'
-import { AssetCellPro, AssetHeaderPro, PnLCellPro, PnLHeaderPro, PositionCellPro, PositionCellWithChangePro, PositionRowPro, PriceCellPro, TimeCellPro, TimeHeaderPro } from 'components/Styles/tableStylesProfessional'
-import { AaveInterestMode } from 'types/1delta'
-
+import { AssetCellPro, AssetHeaderPro, CheckboxCellPro, PnLCellPro, PnLHeaderPro, PositionCellPro, PositionCellWithChangePro, PositionRowPro, PriceCellPro, RewardsHeaderPro, TimeCellPro, TimeHeaderPro } from 'components/Styles/tableStylesProfessional'
+import { AaveInterestMode, SupportedAssets } from 'types/1delta'
+import { Mode } from 'pages/Trading'
+import { TOKEN_SVGS } from 'constants/1delta'
+import { default as ovixStandalone } from 'assets/svg/logos/logo-0vix.svg'
+import { ExternalLinkIcon } from 'components/TokenSafety'
+import { ButtonPrimary, ButtonSecondary } from 'components/Button'
 
 export const ValueText = styled.div<{ positive: boolean }>`
 font-size: 14px;
@@ -63,13 +68,27 @@ const ImageVariable = styled(BarChart2)`
   margin-left: 5px;
 `
 
-const SimpleRow = styled.div`
+const SimpleCol = styled.div`
+  margin-left: -10px;
   display: flex;
-  flex-direction: row;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   justify-content: flex-start;
 `
 
+const PnLCell = styled.div<{ pos: boolean }>`
+text-align: left;
+  ${({ pos }) => pos ? `
+    color: #4ADE80;
+    ` : `
+  color: #EF4444;
+  `}
+`
+
+const PnLCellUSD = styled(PnLCell)`
+opacity: 0.7;
+font-size: 10px ;
+`
 const ResponsiveCheck = styled(Check)``
 
 export function ButtonRadioChecked({
@@ -92,222 +111,196 @@ export function ButtonRadioChecked({
   )
 }
 
-export interface PositionProps extends PreparedAssetData {
+export interface SlotData {
+  pair: [SupportedAssets, SupportedAssets]
+  leverage: number
+  direction: Mode
+  pnl: number
+  healthFactor: number,
+  price: number
+  size: number
+  rewardApr: number
+  supplyApr: number
+  borrowApr: number
+}
+
+const PriceText = styled.div`
+  text-align: left;
+  color: ${({ theme }) => theme.textSecondary};
+  font-size: 12px;
+`
+
+
+const LiqPriceText = styled(PriceText)`
+  text-align: left;
+  color: #FBBF24;
+  font-weight: 400;
+  font-size: 12px;
+`
+
+const TimeText = styled.div`
+  text-align: left;
+  color: ${({ theme }) => theme.textSecondary};
+  font-size: 12px;
+  font-weight: 300;
+`
+
+const DateText = styled(TimeText)`
+  font-weight: 400;
+`
+
+
+const AprText = styled.div<{ pos: boolean }>`
+  text-align: left;
+  margin-left: 4px;
+  color: ${({ theme }) => theme.textSecondary};
+  font-size: 12px;
+  font-weight: 200;
+  ${({ pos }) => pos ? `
+    color: #4ADE80;
+    ` : `
+  color: #EF4444;
+  `}
+`
+
+
+
+
+export interface PositionProps extends SlotData {
   isMobile: boolean
-  lendingProtocol: LendingProtocol
-  change?: { amount: number, type: AaveInterestMode }
 }
 
 export default function PositionRow(props: PositionProps) {
   const { account, chainId } = useChainIdAndAccount()
 
-  const isLong = props.hasPosition
 
   const aprBorrow = useMemo(() => {
-    return `${props.apr.toFixed(props.isMobile ? 2 : 3)}%`
-  }, [chainId, props.apr, props.isMobile])
-
-  const aprBorrowStable = useMemo(() => {
-    return `${props.borrowAprStable.toFixed(props.isMobile ? 2 : 3)}%`
-  }, [chainId, props.borrowAprStable, props.isMobile])
+    return `${props.borrowApr.toFixed(props.isMobile ? 2 : 3)}%`
+  }, [chainId, props.borrowApr, props.isMobile])
 
   const aprSupply = useMemo(() => {
-    return `${props.apr.toFixed(props.isMobile ? 2 : 3)}%`
-  }, [chainId, props.apr, props.isMobile])
+    return `${props.supplyApr.toFixed(props.isMobile ? 2 : 3)}%`
+  }, [chainId, props.supplyApr, props.isMobile])
 
-  const [hasChange, valPlusChange, valPlusChangeUsd] = useMemo(() => {
-    if (!props.change || props.change.amount === 0) return [false, 0, 0]
+  const aprReward = useMemo(() => {
+    return `${props.rewardApr.toFixed(props.isMobile ? 2 : 3)}%`
+  }, [chainId, props.rewardApr, props.isMobile])
 
-    switch (props.change.type) {
-      case AaveInterestMode.NONE: {
-        return [true, props.change.amount + props.userBalance, props.change.amount * props.price + props.userBalanceUsd]
-      }
-      case AaveInterestMode.VARIABLE: {
-        return [true, props.change.amount + props.userBorrow, props.change.amount * props.price + props.userBorrowUsd]
-      }
-      case AaveInterestMode.STABLE: {
-        return [true, props.change.amount + props.userBorrowStable, props.change.amount * props.price + props.userBorrowStableUsd]
-      }
-    }
-  },
-    [props.price, props.change]
-  )
 
   return (
     <PositionRowPro hasBalance={false} hasWalletBalance={false}>
       <AssetCellPro>
-        <AnimatedTokenPositionIcon asset={props.assetId} isMobile={props.isMobile} />
+        <PairPosition pair={props.pair} isMobile={props.isMobile} leverage={props.leverage} direction={props.direction} />
       </AssetCellPro>
       <PnLCellPro  >
-        <SimpleRow>
-          PnL
-        </SimpleRow>
+        <SimpleCol>
+          <PnLCell pos={props.pnl > 0}>
+            {props.pnl > 0 ? '+' : ''}{props.pnl}%
+          </PnLCell>
+          <PnLCellUSD pos={props.pnl > 0}>
+            {props.pnl > 0 ? '+' : ''}{formatSmallGeneralUSDValue(props.pnl * props.price)}
+          </PnLCellUSD>
+        </SimpleCol>
       </PnLCellPro>
       <PriceCellPro  >
-        <SimpleRow>
-          Entry
-        </SimpleRow>
+        <PriceText>
+          {formatPriceString(String(props.price * 1.01))}
+        </PriceText>
       </PriceCellPro>
       <PriceCellPro  >
-        <SimpleRow>
-          Market
-        </SimpleRow>
+        <PriceText>
+          {formatPriceString(String(props.price))}
+        </PriceText>
       </PriceCellPro>
       <PriceCellPro  >
-        <SimpleRow>
-          Liq. Price
-        </SimpleRow>
+        {/* <SimpleCol> */}
+        {/* <LiqPriceText>
+            Health:  {(Math.round(props.healthFactor * 10) / 10).toLocaleString()}
+          </LiqPriceText> */}
+        <LiqPriceText>
+          {formatPriceString(String(props.price * 0.8))}
+        </LiqPriceText>
+        {/* </SimpleCol> */}
       </PriceCellPro>
+      <RewardsHeaderPro hasFilter={false} isEditing={false}>
+        <SimpleCol>
+          <SimpelRow>
+            <StyledLogo src={ovixStandalone} />
+            <AprText pos>
+              +{aprReward}
+            </AprText>
+          </SimpelRow>
+          <SimpelRow>
+            <StyledLogo src={TOKEN_SVGS[props.pair[props.direction === Mode.LONG ? 0 : 1]]} />
+            <AprText pos>
+              +{aprSupply}
+            </AprText>
+          </SimpelRow>
+          <SimpelRow>
+            <StyledLogo src={TOKEN_SVGS[props.pair[props.direction === Mode.LONG ? 1 : 0]]} />
+            <AprText pos={false}>
+              -{aprBorrow}
+            </AprText>
+          </SimpelRow>
+        </SimpleCol>
+      </RewardsHeaderPro>
       <TimeCellPro >
-        Time
+        <SimpleCol>
+          <TimeText>
+            {new Date(Date.now()).toLocaleTimeString()}
+          </TimeText>
+          <DateText>
+            {td(new Date(Date.now()))}
+          </DateText>
+        </SimpleCol>
       </TimeCellPro>
+      <CheckboxCellPro>
+        <LinkOutContainer>
+          <CloseButton>
+            Close
+          </CloseButton>
+          <ExternalLinkIcon />
+        </LinkOutContainer>
+      </CheckboxCellPro>
     </PositionRowPro >
   )
 }
 
-interface APRProps {
-  isLong: boolean
-  changeType?: AaveInterestMode | undefined
-  hasChange: boolean
-  aprDeposit: string
-  apr: string
-  aprStable: string
-  hasStable: boolean
-  hasVariable: boolean
+const CloseButton = styled.button`
+border: none;
+color: ${({ theme }) => theme.textPrimary};
+background: #967CC9;
+width: 50px;
+border-radius: 5px;
+font-weight: 450;
+&:hover{
+  opacity: 0.6;
+}
+`
+
+const td = (date: Date) => {
+
+  return date.toLocaleDateString("en-US", { day: 'numeric' }) + "-"
+    + date.toLocaleDateString("en-US", { month: 'short' }) + "-" +
+    date.toLocaleDateString("en-US", { year: 'numeric' })
 }
 
-
-export const YieldRow = styled.div`
+const LinkOutContainer = styled.div`
+  display: flex;
+  flex-direction:row;
+  align-items: center;
+  justify-content: center;
+  margin-right: 5px;
+`
+const SimpelRow = styled.div`
   display: flex;
   flex-direction: row;
-  align-self: left;
-  justify-content: space-between;
-  align-items: space-between;
-  font-size: 14px;
-  max-width: 120px;
+  align-items: center;
+  justify-content: flex-start;
 `
 
 
-function APRComp(props: APRProps) {
-
-  const changeFlags = useMemo(() => {
-    if (!props.hasChange) return [false, false, false]
-    return [
-      props.changeType === AaveInterestMode.NONE,
-      props.changeType === AaveInterestMode.VARIABLE,
-      props.changeType === AaveInterestMode.STABLE,
-    ]
-  },
-    [props.hasChange, props.changeType]
-  )
-
-  return (
-    <YieldBox>
-      {(props.isLong || changeFlags[0]) && <MouseoverTooltip
-        text={
-          <>
-            <ImageVariable />
-            {'Variable deposit APR - will change based on market conditions.'}
-          </>
-        }
-      >
-        <YieldRow>
-
-          <ImageVariable />
-
-          <div>{`${props.aprDeposit}`}</div>
-        </YieldRow>
-      </MouseoverTooltip >
-      }
-      {(props.hasVariable || changeFlags[1]) && <MouseoverTooltip
-        text={
-          <>
-            <ImageVariable />
-            {'Variable borrowing APR - will change based on market conditions.'}
-          </>
-        }
-      >
-        <YieldRow>
-
-          <ImageVariable />
-
-          <div>{`${props.apr}`}</div>
-        </YieldRow>
-      </MouseoverTooltip >
-      }
-      {(props.hasStable || changeFlags[2]) && (
-        <MouseoverTooltip
-          text={
-            <>
-              <ImageStable />
-              {'Stable APR for borrowing, usually higher than variable rates, however no fluctuations expected.'}
-            </>
-          }
-        >
-          <YieldRow>
-            <ImageStable />
-            <div>{`${props.aprStable}`}</div>
-          </YieldRow>
-        </MouseoverTooltip >
-      )}
-    </YieldBox>
-  )
-}
-
-const ArrowRightIcon = styled(ArrowRight) <{ pos: boolean }>`
-    color: ${({ theme, pos }) => pos ? theme.deprecated_green1 : theme.deprecated_red2};
-    width: 12px;
-    height: 12px;
-    `
-
-
-interface RowWithChangeProps {
-  isMobile: boolean
-  hasChange: boolean;
-  positive: boolean;
-  amount: number;
-  newAmount: number;
-}
-
-function RowWithChange(props: RowWithChangeProps) {
-
-  return (
-    (props.hasChange ?
-      <ChangeRow>
-        <ValueTextMinor positive={props.positive}>
-          {props.amount != 0 ? `${props.positive ? '+' : '-'}${formatSmallGeneralValue(props.amount)}` : 0}</ValueTextMinor>
-        <ArrowRightIcon pos={props.amount < props.newAmount} />
-        <ValueText positive={props.positive}>
-          {`${props.positive ? '+' : '-'}`}{formatSmallGeneralValue(props.newAmount)}</ValueText>
-      </ChangeRow>
-      : props.amount !== 0 ? <ValueText positive={props.positive}>
-        {props.positive ? '+' : '-'}{formatSmallGeneralValue(props.amount)}</ValueText> : null
-    )
-  )
-}
-
-
-interface RowWithChangeUsdProps {
-  isMobile: boolean
-  hasChange: boolean;
-  positive: boolean;
-  amountUsd: number;
-  newAmountUsd: number;
-
-}
-
-function RowWithChangeUsd(props: RowWithChangeUsdProps) {
-  return (
-    (props.hasChange ?
-      <ChangeRow>
-        <ValueTextMinor positive={props.positive}>
-          {props.amountUsd != 0 ? `${props.positive ? '+' : '-'}${formatSmallGeneralUSDValue(props.amountUsd)}` : 0}</ValueTextMinor>
-        <ArrowRightIcon pos={props.amountUsd < props.newAmountUsd} />
-        <ValueText positive={props.positive}>
-          {`${props.positive ? '+' : '-'}`}{formatSmallGeneralUSDValue(Math.abs(props.newAmountUsd))}</ValueText>
-      </ChangeRow>
-      : props.amountUsd != 0 ? <ValueText positive={props.positive}>
-        {`${props.positive ? '+' : '-'}`}{formatSmallGeneralUSDValue(props.amountUsd)}</ValueText> : null
-    )
-  )
-}
+const StyledLogo = styled.img`
+  width: 15px;
+  height: 15px;
+`

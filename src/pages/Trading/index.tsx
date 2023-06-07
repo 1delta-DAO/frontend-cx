@@ -1,6 +1,5 @@
 import { BaseButton, ButtonSecondary } from "components/Button";
 import Loader from "components/Loader";
-import { darken } from "polished";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import TradingViewWidget from 'react-tradingview-widget';
 import styled, { css, useTheme } from "styled-components";
@@ -28,7 +27,6 @@ import { MAINNET_CHAINS } from 'constants/1delta'
 import { SupportedChainId, isSupportedChain } from 'constants/chains'
 import { BigNumber } from 'ethers'
 import { RedesignVariant, useRedesignFlag } from 'featureFlags/flags/redesign'
-import { getAaveTokens } from 'hooks/1delta/tokens'
 import { useGetMarginTraderContract } from 'hooks/1delta/use1DeltaContract'
 import JSBI from 'jsbi'
 import { useIsMobile } from 'hooks/useIsMobile'
@@ -86,8 +84,40 @@ import { calculateCompoundRiskChangeSlot, useGetCompoundRiskParametersSlot } fro
 import { useAlgebraClientSideV3 } from "hooks/professional/algebra/useClientSideV3Trade";
 import { UniswapTrade } from "utils/Types";
 import SettingsTab from "components/Settings";
+import { SlotData } from "./components/MarketTable/PositionRow";
 
+export enum Mode {
+  LONG = 'Long',
+  SHORT = 'Short',
+  EXPERT = 'Expert',
+}
 
+const dummyData: SlotData[] = [
+  {
+    pair: [SupportedAssets.WBTC, SupportedAssets.USDC],
+    leverage: 2.0,
+    direction: Mode.LONG,
+    pnl: 1020,
+    healthFactor: 1.1,
+    price: 21123.2,
+    size: 100,
+    rewardApr: 0.12,
+    supplyApr: 0.12,
+    borrowApr: 0.12,
+  },
+  {
+    pair: [SupportedAssets.USDC, SupportedAssets.ETH],
+    leverage: 2.5,
+    direction: Mode.SHORT,
+    pnl: -23,
+    price: 1823.2,
+    healthFactor: 1.01,
+    size: 1500,
+    rewardApr: 0.12,
+    supplyApr: 0.12,
+    borrowApr: 0.12,
+  },
+]
 export const ArrowWrapper = styled.div<{ clickable: boolean; redesignFlag: boolean }>`
   display: flex;
   align-items: center;
@@ -298,11 +328,6 @@ const getPairs = (assets: SupportedAssets[]): [SupportedAssets, SupportedAssets]
 }
 
 
-enum Mode {
-  LONG = 'Long',
-  SHORT = 'Short',
-  EXPERT = 'Expert',
-}
 
 const assetToId = (asset: SupportedAssets, chainId: number, protocol: LendingProtocol) => {
   if (asset === SupportedAssets.ETH && ETHEREUM_CHAINS.includes(chainId))
@@ -1183,7 +1208,7 @@ export default function Professional() {
           <PositionTable
             tradeImpact={{}}
             isMobile={isMobile}
-            assetData={assetData}
+            assetData={account ? dummyData : []}
           />
         </CartAndTableContainer>
       </ContentContainer>

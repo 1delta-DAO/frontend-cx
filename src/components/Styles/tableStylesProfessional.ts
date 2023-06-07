@@ -1,9 +1,10 @@
+import { center } from 'nft/css/common.css'
 import styled from 'styled-components/macro'
 import {
   PROFESSIONAL_APR_CELL_WIDTH as PROFESSIONAL_REWARDS_CELL_WIDTH,
   PROFESSIONAL_ASSET_CELL_WIDTH,
-  PROFESSIONAL_BORROW_APR_CELL_WIDTH as PROFESSIONAL_TIME_CELL_WIDTH,
-  PROFESSIONAL_BORROW_CELL_WIDTH as PROFESSIONAL_PRICE_CELL_WIDTH,
+  PROFESSIONAL_TIME_CELL_WIDTH,
+  PROFESSIONAL_PRICE_CELL_WIDTH,
   PROFESSIONAL_COLLATERAL_SWITCH_CELL_WIDTH as PROFESSIONAL_PNL_CELL_WIDTH,
   PROFESSIONAL_POSITION_CELL_WIDTH,
   PROFESSIONAL_LIQUIDITY_CELL_WIDTH,
@@ -11,9 +12,8 @@ import {
   PROFESSIONAL_TOTAL_CELL_WIDTH,
   PROFESSIONAL_WALLET_CELL_WIDTH,
   PROFESSIONAL_APR_CELL_WIDTH_MOBILE as PROFESSIONAL_REWARDS_CELL_WIDTH_MOBILE,
-  PROFESSIONAL_ASSET_CELL_WIDTH_MOBILE,
-  PROFESSIONAL_BORROW_APR_CELL_WIDTH_MOBILE as PROFESSIONAL_TIME_CELL_WIDTH_MOBILE,
-  PROFESSIONAL_BORROW_CELL_WIDTH_MOBILE as PROFESSIONAL_PRICE_CELL_WIDTH_MOBILE,
+  PROFESSIONAL_TIME_CELL_WIDTH_MOBILE,
+  PROFESSIONAL_PRICE_CELL_WIDTH_MOBILE,
   PROFESSIONAL_COLLATERAL_SWITCH_CELL_WIDTH_MOBILE as PROFESSIONAL_PNL_CELL_WIDTH_MOBILE,
   PROFESSIONAL_POSITION_CELL_WIDTH_MOBILE,
   PROFESSIONAL_LIQUIDITY_CELL_WIDTH_MOBILE,
@@ -359,7 +359,7 @@ export const TableHeaderRowPro = styled.tr`
   justify-content: space-between;
   background-color: ${({ theme }) => theme.deprecated_bg0};
   &:last-child {
-    padding-right: 10px;
+    padding-right: -10px;
   }
   &:first-child {
 
@@ -389,7 +389,6 @@ export const DebtTableHeaderRow = styled.tr`
 // headerPro components - same widths as cells
 
 export const CheckboxHeaderPro = styled(TableHeaderItem)`
-  max-width: 100px;
   width: ${PROFESSIONAL_SELECT_CELL_WIDTH};
   ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
   width: ${PROFESSIONAL_SELECT_CELL_WIDTH_MOBILE};
@@ -404,6 +403,10 @@ export const AssetHeaderPro = styled(TableHeaderItem)`
 `
 
 export const RewardsHeaderPro = styled(TableHeaderItem)`
+display: flex;
+flex-direction: row;
+align-items: center;
+justify-content: flex-start ;
   width: ${PROFESSIONAL_REWARDS_CELL_WIDTH};
     ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
   width: ${PROFESSIONAL_REWARDS_CELL_WIDTH_MOBILE};
@@ -420,14 +423,14 @@ export const LiquidityHeaderPro = styled(TableHeaderItem)`
 export const TimeHeaderPro = styled(TableHeaderItem)`
   width: ${PROFESSIONAL_TIME_CELL_WIDTH};
   display: flex;
-  align-items: center;
-  justify-content: center;
+  text-align: left;
   ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
   width: ${PROFESSIONAL_TIME_CELL_WIDTH_MOBILE};
   `};
 `
 
 export const PriceHeaderPro = styled(TableHeaderItem)`
+  text-align: left;
   width: ${PROFESSIONAL_PRICE_CELL_WIDTH};
   ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
   width: ${PROFESSIONAL_PRICE_CELL_WIDTH_MOBILE};
@@ -443,7 +446,10 @@ export const PnLHeaderPro = styled(TableHeaderItem)`
 
 
 export const CheckboxCellPro = styled(CellPro)`
-  max-width: 100px;
+  display: flex;
+  flex-direction:row;
+  align-items: center;
+  justify-content: center;
   width: ${PROFESSIONAL_SELECT_CELL_WIDTH};
   ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
   width: ${PROFESSIONAL_SELECT_CELL_WIDTH_MOBILE};
@@ -452,12 +458,18 @@ export const CheckboxCellPro = styled(CellPro)`
 
 export const AssetCellPro = styled(CellPro)`
   width: ${PROFESSIONAL_ASSET_CELL_WIDTH};
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
     ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
   width: ${PROFESSIONAL_SELECT_CELL_WIDTH_MOBILE};
   `};
 `
 
 export const RewardsCellPro = styled(CellPro)`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   width: ${PROFESSIONAL_REWARDS_CELL_WIDTH};
     ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
   width: ${PROFESSIONAL_REWARDS_CELL_WIDTH_MOBILE};
@@ -483,6 +495,9 @@ export const TimeCellPro = styled(CellPro)`
 
 export const PriceCellPro = styled(CellPro)`
   width: ${PROFESSIONAL_PRICE_CELL_WIDTH};
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
   ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
   width: ${PROFESSIONAL_PRICE_CELL_WIDTH_MOBILE};
   `};
@@ -490,6 +505,10 @@ export const PriceCellPro = styled(CellPro)`
 
 export const PnLCellPro = styled(CellPro)`
   width: ${PROFESSIONAL_PNL_CELL_WIDTH};
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
     ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
   width: ${PROFESSIONAL_PNL_CELL_WIDTH_MOBILE};
   `};

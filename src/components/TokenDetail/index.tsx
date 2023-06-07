@@ -9,6 +9,7 @@ import { useAppDispatch } from 'state/hooks'
 import { usePriceAndRef } from 'state/oracles/hooks'
 import { useChainId } from 'state/globalNetwork/hooks'
 import { selectChart } from 'state/user/actions'
+import { Mode } from 'pages/Trading'
 
 const Wrapper = styled.div`
   cursor: pointer;
@@ -80,7 +81,6 @@ export default function TokenIcon({
     </Wrapper>
   )
 }
-
 
 export function AnimatedTokenIcon({
   asset,
@@ -194,4 +194,73 @@ export function AnimatedTokenPositionIcon({
   },
     [price, isDarkTheme, asset, isMobile])
 }
+
+const PairWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+`
+
+const DirectionBanner = styled.div<{ isLong: boolean }>`
+  border-radius: 8px;
+  color: #ff005568;
+  font-size: 10px;
+  margin: 2px;
+  height: 14px;
+  margin-left: 5px;
+  text-align: center;
+  width: 70px;
+  ${({ isLong }) => isLong ? `
+    border: 1px solid green;
+    color: #4ADE80;
+  background: #16a34a36;
+    ` : `
+  border: 1px solid red;
+  color: #EF4444;
+  background: #ef444438;
+  `}
+
+`
+
+
+const PairName = styled(AssetName)`
+  font-weight: 500;
+  font-size: 13px;
+  width: 110px;
+`
+export function PairPosition({
+  pair,
+  direction,
+  leverage,
+  isMobile,
+}: {
+  pair: [SupportedAssets, SupportedAssets];
+  direction: Mode;
+  leverage: number;
+  isMobile: boolean;
+}) {
+  return useMemo(() => {
+
+    return (<PairWrapper >
+      {isMobile ?
+        <>
+          <Image src={getTokenIcon(pair[1])} width={isMobile ? '20px' : '30px'} height={isMobile ? '20px' : '30px'} />
+          <Image src={getTokenIcon(pair[0])} width={isMobile ? '20px' : '30px'} height={isMobile ? '20px' : '30px'} />
+        </> :
+        <PairName>
+          {pair[0]} / {pair[1]}
+        </PairName>
+      }
+
+      <DirectionBanner isLong={direction === Mode.LONG}>
+        {direction.toLocaleUpperCase()} {Math.round(leverage * 10) / 10}x
+      </DirectionBanner>
+
+    </PairWrapper>
+    )
+  },
+    [pair, direction, leverage, isMobile])
+}
+
 

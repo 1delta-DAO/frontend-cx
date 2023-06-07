@@ -17,8 +17,8 @@ import {
   FilterActive,
 } from 'utils/tableUtils/filters'
 import { PreparedAssetData } from 'hooks/asset/useAssetData'
-import PositionRow from './PositionRow'
-import { AssetHeaderPro, TimeHeaderPro, TableContainerPro, TableHeaderPro, TableHeaderRowPro, PnLHeaderPro, PriceHeaderPro } from 'components/Styles/tableStylesProfessional'
+import PositionRow, { SlotData } from './PositionRow'
+import { AssetHeaderPro, TimeHeaderPro, TableContainerPro, TableHeaderPro, TableHeaderRowPro, PnLHeaderPro, PriceHeaderPro, CheckboxHeaderPro } from 'components/Styles/tableStylesProfessional'
 import { AaveInterestMode, SupportedAssets } from 'types/1delta'
 
 const Table = styled.table`
@@ -63,7 +63,7 @@ export interface MappedSwapAmounts {
 
 interface PositionTableProps {
   isMobile: boolean
-  assetData: PreparedAssetData[]
+  assetData: SlotData[]
   tradeImpact: MappedSwapAmounts
 }
 
@@ -98,7 +98,7 @@ export default function PositionTable({
     }
   }, [relevantAccount, lendingProtocol, userLoaded, initialize])
 
-  useInitializeDebtFilter(lendingProtocol, assetData.map(x => x.assetId))
+  // useInitializeDebtFilter(lendingProtocol, assetData.map(x => x.assetId))
 
   // if account changes we re-init
   useEffect(() => {
@@ -134,59 +134,33 @@ export default function PositionTable({
                 )}
               </SimpleRow>
             </PnLHeaderPro>
-            <PriceHeaderPro hasFilter onClick={handleUserBorrowFilter}>
-              <SimpleRow>
-                Entry
-                {filterStateChevrons.filter === FilterActive.USER && (
-                  <ChevronContainer>
-                    {filterStateChevrons.mode === Filter.DESC ? <ChevronDown /> : <ChevronUp />}
-                  </ChevronContainer>
-                )}
-              </SimpleRow>
+            <PriceHeaderPro hasFilter>
+              Entry
+
             </PriceHeaderPro>
-            <PriceHeaderPro hasFilter onClick={handleUserBorrowFilter}>
-              <SimpleRow>
-                Market
-                {filterStateChevrons.filter === FilterActive.USER && (
-                  <ChevronContainer>
-                    {filterStateChevrons.mode === Filter.DESC ? <ChevronDown /> : <ChevronUp />}
-                  </ChevronContainer>
-                )}
-              </SimpleRow>
+            <PriceHeaderPro hasFilter>
+              Market
             </PriceHeaderPro>
-            <PriceHeaderPro hasFilter onClick={handleUserBorrowFilter}>
-              <SimpleRow>
-                Liq. Price
-                {filterStateChevrons.filter === FilterActive.USER && (
-                  <ChevronContainer>
-                    {filterStateChevrons.mode === Filter.DESC ? <ChevronDown /> : <ChevronUp />}
-                  </ChevronContainer>
-                )}
-              </SimpleRow>
+            <PriceHeaderPro hasFilter>
+              Liq. Price
             </PriceHeaderPro>
-            <TimeHeaderPro hasFilter onClick={handleAprFilter}>
-              <SimpleRow>
-                Rewards
-              </SimpleRow>
+            <TimeHeaderPro hasFilter>
+              Rewards
             </TimeHeaderPro>
             <TimeHeaderPro hasFilter={false}>
               Time
             </TimeHeaderPro>
+            <CheckboxHeaderPro hasFilter={false}>
 
+            </CheckboxHeaderPro>
           </TableHeaderRowPro>
         </TableHeaderPro>
         <TableBody>
           {
-            assetData.filter(x => ((x.hasPosition || x.hasBorrowPosition) && Object.keys(tradeImpact).includes(x.assetId)))
-              .sort((a, b) => filterState.indexOf(a.assetId) - filterState.indexOf(b.assetId))
-              .map((dat, i) => <PositionRow isMobile={isMobile} {...dat} key={i} lendingProtocol={lendingProtocol} change={tradeImpact[dat.assetId]} />)
+            assetData
+              // .sort((a, b) => filterState.indexOf(a.pair[0]) - filterState.indexOf(b.assetId))
+              .map((dat, i) => <PositionRow isMobile={isMobile} {...dat} key={i} />)
           }
-          {
-            assetData.filter(x => (x.hasPosition || x.hasBorrowPosition) && !Object.keys(tradeImpact).includes(x.assetId))
-              .sort((a, b) => filterState.indexOf(a.assetId) - filterState.indexOf(b.assetId))
-              .map((dat, i) => <PositionRow isMobile={isMobile} {...dat} key={i} lendingProtocol={lendingProtocol} change={tradeImpact[dat.assetId]} />)
-          }
-
         </TableBody>
       </Table>
     </TableContainerPro>
