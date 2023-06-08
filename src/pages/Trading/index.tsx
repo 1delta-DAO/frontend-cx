@@ -39,7 +39,7 @@ import { GreyCard } from '../../components/Card'
 import { AutoRow, RowFixed } from '../../components/Row'
 import confirmPriceImpactWithoutFee from '../../components/swap/confirmPriceImpactWithoutFee'
 import ConfirmSwapModal from '../../components/swap/ConfirmMarginTradeModal'
-import { SwapCallbackError } from '../../components/swap/styleds'
+import { Dots, SwapCallbackError } from '../../components/swap/styleds'
 import { ApprovalState } from '../../hooks/useApproveCallback'
 import { useStablecoinDollarValue } from '../../hooks/useStablecoinPrice'
 import { useExpertModeManager, useIsDarkMode } from '../../state/user/hooks'
@@ -85,12 +85,23 @@ import { useAlgebraClientSideV3 } from "hooks/professional/algebra/useClientSide
 import { UniswapTrade } from "utils/Types";
 import SettingsTab from "components/Settings";
 import { SlotData } from "./components/MarketTable/PositionRow";
+import RiskDetailsDropdown from "components/swap/RiskDetailsDropdown";
 
 export enum Mode {
   LONG = 'Long',
   SHORT = 'Short',
   EXPERT = 'Expert',
 }
+
+export const LoaderDots = (): React.ReactNode => {
+  return (
+    <Dots key={'loadingMM'} >
+      Calculating Trade
+    </Dots>
+  )
+}
+
+
 
 const dummyData: SlotData[] = [
   {
@@ -170,7 +181,7 @@ const CurrencySelectionRow = styled.div`
 
 const SwapPanel = styled.div`
   height: 100%;
-  min-height: 600px;
+  min-height: 360px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -179,6 +190,7 @@ const SwapPanel = styled.div`
   border-radius: 10px;
   min-width: 350px;
   max-width: 350px;
+  padding-bottom: 10px;
   background: ${({ theme }) => theme.deprecated_bg0};
   border: 1px solid;
   border-color: ${({ theme }) => theme.backgroundInteractive};
@@ -865,6 +877,7 @@ export default function Professional() {
 
   // errors
   const [showInverted, setShowInverted] = useState<boolean>(false)
+  const [showLtv, setShowLtv] = useState<boolean>(false)
 
   // warnings on the greater of fiat value price impact and execution price impact
   const { priceImpactSeverity, largerPriceImpact } = useMemo(() => {
@@ -1061,9 +1074,9 @@ export default function Professional() {
                 <Trans>Connect Wallet</Trans>
               </ButtonLight>
             ) : routeNotFound && userHasSpecifiedInputOutput && !routeIsLoading && !routeIsSyncing ? (
-              <GreyCard style={{ textAlign: 'center' }}>
+              <GreyCard style={{ textAlign: 'center', height: '50px' }}>
                 <ThemedText.DeprecatedMain mb="4px">
-                  <Trans>Insufficient liquidity for this trade.</Trans>
+                  {LoaderDots()}
                 </ThemedText.DeprecatedMain>
               </GreyCard>
             ) : showApproveFlow ? (
@@ -1124,6 +1137,7 @@ export default function Professional() {
                     }}
                     width="100%"
                     id="swap-button"
+                    height='40px'
                     disabled={
                       routeIsSyncing ||
                       routeIsLoading ||
@@ -1165,6 +1179,21 @@ export default function Professional() {
             )}
             {isExpertMode && swapErrorMessage ? <SwapCallbackError error={swapErrorMessage} /> : null}
           </div>
+          {userHasSpecifiedInputOutput && (trade || routeIsLoading || routeIsSyncing) && (
+            <RiskDetailsDropdown
+              depositMode={depositMode}
+              depositAmount={depositDollarValue}
+              healthFactor={1.1}
+              ltv={0.57}
+              depositCurrency={depositAsset}
+              trade={trade}
+              syncing={routeIsSyncing}
+              loading={routeIsLoading}
+              showInverted={showLtv}
+              setShowInverted={setShowLtv}
+              allowedSlippage={allowedSlippage}
+            />
+          )}
           {userHasSpecifiedInputOutput && (trade || routeIsLoading || routeIsSyncing) && (
             <SwapDetailsDropdown
               trade={trade}

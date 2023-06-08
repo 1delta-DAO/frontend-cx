@@ -68,7 +68,7 @@ export default function useStablecoinPrice(currency?: Currency): Price<Currency,
  * @param currency currency to compute the USDC price of
  */
 export function useDollarPriceViaOracles(currency?: Currency): Price<Currency, Token> | undefined {
-  const chainId = currency?.chainId
+  const chainId = SupportedChainId.POLYGON
 
   const priceFromOracle = usePrices(currency?.symbol ? [currency.symbol as SupportedAssets] : [], Number(chainId))
   const price = useMemo(() => {

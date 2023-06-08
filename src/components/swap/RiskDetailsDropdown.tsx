@@ -3,6 +3,7 @@ import { Currency, Percent, TradeType } from '@uniswap/sdk-core'
 import AnimatedDropdown from 'components/AnimatedDropdown'
 import Card, { OutlineCard } from 'components/Card'
 import { AutoColumn } from 'components/Column'
+import { DepositMode } from 'components/Dropdown/depositTypeDropdown'
 import { LoadingOpacityContainer } from 'components/Loader/styled'
 import Row, { RowBetween, RowFixed } from 'components/Row'
 import { MouseoverTooltipContent } from 'components/Tooltip'
@@ -14,9 +15,12 @@ import { useChainId } from 'state/globalNetwork/hooks'
 import { InterfaceTrade } from 'state/routing/types'
 import styled, { keyframes, useTheme } from 'styled-components/macro'
 import { HideSmall, ThemedText } from 'theme'
+import { SupportedAssets } from 'types/1delta'
+import { AdvancedRiskDetails } from './AdvancedRiskDetails'
 
 import { AdvancedSwapDetails } from './AdvancedSwapDetails'
 import GasEstimateBadge from './GasEstimateBadge'
+import RiskEstimate from './RiskEstimate'
 import { ResponsiveTooltipContainer } from './styleds'
 import SwapRoute from './SwapRoute'
 import TradePrice from './TradePrice'
@@ -46,7 +50,7 @@ const StyledHeaderRow = styled(RowBetween) <{ disabled: boolean; open: boolean; 
   border-top: 1px solid ${({ theme, redesignFlag }) => (redesignFlag ? theme.backgroundOutline : 'transparent')};
   margin-top: ${({ redesignFlag }) => redesignFlag && '8px'};
   cursor: ${({ disabled }) => (disabled ? 'initial' : 'pointer')};
-  min-height: 40px;
+  max-height: 40px;
   border-radius: 5px;
 `
 
@@ -107,8 +111,13 @@ const Spinner = styled.div`
   top: -3px;
 `
 
-interface SwapDetailsInlineProps {
+interface RiskDetailsProps {
   trade: InterfaceTrade<Currency, Currency, TradeType> | undefined
+  depositCurrency: SupportedAssets
+  depositMode: DepositMode
+  depositAmount: number
+  ltv: number
+  healthFactor: number
   syncing: boolean
   loading: boolean
   showInverted: boolean
@@ -116,17 +125,22 @@ interface SwapDetailsInlineProps {
   allowedSlippage: Percent
 }
 
-export default function SwapDetailsDropdown({
+export default function RiskDetailsDropdown({
   trade,
+  depositAmount,
+  healthFactor,
+  depositMode,
+  depositCurrency,
   syncing,
   loading,
+  ltv,
   showInverted,
   setShowInverted,
   allowedSlippage,
-}: SwapDetailsInlineProps) {
+}: RiskDetailsProps) {
   const theme = useTheme()
   const chainId = useChainId()
-  const [showDetails, setShowDetails] = useState(false)
+  const [showDetails, setShowDetails] = useState(true)
   const redesignFlag = useRedesignFlag()
   const redesignFlagEnabled = redesignFlag === RedesignVariant.Enabled
 
@@ -151,9 +165,14 @@ export default function SwapDetailsDropdown({
                 <MouseoverTooltipContent
                   wrap={false}
                   content={
-                    <ResponsiveTooltipContainer origin="top right" style={{ padding: '0' }}>
+                    <ResponsiveTooltipContainer origin="top right" style={{ padding: '0', height: '40px' }}>
                       <Card padding="12px">
-                        <AdvancedSwapDetails
+                        <AdvancedRiskDetails
+                          depositMode={depositMode}
+                          ltv={ltv}
+                          depositAmount={depositAmount}
+                          healthFactor={healthFactor}
+                          depositCurrency={depositCurrency}
                           trade={trade}
                           allowedSlippage={allowedSlippage}
                           syncing={syncing}
@@ -171,7 +190,9 @@ export default function SwapDetailsDropdown({
             )}
             {trade ? (
               <LoadingOpacityContainer $loading={syncing}>
-                <TradePrice
+                <RiskEstimate
+                  ltv={ltv}
+                  healthFactor={healthFactor}
                   price={trade.executionPrice}
                   showInverted={showInverted}
                   setShowInverted={setShowInverted}
@@ -179,7 +200,7 @@ export default function SwapDetailsDropdown({
               </LoadingOpacityContainer>
             ) : loading || syncing ? (
               <ThemedText.DeprecatedMain fontSize={14}>
-                <Trans>Fetching best price...</Trans>
+                <Trans>Calculating Risk...</Trans>
               </ThemedText.DeprecatedMain>
             ) : null}
           </RowFixed>
@@ -205,10 +226,17 @@ export default function SwapDetailsDropdown({
           <AutoColumn gap={'8px'} style={{ padding: '0', paddingBottom: '8px' }}>
             {trade ? (
               <StyledCard redesignFlag={redesignFlagEnabled}>
-                <AdvancedSwapDetails trade={trade} allowedSlippage={allowedSlippage} syncing={syncing} />
+                <AdvancedRiskDetails
+                  ltv={ltv}
+                  depositMode={depositMode}
+                  depositAmount={depositAmount}
+                  depositCurrency={depositCurrency}
+                  healthFactor={healthFactor}
+                  trade={trade}
+                  allowedSlippage={allowedSlippage}
+                  syncing={syncing} />
               </StyledCard>
             ) : null}
-            {trade ? <SwapRoute trade={trade} syncing={syncing} /> : null}
           </AutoColumn>
         </AnimatedDropdown>
       </AutoColumn>

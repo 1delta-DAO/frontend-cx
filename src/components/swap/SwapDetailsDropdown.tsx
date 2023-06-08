@@ -46,7 +46,7 @@ const StyledHeaderRow = styled(RowBetween) <{ disabled: boolean; open: boolean; 
   border-top: 1px solid ${({ theme, redesignFlag }) => (redesignFlag ? theme.backgroundOutline : 'transparent')};
   margin-top: ${({ redesignFlag }) => redesignFlag && '8px'};
   cursor: ${({ disabled }) => (disabled ? 'initial' : 'pointer')};
-  min-height: 40px;
+  max-height: 40px;
   border-radius: 5px;
 `
 
