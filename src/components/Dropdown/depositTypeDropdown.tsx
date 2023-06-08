@@ -17,25 +17,6 @@ const DropdownContainer = styled.div`
   z-index: 1;
 `;
 
-
-const DropdownBg = styled.div`
-  position: absolute;  
-  display: none;
-  border-radius: 10px;
-  position: absolute;
-  min-width: 120px;
-  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-  z-index: 1;
-  padding: 12px 16px;
-  cursor: pointer;
-  background: ${({ theme }) => theme.deprecated_bg2};
-  backdrop-filter: blur(10px);
-  ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
-  max-width: 120px;
-  min-width: 120px;
-`};
-`;
-
 const DropdownButton = styled.button<{ isOpen: boolean }>`
   border: 1px solid ${({ theme }) => theme.deprecated_bg3};;
   background: none;
@@ -65,16 +46,16 @@ const DropdownContent = styled.div<{ isOpen: boolean }>`
   background-color: #060707;
   position: absolute;
   color: ${({ theme }) => theme.textSecondary};
-  height: 20px;
   border-radius: 4px;
   width: 120px;
   font-size: 12px;
-  height: 25px;
   font-weight: 200;
   cursor: pointer;
   backdrop-filter: blur(10px);
   z-index: ${Z_INDEX.modal};
   backdrop-filter: blur(10px);
+  overflow-x: hidden;
+  overflow-y: hidden;
   :hover & {
     display: block;
     border-top: none;
@@ -92,8 +73,7 @@ const DropdownContent = styled.div<{ isOpen: boolean }>`
 
 const DropdownItem = styled.div`
   width: 120px;
-  margin-top: 5px;
-
+  height: 20px;
   margin-left: 10px;
   display: block;
   color: ${({ theme }) => theme.textSecondary};
@@ -102,6 +82,9 @@ const DropdownItem = styled.div`
   font-size: 12px;
   font-weight: 200;
     border-top: none;
+  &:first-child{
+  margin-top: 5px;
+  }
   &:last-child {
     border-bottom: none;
   }
