@@ -20,8 +20,8 @@ import { computeRealizedPriceImpact } from '../../utils/prices'
 import { AutoColumn } from '../Column'
 import { RowBetween, RowFixed } from '../Row'
 import { MouseoverTooltip } from '../Tooltip'
-import FormattedPriceImpact from './FormattedPriceImpact'
 import { DepositMode } from 'components/Dropdown/depositTypeDropdown'
+import { default as ovixStandalone } from 'assets/svg/logos/logo-0vix.svg'
 
 const StyledCard = styled(Card)`
   padding: 0;
@@ -50,14 +50,14 @@ flex-direction: column;
 
 const ProgressWrapper = styled.div`
 width: 100%;
-height: 7px;
+height: 5px;
 border-radius: 20px;
 background-color: ${({ theme }) => theme.backgroundOutline};
 position: relative;
 `
 
 const Progress = styled.div<{ percentageString?: string, level: Level }>`
-height: 7px;
+height: 5px;
 border-radius: 20px;
 opacity: 0.6;
 ${({ theme, level }) => `
@@ -67,7 +67,7 @@ ${({ theme, level }) => `
     `  : level === Level.CRITICAL ? `
     0px 0px 2px 2px  ${theme.accentFailure};
     ` : `
-    0px 0px 1px 1px ${theme.accentSuccess};
+    0px 0px 0.01rem 0.01rem ${theme.accentSuccess};
     ` )}`}
 width: ${({ percentageString }) => percentageString ?? '0%'};
 `
@@ -93,9 +93,6 @@ justify-content: space-between;
 align-items: flex-start;
 `
 
-
-
-
 const StyledImg = styled.img`
   width: 20px;
   height: 20px;
@@ -107,10 +104,27 @@ const TextToImage = styled.div`
   display: flex;
   flex-direction: row;
 `
+const SimpleRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+`
+
+const AprRow = styled(SimpleRow)`
+  width: 70px;
+  padding: 1px;
+`
 
 interface AdvancedRiskDetailsProps {
   depositCurrency: SupportedAssets
   depositAmount: number
+  aprSupply: number
+  aprDeposit: number
+  aprBorrow: number
+  rewardSupply: number
+  rewardDeposit: number
+  rewardBorrow: number
   ltv: number
   depositMode: DepositMode
   healthFactor: number
@@ -138,11 +152,57 @@ function TextWithLoadingPlaceholder({
   )
 }
 
+const SimpleCol = styled.div`
+  margin-left: -10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+`
+
+
+
+const StyledLogo = styled.img`
+  width: 15px;
+  height: 15px;
+`
+
+const AprText = styled.div<{ pos: boolean }>`
+  text-align: left;
+  margin-left: 4px;
+  color: ${({ theme }) => theme.textSecondary};
+  font-size: 12px;
+  font-weight: 200;
+  ${({ pos }) => pos ? `
+    color: #4ADE80;
+    ` : `
+  color: #EF4444;
+  `}
+`
+
+export const SeparatorBase = styled(Separator)`
+ height: 2px;
+ opacity: 0.3;
+ background-color: ${({ theme, redesignFlag }) => (redesignFlag ? theme.backgroundOutline : theme.deprecated_bg5)};
+`
+
+export const SeparatorLight = styled(Separator)`
+ opacity: 0.7;
+ width: 70%;
+ margin-left: 50px;
+`
+
 export function AdvancedRiskDetails({
   trade,
   depositAmount,
   healthFactor,
   ltv,
+  aprSupply,
+  aprDeposit,
+  aprBorrow,
+  rewardSupply,
+  rewardDeposit,
+  rewardBorrow,
   depositCurrency,
   depositMode,
   allowedSlippage,
@@ -166,7 +226,7 @@ export function AdvancedRiskDetails({
     trade.outputAmount.currency.symbol as SupportedAssets,
     trade.inputAmount.currency.symbol as SupportedAssets] : undefined
   const [priceReceived, priceCollateral, priceDebt] = usePrices(data ?? [], SupportedChainId.POLYGON)
-
+  console.log("DEPOSIT", depositCurrency, depositMode)
   const [safeLtv, safeHf, state] = useMemo(() => {
     const _safeLtv = Number(ltv * 100)
     const _safeHf = healthFactor === 0 ? 100 : Number(healthFactor)
@@ -184,13 +244,13 @@ export function AdvancedRiskDetails({
             <MouseoverTooltip
               text={
                 <Trans>
-                  T
+                  The collateral in the selected position.
                 </Trans>
               }
               disableHover={hideInfoTooltips}
             >
               <ThemedText.DeprecatedSubHeader color={theme.deprecated_text1}>
-                <Trans>Expected Collateral</Trans>
+                <Trans>Collateral</Trans>
               </ThemedText.DeprecatedSubHeader>
             </MouseoverTooltip>
           </RowFixed>
@@ -203,8 +263,11 @@ export function AdvancedRiskDetails({
 
               </ThemedText.DeprecatedBlack>
               <StyledImg src={TOKEN_SVGS[data[1]]} />
+
+
             </TextToImage>
           </TextWithLoadingPlaceholder>
+
         </RowBetween>
         {trade && (depositMode !== DepositMode.TO_COLLATERAL) && <RowBetween>
           <RowFixed>
@@ -217,19 +280,72 @@ export function AdvancedRiskDetails({
                   ? `${formatSmallUSDValue(depositAmount)} in `
                   : '-'}
               </ThemedText.DeprecatedBlack>
-              <StyledImg src={TOKEN_SVGS[depositMode === DepositMode.DIRECT ? data[2] : SupportedAssets.USDC]} />
+              <StyledImg src={TOKEN_SVGS[depositMode === DepositMode.DIRECT ? data[0] : SupportedAssets.USDC]} />
             </TextToImage>
           </TextWithLoadingPlaceholder>
         </RowBetween>}
-        <Separator redesignFlag={redesignFlagEnabled} />
+        <SeparatorLight />
+        <RowBetween >
+          <RowFixed>
+            <MouseoverTooltip
+              text={
+                <Trans>
+                  The income on your collateral.
+                </Trans>
+              }
+              disableHover={hideInfoTooltips}
+            >
+              <ThemedText.DeprecatedSubHeader color={theme.textSecondary} fontWeight={'300'}>
+                <Trans>Yields</Trans>
+              </ThemedText.DeprecatedSubHeader>
+            </MouseoverTooltip>
+          </RowFixed>
+          <TextWithLoadingPlaceholder syncing={syncing} width={65}>
+            <SimpleCol>
+              <TextWithLoadingPlaceholder syncing={syncing} width={65}>
+                <SimpleRow>
+                  <AprRow>
+                    <StyledLogo src={ovixStandalone} />
+                    <AprText pos>
+                      +{`${rewardSupply.toFixed(2)}%`}
+                    </AprText>
+                  </AprRow>
+                  <AprRow>
+                    <StyledLogo src={TOKEN_SVGS[data[1]]} />
+                    <AprText pos>
+                      {`${aprSupply.toFixed(2)}%`}
+                    </AprText>
+                  </AprRow>
+                </SimpleRow>
+
+              </TextWithLoadingPlaceholder>
+              {(depositMode !== DepositMode.TO_COLLATERAL) && <SimpleRow>
+                <AprRow>
+                  <StyledLogo src={ovixStandalone} />
+                  <AprText pos>
+                    +{`${rewardDeposit.toFixed(2)}%`}
+                  </AprText>
+                </AprRow>
+                <AprRow>
+                  <StyledLogo src={TOKEN_SVGS[depositMode === DepositMode.DIRECT ? data[0] : SupportedAssets.USDC]} />
+                  <AprText pos>
+                    {`${aprDeposit.toFixed(2)}%`}
+                  </AprText>
+                </AprRow>
+              </SimpleRow>}
+            </SimpleCol>
+          </TextWithLoadingPlaceholder>
+
+        </RowBetween>
+        <SeparatorBase redesignFlag={redesignFlagEnabled} />
         <RowBetween>
           <RowFixed>
             <MouseoverTooltip
-              text={<Trans>The impact your trade has on the market price of this pool.</Trans>}
+              text={<Trans>The debt that is taken out for this position.</Trans>}
               disableHover={hideInfoTooltips}
             >
               <ThemedText.DeprecatedSubHeader color={theme.deprecated_text1}>
-                <Trans>Expected Debt</Trans>
+                <Trans>Debt</Trans>
               </ThemedText.DeprecatedSubHeader>
             </MouseoverTooltip>
           </RowFixed>
@@ -242,10 +358,41 @@ export function AdvancedRiskDetails({
 
               </ThemedText.DeprecatedBlack>
               <StyledImg src={TOKEN_SVGS[data[2]]} />
+
             </TextToImage>
           </TextWithLoadingPlaceholder>
         </RowBetween>
-        <Separator redesignFlag={redesignFlagEnabled} />
+        <SeparatorLight />
+        <RowBetween>
+          <RowFixed>
+            <MouseoverTooltip
+              text={<Trans>The yields that accrue on your debt.</Trans>}
+              disableHover={hideInfoTooltips}
+            >
+              <ThemedText.DeprecatedSubHeader color={theme.textSecondary} fontWeight={'300'}>
+                <Trans>Yields</Trans>
+              </ThemedText.DeprecatedSubHeader>
+            </MouseoverTooltip>
+          </RowFixed>
+          <TextWithLoadingPlaceholder syncing={syncing} width={65}>
+            <SimpleRow>
+              <AprRow>
+                <StyledLogo src={ovixStandalone} />
+                <AprText pos>
+                  +{`${rewardBorrow.toFixed(2)}%`}
+                </AprText>
+              </AprRow>
+              <AprRow>
+                <StyledLogo src={TOKEN_SVGS[data[2]]} />
+                <AprText pos={false}>
+                  -{`${aprBorrow.toFixed(2)}%`}
+                </AprText>
+              </AprRow>
+            </SimpleRow>
+          </TextWithLoadingPlaceholder>
+        </RowBetween>
+
+        <SeparatorBase redesignFlag={redesignFlagEnabled} />
         <RowBetween>
           <BarCol>
             <RowSpaceBetween>

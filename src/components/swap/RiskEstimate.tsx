@@ -39,7 +39,7 @@ const StyledPriceContainer = styled.button`
   grid-gap: 0.25rem;
   display: flex;
   flex-direction: row;
-  width: 200px;
+  width: 220px;
   text-align: left;
   flex-wrap: wrap;
   padding: 5px;
@@ -84,7 +84,7 @@ export default function RiskEstimate({
       title={text}
     >
       <Text fontWeight={500} color={theme.deprecated_text1}>
-        {text}
+        {'Position Breakdown'}
       </Text>{' '}
       <HFBanner safe={healthFactor > 1.05} >
         {healthFactor > 1.05 ? 'Safe' : 'Risky'}

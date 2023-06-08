@@ -13,34 +13,29 @@ import {
   formatPriceString,
   formatSmallGeneralUSDValue,
   formatSmallGeneralValue,
+  formatSmallUSDValue,
   formatSmallValue
 } from 'utils/tableUtils/format'
 import { useChainIdAndAccount } from 'state/globalNetwork/hooks'
-import { MouseoverTooltip } from 'components/Tooltip'
-
-import { LendingProtocol } from 'state/1delta/actions'
-import { PreparedAssetData } from 'hooks/asset/useAssetData'
-import { AssetCellPro, AssetHeaderPro, CheckboxCellPro, PnLCellPro, PnLHeaderPro, PositionCellPro, PositionCellWithChangePro, PositionRowPro, PriceCellPro, RewardsHeaderPro, TimeCellPro, TimeHeaderPro } from 'components/Styles/tableStylesProfessional'
+import { AssetCellPro, CheckboxCellPro, PnLCellPro, PositionCellPro, PositionCellWithChangePro, PositionRowPro, PriceCellPro, RewardsHeaderPro, TimeCellPro, TimeHeaderPro } from 'components/Styles/tableStylesProfessional'
 import { AaveInterestMode, SupportedAssets } from 'types/1delta'
 import { Mode } from 'pages/Trading'
 import { TOKEN_SVGS } from 'constants/1delta'
 import { default as ovixStandalone } from 'assets/svg/logos/logo-0vix.svg'
 import { ExternalLinkIcon } from 'components/TokenSafety'
-import { ButtonPrimary, ButtonSecondary } from 'components/Button'
 
 export const ValueText = styled.div<{ positive: boolean }>`
-font-size: 14px;
-text-align: left;
-color: ${({ theme, positive }) => positive ? theme.deprecated_green1 : theme.deprecated_red2};
+  font-size: 14px;
+  text-align: left;
+  color: ${({ theme, positive }) => positive ? theme.deprecated_green1 : theme.deprecated_red2};
 `
 
 export const ValueTextMinor = styled.div<{ positive: boolean }>`
-font-size: 12px;
-text-align: left;
-opacity: 0.7;
-color: ${({ theme, positive }) => positive ? theme.deprecated_green1 : theme.deprecated_red2};
+  font-size: 12px;
+  text-align: left;
+  opacity: 0.7;
+  color: ${({ theme, positive }) => positive ? theme.deprecated_green1 : theme.deprecated_red2};
 `
-
 
 export const ChangeRow = styled.div`
   display: flex;
@@ -53,19 +48,6 @@ export const NewValWithArrow = styled.div`
   flex-direction: row;
   justify-content: flex-end;
   align-items: center;
-`
-
-
-const ImageStable = styled(Anchor)`
-  width: 12px;
-  height: 12px;
-  margin-left: 5px;
-`
-
-const ImageVariable = styled(BarChart2)`
-  width: 12px;
-  height: 12px;
-  margin-left: 5px;
 `
 
 const SimpleCol = styled.div`
@@ -130,6 +112,11 @@ const PriceText = styled.div`
   font-size: 12px;
 `
 
+const PositionText = styled.div`
+  text-align: left;
+  color: ${({ theme }) => theme.textSecondary};
+  font-size: 12px;
+`
 
 const LiqPriceText = styled(PriceText)`
   text-align: left;
@@ -162,9 +149,6 @@ const AprText = styled.div<{ pos: boolean }>`
   color: #EF4444;
   `}
 `
-
-
-
 
 export interface PositionProps extends SlotData {
   isMobile: boolean
@@ -202,6 +186,11 @@ export default function PositionRow(props: PositionProps) {
           </PnLCellUSD>
         </SimpleCol>
       </PnLCellPro>
+      <PositionCellPro>
+        <PositionText>
+          {formatSmallUSDValue(props.size)}
+        </PositionText>
+      </PositionCellPro>
       <PriceCellPro  >
         <PriceText>
           {formatPriceString(String(props.price * 1.01))}
@@ -275,6 +264,7 @@ border-radius: 5px;
 font-weight: 450;
 &:hover{
   opacity: 0.6;
+  cursor: pointer;
 }
 `
 

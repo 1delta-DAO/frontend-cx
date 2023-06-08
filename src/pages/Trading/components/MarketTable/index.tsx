@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { Anchor, BarChart2, ChevronDown, ChevronUp } from 'react-feather'
+import { ChevronDown, ChevronUp } from 'react-feather'
 import { LendingProtocol } from 'state/1delta/actions'
 import { useCurrentLendingProtocol, useGetCurrentAccount, useIsUserLoaded } from 'state/1delta/hooks'
 import { useChainIdAndAccount } from 'state/globalNetwork/hooks'
@@ -9,17 +9,26 @@ import {
   useDebtFilterHandlers,
   useDebtFilterList,
   useDebtFilterSetting,
-  useInitializeDebtFilter
 } from 'state/tableFilter/hooks'
 import styled from 'styled-components/macro'
 import {
   Filter,
   FilterActive,
 } from 'utils/tableUtils/filters'
-import { PreparedAssetData } from 'hooks/asset/useAssetData'
 import PositionRow, { SlotData } from './PositionRow'
-import { AssetHeaderPro, TimeHeaderPro, TableContainerPro, TableHeaderPro, TableHeaderRowPro, PnLHeaderPro, PriceHeaderPro, CheckboxHeaderPro } from 'components/Styles/tableStylesProfessional'
-import { AaveInterestMode, SupportedAssets } from 'types/1delta'
+import {
+  AssetHeaderPro,
+  TimeHeaderPro,
+  TableContainerPro,
+  TableHeaderPro,
+  TableHeaderRowPro,
+  PnLHeaderPro,
+  PriceHeaderPro,
+  CheckboxHeaderPro,
+  PositionCellWithChangePro,
+  PositionHeaderPro
+} from 'components/Styles/tableStylesProfessional'
+import { AaveInterestMode } from 'types/1delta'
 
 const Table = styled.table`
   border-collapse: collapse;
@@ -64,13 +73,11 @@ export interface MappedSwapAmounts {
 interface PositionTableProps {
   isMobile: boolean
   assetData: SlotData[]
-  tradeImpact: MappedSwapAmounts
 }
 
 export default function PositionTable({
   assetData,
-  isMobile,
-  tradeImpact
+  isMobile
 }: PositionTableProps) {
   const { account, chainId } = useChainIdAndAccount()
 
@@ -134,9 +141,11 @@ export default function PositionTable({
                 )}
               </SimpleRow>
             </PnLHeaderPro>
+            <PositionHeaderPro hasFilter>
+              Size
+            </PositionHeaderPro>
             <PriceHeaderPro hasFilter>
               Entry
-
             </PriceHeaderPro>
             <PriceHeaderPro hasFilter>
               Market

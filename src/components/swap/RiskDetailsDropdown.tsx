@@ -117,6 +117,12 @@ interface RiskDetailsProps {
   depositMode: DepositMode
   depositAmount: number
   ltv: number
+  aprSupply: number
+  aprDeposit: number
+  aprBorrow: number
+  rewardSupply: number
+  rewardDeposit: number
+  rewardBorrow: number
   healthFactor: number
   syncing: boolean
   loading: boolean
@@ -133,6 +139,12 @@ export default function RiskDetailsDropdown({
   depositCurrency,
   syncing,
   loading,
+  aprSupply,
+  aprDeposit,
+  aprBorrow,
+  rewardSupply,
+  rewardDeposit,
+  rewardBorrow,
   ltv,
   showInverted,
   setShowInverted,
@@ -168,6 +180,12 @@ export default function RiskDetailsDropdown({
                     <ResponsiveTooltipContainer origin="top right" style={{ padding: '0', height: '40px' }}>
                       <Card padding="12px">
                         <AdvancedRiskDetails
+                          aprSupply={aprSupply}
+                          aprDeposit={aprDeposit}
+                          aprBorrow={aprBorrow}
+                          rewardSupply={rewardSupply}
+                          rewardDeposit={rewardDeposit}
+                          rewardBorrow={rewardBorrow}
                           depositMode={depositMode}
                           ltv={ltv}
                           depositAmount={depositAmount}
@@ -227,8 +245,14 @@ export default function RiskDetailsDropdown({
             {trade ? (
               <StyledCard redesignFlag={redesignFlagEnabled}>
                 <AdvancedRiskDetails
-                  ltv={ltv}
+                  aprSupply={aprSupply}
+                  aprDeposit={aprDeposit}
+                  aprBorrow={aprBorrow}
+                  rewardSupply={rewardSupply}
+                  rewardDeposit={rewardDeposit}
+                  rewardBorrow={rewardBorrow}
                   depositMode={depositMode}
+                  ltv={ltv}
                   depositAmount={depositAmount}
                   depositCurrency={depositCurrency}
                   healthFactor={healthFactor}

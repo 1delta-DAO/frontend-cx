@@ -197,13 +197,13 @@ export function AnimatedTokenPositionIcon({
 
 const PairWrapper = styled.div`
   display: flex;
-  flex-direction: row;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   justify-content: space-between;
 `
 
 const DirectionBanner = styled.div<{ isLong: boolean }>`
-  border-radius: 8px;
+  border-radius: 5px;
   color: #ff005568;
   font-size: 10px;
   margin: 2px;

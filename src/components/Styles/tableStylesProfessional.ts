@@ -88,7 +88,7 @@ export const PositionCellPro = styled(CellPro)`
   width: ${PROFESSIONAL_POSITION_CELL_WIDTH};
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: center;
   ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
   width: ${PROFESSIONAL_POSITION_CELL_WIDTH_MOBILE};
@@ -436,6 +436,15 @@ export const PriceHeaderPro = styled(TableHeaderItem)`
   width: ${PROFESSIONAL_PRICE_CELL_WIDTH_MOBILE};
   `};
 `
+
+export const PositionHeaderPro = styled(TableHeaderItem)`
+  text-align: left;
+  width: ${PROFESSIONAL_POSITION_CELL_WIDTH};
+  ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
+  width: ${PROFESSIONAL_POSITION_CELL_WIDTH_MOBILE};
+  `};
+`
+
 
 export const PnLHeaderPro = styled(TableHeaderItem)`
   width: ${PROFESSIONAL_PNL_CELL_WIDTH};

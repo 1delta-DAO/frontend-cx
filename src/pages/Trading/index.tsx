@@ -53,7 +53,7 @@ import { calculateGasMargin } from 'utils/calculateGasMargin'
 import { useTransactionAdder } from 'state/transactions/hooks'
 import { MarginTradingButtonText } from 'components/Styles'
 import { parseMessage } from 'constants/errors'
-import { useDeltaState, useGetCurrentAccount } from "state/1delta/hooks";
+import { useDeltaState } from "state/1delta/hooks";
 import { useDerivedSwapInfoMargin, useDerivedSwapInfoMarginAlgebra } from "state/professionalTradeSelection/tradeHooks";
 import { Text } from "rebass";
 import PairInput from "components/CurrencyInputPanel/PairInput";
@@ -108,7 +108,7 @@ const dummyData: SlotData[] = [
     pair: [SupportedAssets.WBTC, SupportedAssets.USDC],
     leverage: 2.0,
     direction: Mode.LONG,
-    pnl: 1020,
+    pnl: 1020.23,
     healthFactor: 1.1,
     price: 21123.2,
     size: 100,
@@ -120,7 +120,7 @@ const dummyData: SlotData[] = [
     pair: [SupportedAssets.USDC, SupportedAssets.ETH],
     leverage: 2.5,
     direction: Mode.SHORT,
-    pnl: -23,
+    pnl: -23.28,
     price: 1823.2,
     healthFactor: 1.01,
     size: 1500,
@@ -301,6 +301,7 @@ const SliderContainer = styled.div`
   padding: 2px;
   align-items: center;
   justify-content: center;
+  margin-top: 10px;
   margin-left: 10px;
   margin-right: 10px;
 `
@@ -371,9 +372,7 @@ export default function Professional() {
   const { connectionIsSupported, chainId, account } = useNetworkState()
   const currentProtocol = LendingProtocol.COMPOUND
 
-  const deltaAccount = useGetCurrentAccount(chainId)
-
-  const relevantAccount = currentProtocol === LendingProtocol.COMPOUND ? deltaAccount?.accountAddress : account
+  const relevantAccount = account
 
   const isDark = useIsDarkMode()
 
@@ -388,8 +387,6 @@ export default function Professional() {
   }
 
   const [leverage, setLeverage] = useState(1.2)
-
-
 
   const assets = useMemo(() => getSupportedAssets(chainId, LendingProtocol.COMPOUND), [chainId]).map(x => x === SupportedAssets.ETH ? SupportedAssets.WETH : x)
 
@@ -1181,6 +1178,12 @@ export default function Professional() {
           </div>
           {userHasSpecifiedInputOutput && (trade || routeIsLoading || routeIsSyncing) && (
             <RiskDetailsDropdown
+              aprSupply={0.1}
+              aprDeposit={0.12}
+              aprBorrow={0.2}
+              rewardSupply={0.2}
+              rewardDeposit={0.3}
+              rewardBorrow={0.3}
               depositMode={depositMode}
               depositAmount={depositDollarValue}
               healthFactor={1.1}
@@ -1235,7 +1238,6 @@ export default function Professional() {
             />
           </ChartContainer>
           <PositionTable
-            tradeImpact={{}}
             isMobile={isMobile}
             assetData={account ? dummyData : []}
           />
