@@ -86,6 +86,8 @@ import { UniswapTrade } from "utils/Types";
 import SettingsTab from "components/Settings";
 import { SlotData } from "./components/MarketTable/PositionRow";
 import RiskDetailsDropdown from "components/swap/RiskDetailsDropdown";
+import { fetchCompoundPublicDataAsync } from "state/1delta/compound/fetchCompoundPublicData";
+import { math } from "polished";
 
 export enum Mode {
   LONG = 'Long',
@@ -423,7 +425,7 @@ export default function Professional() {
     // fetch oracle data
     dispatch(fetchChainLinkData({ chainId: SupportedChainId.POLYGON }))
     dispatch(fetchAAVEAggregatorDataAsync({ chainId: SupportedChainId.POLYGON }))
-
+    dispatch(fetchCompoundPublicDataAsync({ chainId }))
     // fetch wallet balances
     if (account) {
       dispatch(fetchUserBalances({ chainId, account, lendingProtocol: currentProtocol }))
@@ -642,15 +644,12 @@ export default function Professional() {
 
   // const [trade, parsedAmount] = Boolean(tradeUni) ? [tradeUni, parsedAmountUni] : [tradeAlgebra, parsedAmountAlgebra]
 
-  const riskParams = useGetCompoundRiskParametersSlot(chainId, oracleState.data[chainId].chainLink)
+  const riskParams = useGetCompoundRiskParametersSlot(chainId, oracleState.data[SupportedChainId.POLYGON].chainLink)
 
   const riksParamsChange = useMemo(() => {
-
     if (!borrowAmount) {
       return undefined
-
     }
-
     return calculateCompoundRiskChangeSlot(
       {
         asset: depositAsset,
@@ -672,7 +671,7 @@ export default function Professional() {
   },
     [borrowAmount, depositAsset, trade, tradeIn, pair, depositMode, parsedAmountIn, riskParams])
 
-  // console.log("RISK", riksParamsChange)
+  console.log("RISK", riksParamsChange)
   const recipientAddress = recipient
 
   const parsedAmounts = useMemo(
@@ -923,10 +922,6 @@ export default function Professional() {
 
   const handlePairSwap = useCallback(() => handleSelectPair([pair[1], pair[0]]), [pair])
 
-
-  const { aprData, assetData, balanceData } = usePrepareAssetData(currentProtocol, chainId, account)
-
-
   const [appprovalMessagRequest, approvalMessage] = useMemo(() => {
 
     return [
@@ -941,6 +936,21 @@ export default function Professional() {
   const chartPrices = usePrices(chartPair, chainId)
 
   const tradingViewSymbol = useMemo(() => getTradingViewSymbol(chartPair[0], chartPair[1]), [chartPair])
+
+  const [leverageValidated, minVal, onLevChange, maxVal] = useMemo(() => {
+
+    if (depositMode === DepositMode.TO_COLLATERAL && selectedMode === Mode.LONG) {
+      return [leverage + 1, 1.2, (n: number) => setLeverage(n - 1), 4]
+    }
+
+    return [leverage, 1.2, setLeverage, 4]
+  }, [
+    leverage,
+    setLeverage,
+    depositMode,
+    selectedMode
+  ]
+  )
 
   return (
     <Container >
@@ -1027,6 +1037,7 @@ export default function Professional() {
 
             <InputWrapper redesignFlag={redesignFlagEnabled}>
               <PairInput
+                additionalValue={depositMode === DepositMode.TO_COLLATERAL ? depositDollarValue : undefined}
                 isLong={selectedMode === Mode.LONG}
                 simpleVersion={selectedMode !== Mode.EXPERT}
                 onPairSelect={handleSelectPair}
@@ -1061,9 +1072,9 @@ export default function Professional() {
           ) : null}
           <SliderContainer >
             <SliderValue>
-              {leverage}x
+              {leverageValidated}x
             </SliderValue>
-            <DecimalSlider min={1.2} max={5} step={0.1} markers={[0, 1, 2, 3, 4, 5]} onChange={setLeverage} value={leverage} />
+            <DecimalSlider min={minVal} max={maxVal} step={0.1} markers={[0, 1, 2, 3, 4, 5]} onChange={onLevChange} value={leverageValidated} />
           </SliderContainer>
           <div style={{ marginTop: '10px', zIndex: 0, width: '80%' }}>
             {!account ? (
@@ -1178,16 +1189,16 @@ export default function Professional() {
           </div>
           {userHasSpecifiedInputOutput && (trade || routeIsLoading || routeIsSyncing) && (
             <RiskDetailsDropdown
-              aprSupply={0.1}
-              aprDeposit={0.12}
-              aprBorrow={0.2}
+              aprSupply={riksParamsChange?.aprSupply ?? 0}
+              aprDeposit={riksParamsChange?.aprSupply ?? 0}
+              aprBorrow={riksParamsChange?.aprBorrow ?? 0}
               rewardSupply={0.2}
               rewardDeposit={0.3}
               rewardBorrow={0.3}
               depositMode={depositMode}
               depositAmount={depositDollarValue}
-              healthFactor={1.1}
-              ltv={0.57}
+              healthFactor={riksParamsChange?.healthFactor ?? 1.1}
+              ltv={riksParamsChange?.ltv ?? 0.5}
               depositCurrency={depositAsset}
               trade={trade}
               syncing={routeIsSyncing}

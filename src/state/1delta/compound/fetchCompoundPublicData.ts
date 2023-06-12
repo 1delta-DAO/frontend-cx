@@ -59,7 +59,13 @@ export const fetchCompoundPublicDataAsync: AsyncThunk<CompoundPublicResponse, Co
           params: [tk],
         }
       })
-      const multicallResult = await multicallSecondary(chainId, isEthereum ? COMPOUND_LENS_ABI : OVIX_LENS_ABI, calls)
+
+      let multicallResult: any[] = []
+      try {
+        multicallResult = await multicallSecondary(chainId, isEthereum ? COMPOUND_LENS_ABI : OVIX_LENS_ABI, calls)
+      } catch (e) {
+        console.log("Error fetching protocol data:", e)
+      }
 
       const result = Object.assign(
         {},

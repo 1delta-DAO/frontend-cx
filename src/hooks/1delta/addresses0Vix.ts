@@ -14,6 +14,7 @@ export const oVixAddresses: AddressDictionary = {
   Unitroller: {
     [SupportedChainId.POLYGON_MUMBAI]: '0xC9CC886dA03D3Ae9F362bc69972Dc68235944847',
     [SupportedChainId.POLYGON]: '0x8849f1a0cB6b5D6076aB150546EddEe193754F1C',
+    [SupportedChainId.POLYGON_ZK_EVM]: '0x6EA32f626e3A5c41547235ebBdf861526e11f482',
   },
   InterestRate: {
     [SupportedChainId.POLYGON_MUMBAI]: '0x8e7a6D141fd2854b703Ec624D523b54096465557',
@@ -63,6 +64,7 @@ export const oVixAddresses: AddressDictionary = {
   CompoundLens: {
     [SupportedChainId.POLYGON_MUMBAI]: '0xB07222F11819CEBf994dcfb28Edd4B2Fc77EA18b',
     [SupportedChainId.POLYGON]: '0x38294502a05D10cf9266964443212e8D535bd3E1',
+    [SupportedChainId.POLYGON_ZK_EVM]: '0xf9438f2b1c63D8dAC24311256F5483D7f7575863'
   },
   oMAI: {
     [SupportedChainId.POLYGON]: '0xC57E5e261d49Af3026446de3eC381172f17bB799',
@@ -80,10 +82,12 @@ export const addresses0VixOTokens: AddressDictionary = {
   [SupportedAssets.USDC]: {
     [SupportedChainId.POLYGON_MUMBAI]: '0x4413dbCf851D73bEc0BBF50b474EA89bded11153',
     [SupportedChainId.POLYGON]: '0xEBb865Bf286e6eA8aBf5ac97e1b56A76530F3fBe',
+    [SupportedChainId.POLYGON_ZK_EVM]: '0x68d9baA40394dA2e2c1ca05d30BF33F52823ee7B'
   },
   [SupportedAssets.USDT]: {
     [SupportedChainId.POLYGON_MUMBAI]: '0x2ed82022025374fcC839D557c7a360099244e06b',
     [SupportedChainId.POLYGON]: '0x1372c34acC14F1E8644C72Dad82E3a21C211729f',
+    [SupportedChainId.POLYGON_ZK_EVM]: '0xad41C77d99E282267C1492cdEFe528D7d5044253'
   },
   [SupportedAssets.WBTC]: {
     [SupportedChainId.POLYGON_MUMBAI]: '0xF151CC6EE64046342D8287660596fb78D2212A23',
@@ -117,6 +121,15 @@ export const addresses0VixOTokens: AddressDictionary = {
   // },
   [SupportedAssets.WSTETH]: {
     [SupportedChainId.POLYGON]: '0xf06edA703C62b9889C75DccDe927b93bde1Ae654'
+  },
+  [SupportedAssets.WMATIC]: {
+    [SupportedChainId.POLYGON_ZK_EVM]: '0x8903Dc1f4736D2FcB90C1497AebBABA133DaAC76'
+  },
+  [SupportedAssets.ETH]: {
+    [SupportedChainId.POLYGON_ZK_EVM]: '0xee1727f5074E747716637e1776B7F7C7133f16b1'
+  },
+  [SupportedAssets.WETH]: {
+    [SupportedChainId.POLYGON_ZK_EVM]: '0xee1727f5074E747716637e1776B7F7C7133f16b1'
   }
 }
 

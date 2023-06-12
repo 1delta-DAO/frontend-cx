@@ -3,7 +3,7 @@ import { loadingOpacityMixin } from 'components/Loader/styled'
 import { isSupportedChain, SupportedChainId } from 'constants/chains'
 import { RedesignVariant, useRedesignFlag } from 'featureFlags/flags/redesign'
 import { darken } from 'polished'
-import { ReactNode, useState } from 'react'
+import { ReactNode, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components/macro'
 import { ReactComponent as DropDown } from 'assets/images/dropdown.svg'
 import { Input as NumericalInput } from '../../NumericalInput'
@@ -91,6 +91,7 @@ const Image = styled.img`
 
 interface PairInputProps {
   placeholder: SupportedAssets
+  additionalValue?: number | undefined
   trade?: UniswapTrade
   pairList: [SupportedAssets, SupportedAssets][]
   onPairSelect: (pair: [SupportedAssets, SupportedAssets]) => void
@@ -119,6 +120,7 @@ export default function PairInput({
   placeholder,
   providedTokenList,
   pairList,
+  additionalValue,
   trade,
   onPairSelect,
   onUserInput,
@@ -148,12 +150,40 @@ export default function PairInput({
   const [showCollateral, setShowCollateral] = useState(true)
   const color = '#7C8792'
   const price = usePrices(trade ? [trade.outputAmount.currency.symbol as SupportedAssets] : [], SupportedChainId.POLYGON)
+
+  const additionalAmount = useMemo(() => {
+    if (!additionalValue || !price?.[0]) return 0
+    const val = additionalValue / price[0]
+
+    if (isNaN(val)) return 0
+    return val
+  },
+    [price, additionalValue]
+  )
+
+  const value = useMemo(() => {
+    if (simpleVersion) {
+      if (isLong) {
+        return (Number(trade?.outputAmount.toFixed(4)) + additionalAmount)?.toFixed(4) ?? '0.0'
+      } else {
+        return trade?.inputAmount.toFixed(4) ?? '0.0'
+      }
+    }
+    if (showCollateral) {
+      return trade?.outputAmount.toFixed(4)
+    }
+    else return trade?.inputAmount.toFixed(4)
+  }
+    ,
+    [trade, simpleVersion, isLong, showCollateral]
+  )
+  const additionalUSD = (isLong && additionalValue) ? additionalValue : 0
   return (
     <InputPanel id={id} hideInput={hideInput} {...rest}>
       <SimpleRow>
         <PanelContainer>
           {simpleVersion && <div style={{ color, fontSize: '14px', marginLeft: '10px' }}>
-            {isLong ? 'Long' : 'Short'}{trade && price[0] && `: ${formatUSDValuePanel(price[0] * Number(trade.outputAmount.toExact()))}`}
+            {isLong ? 'Long' : 'Short'}{trade && price[0] && `: ${formatUSDValuePanel(price[0] * Number(trade.outputAmount.toExact()) + additionalUSD)}`}
           </div>}
           {!simpleVersion && pair && (
             <>
@@ -182,7 +212,7 @@ export default function PairInput({
           {!hideInput && (
             <StyledNumericalInput
               className="token-amount-input"
-              value={(simpleVersion ? (isLong ? trade?.outputAmount.toFixed(4) : trade?.inputAmount.toFixed(4)) : (showCollateral ? trade?.outputAmount.toFixed(4) : trade?.inputAmount.toFixed(4))) ?? '0.0'}
+              value={isNaN(Number(value)) ? '0.0' : value ?? '0.0'}
               onUserInput={onUserInput}
               disabled
               $loading={loading}

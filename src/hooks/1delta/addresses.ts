@@ -29,7 +29,7 @@ export const getMulticallV2Address = (chainId: number): string => {
     case SupportedChainId.POLYGON_MUMBAI:
       return '0xe9939e7Ea7D7fb619Ac57f648Da7B1D425832631'
     case SupportedChainId.POLYGON_ZK_EVM:
-      return '0x61530d6E1c7A47BBB3e48e8b8EdF7569DcFeE121'
+      return '0xCe434378adacC51d54312c872113D687Ac19B516'
     default: return MULTICALL2_ADDRESS
   }
 }
@@ -50,6 +50,7 @@ export const uniswapMulticallAddress: { [chainId: number]: string } = {
   [SupportedChainId.GOERLI]: '0x5BA1e12693Dc8F9c48aAD8770482f4739bEeD696',
   [SupportedChainId.POLYGON]: '0x35e4aA226ce52e1E59E5e5Ec24766007bCbE2e7D',
   [SupportedChainId.POLYGON_MUMBAI]: '0x08411ADd0b5AA8ee47563b146743C13b3556c9Cc',
+  [SupportedChainId.POLYGON_ZK_EVM]: '0xCe434378adacC51d54312c872113D687Ac19B516'
 }
 
 export const chainLinkOracles: AddressDictionary = {

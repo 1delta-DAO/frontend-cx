@@ -210,7 +210,7 @@ export function useGetCompoundRiskParametersSlot(
       const liquidationThreshold =
         assetData[name]?.compoundData[chainId].reserveData?.collateralFactorMantissa ?? ONE_18
 
-
+      console.log(name, "liquidationThreshold", liquidationThreshold)
       const apr = calculateRateToNumber(
         assetData[name]?.compoundData[chainId]?.reserveData.supplyRatePerBlock ?? '0',
         chainId,
@@ -280,6 +280,8 @@ export function calculateCompoundRiskChangeSlot(
   let aprIncome = 0
   let aprLiability = 0
 
+  console.log("!Asse", assetChange0, assetChange1, assetChange2)
+  console.log("!AsseT", assetChange0 && tradeParams.assetData[assetChange0.asset], assetChange1 && tradeParams.assetData[assetChange1.asset], assetChange2 && tradeParams.assetData[assetChange2.asset])
   if (assetChange0)
     if (assetChange0.side === PositionSides.Collateral) {
       [deltaCollateral, effectiveDeltaCollateral] = calculateDeltaCollateral(assetChange0, tradeParams.assetData[assetChange0.asset])
@@ -288,7 +290,6 @@ export function calculateCompoundRiskChangeSlot(
       aprLiability += getAprContrib(deltaCollateral, tradeParams.assetData[assetChange0.asset].borrowRate)
       effectiveDeltaBorrow = calculateDeltaBorrow(assetChange0, tradeParams.assetData[assetChange0.asset])
     }
-
   if (assetChange1)
     if (assetChange1.side === PositionSides.Collateral) {
       const [newCollat, effectiveNewCollat] = calculateDeltaCollateral(assetChange1, tradeParams.assetData[assetChange1.asset])
@@ -303,7 +304,6 @@ export function calculateCompoundRiskChangeSlot(
       )
       aprLiability += getAprContrib(effectiveDeltaBorrow, tradeParams.assetData[assetChange1.asset].borrowRate)
     }
-
   if (assetChange2)
     if (assetChange2.side === PositionSides.Collateral) {
       const [newCollat, effectiveNewCollat] = calculateDeltaCollateral(assetChange2, tradeParams.assetData[assetChange2.asset])
@@ -320,15 +320,19 @@ export function calculateCompoundRiskChangeSlot(
       aprLiability += getAprContrib(newBorrow, tradeParams.assetData[assetChange2.asset].borrowRate)
     }
 
+
   // new values are created by adding the deltas
   const newCollateral = tradeParams.collateral.add(effectiveDeltaCollateral)
   const newBorrow = tradeParams.debt.add(effectiveDeltaBorrow)
-
   // the new ltv is the quotient
   const ltvNew = newCollateral.gt(0) ? newBorrow.mul(ONE_18).div(newCollateral) : ZERO_BN
   const healthFactorNew = newBorrow.gt(0)
     ? newCollateral.mul(ONE_18).div(newBorrow)
     : ethers.constants.MaxUint256
+
+  console.log("newCollateral", newCollateral.toString())
+  console.log("newBorrow", newBorrow.toString())
+  console.log("aprIncome", aprIncome)
   return {
     ltv: getNumber(ltvNew),
     healthFactor: getNumber(healthFactorNew),
@@ -352,16 +356,20 @@ function calculateDeltaCollateral(
 
   // fetch prices - we measure everything on state price levels
   const priceCollateral = priceParams.price
-
   // the collateral will be downscaled
   const collateralFactor = tradeParams.liquidationThreshold
-
+  console.log("TRADEPARAMS", assetChange.delta.toString(), multiplierCollateral.toString(), priceCollateral.toString(), multiplierPriceCollateral.toString(), collateralFactor.toString())
   const collateral = assetChange.delta
     .mul(multiplierCollateral)
     .mul(priceCollateral)
     .mul(multiplierPriceCollateral)
     .div(ONE_18)
-
+  console.log("ttradeparams", [
+    collateral.toString(),
+    collateral
+      .mul(collateralFactor)
+      .div(ONE_18).toString()
+  ])
   return [
     collateral,
     collateral

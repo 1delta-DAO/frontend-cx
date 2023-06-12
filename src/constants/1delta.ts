@@ -193,6 +193,7 @@ export const getSupportedAssets = (chainId: number, lendingProtocol = LendingPro
         case LendingProtocol.COMPOUND:
           return [
             SupportedAssets.ETH,
+            SupportedAssets.WETH,
             SupportedAssets.USDC,
             SupportedAssets.USDT,
             SupportedAssets.WMATIC
