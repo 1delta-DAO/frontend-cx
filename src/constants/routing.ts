@@ -1,7 +1,7 @@
 // a list of tokens by chain
 import { Currency, Token } from '@uniswap/sdk-core'
 import { WMATIC_POLYGON_MUMBAI } from '@uniswap/smart-order-router'
-import { getAaveTokens, getCompoundTokens, getCompoundV3Tokens } from 'hooks/1delta/tokens'
+import { getAaveTokens, getCompoundTokens, getCompoundTokensNoWETH, getCompoundV3Tokens } from 'hooks/1delta/tokens'
 
 import { SupportedChainId } from './chains'
 import {
@@ -100,7 +100,7 @@ export const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
   ],
   [SupportedChainId.POLYGON_ZK_EVM]: [
     ...WRAPPED_NATIVE_CURRENCIES_ONLY[SupportedChainId.POLYGON_ZK_EVM],
-    ...Object.values(getCompoundTokens(SupportedChainId.POLYGON_ZK_EVM)),
+    ...Object.values(getCompoundTokensNoWETH(SupportedChainId.POLYGON_ZK_EVM)),
   ],
 }
 export const ADDITIONAL_BASES: { [chainId: number]: { [tokenAddress: string]: Token[] } } = {

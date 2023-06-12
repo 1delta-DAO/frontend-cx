@@ -34,7 +34,7 @@ export function useAlgebraClientSideV3Margin<TTradeType extends TradeType>(
       : [otherCurrency, amountSpecified?.currency]
 
   const { routes: fetchedRoutes, loading: routesLoading } = useAllV3RoutesAlgebra(currencyIn, currencyOut)
-  console.log("fetchedRoutesMargin", fetchedRoutes)
+  // console.log("fetchedRoutesMargin", fetchedRoutes, currencyIn, currencyOut)
   // cache routes and load from cache if known route but not loaded
   const routes = useMemo(() => {
     if (currencyIn && currencyOut) {

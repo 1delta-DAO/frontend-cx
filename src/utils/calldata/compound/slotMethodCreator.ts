@@ -1,23 +1,46 @@
 import { RouteV3 } from '@uniswap/router-sdk'
-import { Currency, Percent, TradeType } from '@uniswap/sdk-core'
-import { Pool } from '@uniswap/v3-sdk'
-import { MarginTrader, Sweeper } from 'abis/types'
-import { Contract } from 'ethers'
-import { encodePath, PositionSides } from 'types/1delta'
-import { modules } from './modules'
+import { Currency, CurrencyAmount, Percent } from '@uniswap/sdk-core'
+import { SlotFactory } from 'abis/types'
+import { ethers } from 'ethers'
 import { ContractCallDataWithOptions, ContractCallWithOptions, UniswapTrade } from '../../Types'
 import { TradeAction } from 'pages/Trading'
 
+const typeSliceSimple = ['address', 'uint8',]
 
-export const createMarginTradeCalldataCompound = (
+export function encodeAlgebraPathEthersSimple(path: string[], flags: number[], flag: number): string {
+  if (path.length != flags.length + 1) {
+    throw new Error('path/fee lengths do not match')
+  }
+  let types: string[] = []
+  let data: string[] = []
+  for (let i = 0; i < flags.length; i++) {
+    const p = path[i]
+    types = [...types, ...typeSliceSimple]
+    data = [...data, p, String(flags[i])]
+  }
+  // add last address and flag
+  types.push('address')
+  types.push('uint8')
+  data.push(path[path.length - 1])
+  data.push(String(flag))
+
+  return ethers.utils.solidityPack(types, data)
+}
+
+
+export function encodeAddress(path: string): string {
+  return ethers.utils.solidityPack(['address'], [path])
+}
+
+
+export const createSlotCalldata = (
   action: TradeAction,
+  parsedAmountIn: CurrencyAmount<Currency> | undefined,
+  tradeIn: UniswapTrade | undefined,
   trade: UniswapTrade | undefined,
   allowedSlippage: Percent,
-  marginTraderContract: MarginTrader & Sweeper,
-  sideIn: PositionSides,
+  slotFactoryContract: SlotFactory,
   account?: string,
-  isMaxIn?: boolean,
-  isMaxOut?: boolean
 ): ContractCallDataWithOptions => {
   let args: any = {}
   let method: any
@@ -33,175 +56,35 @@ export const createMarginTradeCalldataCompound = (
       estimate: undefined,
     }
 
+  const v3RouteIn = tradeIn?.routes[0] as RouteV3<Currency, Currency>
   const hasOnePool = v3Route.pools.length === 1
 
   if (action === TradeAction.OPEN) {
+    const pathIn = tradeIn ?
+      encodeAlgebraPathEthersSimple(v3RouteIn.path.map((p) => p.address), new Array(v3RouteIn.path.length - 1).fill(3), 0) :
+      parsedAmountIn ? encodeAddress(parsedAmountIn.currency.wrapped.address) :
+        '0x' // - should fail
 
-  }
+    const pathMargin = tradeIn ?
+      encodeAlgebraPathEthersSimple(v3Route.path.map((p) => p.address), v3Route.path.length === 1 ? [0] : [0, ...new Array(v3Route.path.length - 2).fill(3)], 0) :
+      '0x' // - should fail
 
-  if (sideIn === PositionSides.Borrow) {
-    // Increase or create position
-    if (tradeType === TradeType.EXACT_INPUT) {
-      if (hasOnePool) {
-        args = v3Route && {
-          tokenIn: v3Route.input.wrapped.address,
-          tokenOut: v3Route.output.wrapped.address,
-          fee: v3Route.pools[0].fee,
-          amountIn: trade.inputAmount.quotient.toString(),
-          amountOutMinimum: trade.minimumAmountOut(allowedSlippage).quotient.toString(),
-        }
-        method = marginTraderContract.openMarginPositionExactIn
-        estimate = async () => await marginTraderContract.estimateGas.openMarginPositionExactIn(args)
-        contractCall = async (opts: any) => await marginTraderContract.openMarginPositionExactIn(args, opts)
-      } else {
-        args = v3Route && {
-          path: encodePath(
-            v3Route.path.map((p) => p.address),
-            v3Route.pools.map((pool) => pool.fee)
-          ),
-          amountIn: trade?.inputAmount.quotient.toString(),
-          amountOutMinimum: trade.minimumAmountOut(allowedSlippage).quotient.toString()
-        }
-        method = marginTraderContract.openMarginPositionExactInMulti
-        estimate = async () => await marginTraderContract.estimateGas.openMarginPositionExactInMulti(args)
-        contractCall = async (opts: any) => await marginTraderContract.openMarginPositionExactInMulti(args, opts)
-      }
-    } else { // exact out open
-      if (hasOnePool) {
-        args = v3Route && {
-          tokenIn: v3Route.input.wrapped.address,
-          tokenOut: v3Route.output.wrapped.address,
-          fee: v3Route.pools[0].fee,
-          amountOut: trade.outputAmount.quotient.toString(),
-          amountInMaximum: trade.maximumAmountIn(allowedSlippage).quotient.toString()
-        }
-        method = marginTraderContract.openMarginPositionExactOut
-        estimate = async () => await marginTraderContract.estimateGas.openMarginPositionExactOut(args)
-        contractCall = async (opts: any) => await marginTraderContract.openMarginPositionExactOut(args, opts)
-      } else {
-        const structInp = v3Route && {
-          path: encodePath(
-            v3Route.path.map((p) => p.address).reverse(),
-            v3Route.pools.map((pool) => pool.fee).reverse()
-          ),
-          amountOut: trade.outputAmount.quotient.toString(),
-          amountInMaximum: trade.maximumAmountIn(allowedSlippage).quotient.toString()
-        }
-        args = v3Route && [structInp]
-        method = marginTraderContract.openMarginPositionExactOutMulti
-        estimate = async () => await marginTraderContract.estimateGas.openMarginPositionExactOutMulti(args)
-        contractCall = async (opts: any) => await marginTraderContract.openMarginPositionExactOutMulti(structInp, opts)
-      }
+    args = {
+      amountDeposited: tradeIn ? tradeIn.inputAmount.quotient.toString() : parsedAmountIn?.quotient.toString(),
+      minimumAmountDeposited: trade.minimumAmountOut(allowedSlippage).quotient.toString(),
+      borrowAmount: trade.inputAmount.quotient.toString(),
+      minimumMarginReceived: trade.minimumAmountOut(allowedSlippage),
+      // path to deposit - can be empty if depo ccy = collateral
+      swapPath: pathIn,
+      // path for margin trade
+      marginPath: pathMargin
     }
-  }
-  // trimming positions
-  else {
-    if (tradeType === TradeType.EXACT_INPUT) {
-      if (hasOnePool) {
-        if (isMaxIn) {
-          args = v3Route && {
-            tokenIn: v3Route.input.wrapped.address,
-            tokenOut: v3Route.output.wrapped.address,
-            fee: v3Route.pools[0].fee,
-            amountIn: trade.inputAmount.quotient.toString(),
-            amountOutMinimum: trade.minimumAmountOut(allowedSlippage).quotient.toString(),
-          }
-          method = marginTraderContract.trimMarginPositionAllIn
-          estimate = async () => await marginTraderContract.estimateGas.trimMarginPositionAllIn(args)
-          contractCall = async (opts: any) => await marginTraderContract.trimMarginPositionAllIn(args, opts)
-        } else {
-          args = v3Route && {
-            tokenIn: v3Route.input.wrapped.address,
-            tokenOut: v3Route.output.wrapped.address,
-            fee: v3Route.pools[0].fee,
-            amountIn: trade.inputAmount.quotient.toString(),
-            amountOutMinimum: trade.minimumAmountOut(allowedSlippage).quotient.toString(),
-          }
-          method = marginTraderContract.trimMarginPositionExactIn
-          estimate = async () => await marginTraderContract.estimateGas.trimMarginPositionExactIn(args)
-          contractCall = async (opts: any) => await marginTraderContract.trimMarginPositionExactIn(args, opts)
-        }
-      } else {
-        if (isMaxIn) {
-          args = v3Route && {
-            path: encodePath(
-              v3Route.path.map((p) => p.address),
-              v3Route.pools.map((pool) => pool.fee)
-            ),
-            amountOutMinimum: trade.minimumAmountOut(allowedSlippage).quotient.toString(),
-          }
-          method = marginTraderContract.trimMarginPositionAllInMulti
-          estimate = async () => await marginTraderContract.estimateGas.trimMarginPositionAllInMulti(args)
-          contractCall = async (opts: any) => await marginTraderContract.trimMarginPositionAllInMulti(args, opts)
-        } else {
-          args = v3Route && {
-            path: encodePath(
-              v3Route.path.map((p) => p.address),
-              v3Route.pools.map((pool) => pool.fee)
-            ),
-            amountIn: trade?.inputAmount.quotient.toString(),
-            amountOutMinimum: trade.minimumAmountOut(allowedSlippage).quotient.toString(),
-          }
-          method = marginTraderContract.trimMarginPositionExactInMulti
-          estimate = async () => await marginTraderContract.estimateGas.trimMarginPositionExactInMulti(args)
-          contractCall = async (opts: any) => await marginTraderContract.trimMarginPositionExactInMulti(args, opts)
-        }
-      }
-    } else { // trim exact out
-      if (hasOnePool) {
-        if (isMaxOut) {
-          args = v3Route && {
-            tokenIn: v3Route.input.wrapped.address,
-            tokenOut: v3Route.output.wrapped.address,
-            fee: v3Route.pools[0].fee,
-            amountInMaximum: trade.maximumAmountIn(allowedSlippage).quotient.toString(),
-          }
-          method = marginTraderContract.trimMarginPositionAllOut
-          estimate = async () => await marginTraderContract.estimateGas.trimMarginPositionAllOut(args)
-          contractCall = async (opts: any) => await marginTraderContract.trimMarginPositionAllOut(args, opts)
-        } else {
-          args = v3Route && {
-            tokenIn: v3Route.input.wrapped.address,
-            tokenOut: v3Route.output.wrapped.address,
-            fee: v3Route.pools[0].fee,
-            amountOut: trade.outputAmount.quotient.toString(),
-            amountInMaximum: trade.maximumAmountIn(allowedSlippage).quotient.toString(),
-          }
-          method = marginTraderContract.trimMarginPositionExactOut
-          estimate = async () => await marginTraderContract.estimateGas.trimMarginPositionExactOut(args)
-          contractCall = async (opts: any) => await marginTraderContract.trimMarginPositionExactOut(args, opts)
-        }
-      } else {
-        if (isMaxOut) {
-          const structInp = v3Route && {
-            path: encodePath(
-              v3Route.path.map((p) => p.address).reverse(),
-              v3Route.pools.map((pool) => pool.fee).reverse()
-            ),
-            amountOut: trade.outputAmount.quotient.toString(),
-            amountInMaximum: trade.maximumAmountIn(allowedSlippage).quotient.toString(),
-          }
-          args = [structInp]
-          method = marginTraderContract.trimMarginPositionAllOutMulti
-          estimate = async () => await marginTraderContract.estimateGas.trimMarginPositionAllOutMulti(args)
-          contractCall = async (opts: any) => await marginTraderContract.trimMarginPositionAllOutMulti(structInp, opts)
-        } else {
-          const structInp = v3Route && {
-            path: encodePath(
-              v3Route.path.map((p) => p.address).reverse(),
-              v3Route.pools.map((pool) => pool.fee).reverse()
-            ),
-            amountOut: trade.outputAmount.quotient.toString(),
-            amountInMaximum: trade.maximumAmountIn(allowedSlippage).quotient.toString(),
-          }
-          args = [structInp]
-          method = marginTraderContract.trimMarginPositionExactOutMulti
-          estimate = async () => await marginTraderContract.estimateGas.trimMarginPositionExactOutMulti(args)
-          contractCall = async (opts: any) => await marginTraderContract.trimMarginPositionExactOutMulti(structInp, opts)
-        }
-      }
-    }
-  }
 
+    method = slotFactoryContract.createSlot(args)
+    estimate = async () => await slotFactoryContract.estimateGas.createSlot(args)
+    contractCall = async (opts: any) => await slotFactoryContract.createSlot(args, opts)
+  } else {
+
+  }
   return { args, method, estimate, call: contractCall }
 }

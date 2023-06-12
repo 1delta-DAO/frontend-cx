@@ -1,8 +1,6 @@
-import { Currency, Token } from '@uniswap/sdk-core'
-import { FeeAmount, Pool } from '@uniswap/v3-sdk'
-import { SupportedChainId } from 'constants/chains'
+import { Currency } from '@uniswap/sdk-core'
+import { Pool } from '@uniswap/v3-sdk'
 import { useMemo } from 'react'
-import { useChainId } from 'state/globalNetwork/hooks'
 import { useAllCurrencyCombinations } from '../../useAllCurrencyCombinations'
 import { PoolState, useAlgebraPools } from './usePools'
 
@@ -18,12 +16,9 @@ export function useAlgebraSwapPools(
   pools: Pool[]
   loading: boolean
 } {
-  const chainId = useChainId()
-
   const allCurrencyCombinations = useAllCurrencyCombinations(currencyIn, currencyOut)
 
   const pools = useAlgebraPools(allCurrencyCombinations)
-
   return useMemo(() => {
     return {
       pools: pools

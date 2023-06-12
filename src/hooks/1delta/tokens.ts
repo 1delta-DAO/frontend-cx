@@ -57,6 +57,20 @@ export const getCompoundTokens = (chainId: number): { [assetKey: string]: Token 
   )
 }
 
+export const getCompoundTokensNoWETH = (chainId: number): { [assetKey: string]: Token } => {
+  return Object.assign(
+    {},
+    ...getSupportedAssets(chainId, LendingProtocol.COMPOUND)
+      .filter((x) => x !== NATIVE_SYMBOL[chainId] && x !== WRAPPED_NATIVE_SYMBOL[chainId])
+      .map((asset) => {
+        return {
+          [asset]: safeGetToken(chainId, asset, LendingProtocol.COMPOUND),
+        }
+      })
+  )
+}
+
+
 export const getCompoundV3Tokens = (chainId: number): { [assetKey: string]: Token } => {
   return Object.assign(
     {},

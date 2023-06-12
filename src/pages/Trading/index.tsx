@@ -27,7 +27,7 @@ import { MAINNET_CHAINS } from 'constants/1delta'
 import { SupportedChainId, isSupportedChain } from 'constants/chains'
 import { BigNumber } from 'ethers'
 import { RedesignVariant, useRedesignFlag } from 'featureFlags/flags/redesign'
-import { useGetMarginTraderContract } from 'hooks/1delta/use1DeltaContract'
+import { useGetSlotFactoryContract } from 'hooks/1delta/use1DeltaContract'
 import JSBI from 'jsbi'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { useToggleWalletModal } from 'state/application/hooks'
@@ -48,7 +48,6 @@ import { computeFiatValuePriceImpact } from '../../utils/computeFiatValuePriceIm
 import { maxAmountSpend } from '../../utils/maxAmountSpend'
 import { computeRealizedPriceImpact, warningSeverity } from '../../utils/prices'
 import { largerPercentValue } from 'utils/1delta/generalFormatters'
-import { AaveMarginTrader, AaveSweeper } from 'abis/types'
 import { calculateGasMargin } from 'utils/calculateGasMargin'
 import { useTransactionAdder } from 'state/transactions/hooks'
 import { MarginTradingButtonText } from 'components/Styles'
@@ -61,9 +60,6 @@ import PositionTable from "./components/MarketTable";
 import { useOracleState, usePrices } from "state/oracles/hooks";
 import { usePollLendingData } from "hooks/polling/pollData";
 import DecimalSlider from "./components/Slider";
-import { useMarginTradeApproval } from "hooks/approval";
-import { usePrepareAssetData } from "hooks/asset/useAssetData";
-import { generateCalldata } from "utils/calldata/generateCall";
 import { SwitchCircle } from "components/Wallet";
 import { fetchChainLinkData } from "state/oracles/fetchChainLinkData";
 import { fetchAAVEAggregatorDataAsync } from "state/oracles/fetchAaveAggregatorData";
@@ -87,8 +83,8 @@ import SettingsTab from "components/Settings";
 import { SlotData } from "./components/MarketTable/PositionRow";
 import RiskDetailsDropdown from "components/swap/RiskDetailsDropdown";
 import { fetchCompoundPublicDataAsync } from "state/1delta/compound/fetchCompoundPublicData";
-import { math } from "polished";
 import { useNextSlotAddress } from "hooks/useNexSlotAddress";
+import { createSlotCalldata } from "utils/calldata/compound/slotMethodCreator";
 
 export enum Mode {
   LONG = 'Long',
@@ -559,7 +555,6 @@ export default function Professional() {
   )
 
   const tradeIn = useMemo(() => {
-
     const currTrade = tradeInUni ?? algebraTradeIn
     if (!currTrade) {
       if (LAST_VALID_AMOUNT_IN && parsedAmountIn && LAST_VALID_AMOUNT_IN.toExact() === parsedAmountIn?.toExact())
@@ -581,6 +576,7 @@ export default function Professional() {
   },
     [parsedAmountIn, Boolean(tradeIn?.outputAmount), depositMode, Boolean(prices[2]), Boolean(selectedPrice?.[0]), pair]
   )
+
   const borrowAmount = useMemo(() => {
     if (!debtCurrency || !prices[1]) return undefined
     try {
@@ -598,7 +594,6 @@ export default function Professional() {
   )
 
   const debouncedBorrowAmount = useDebounce(borrowAmount, 200)
-
 
   const {
     trade: { state: tradeStateUni, trade: tradeUni },
@@ -646,9 +641,6 @@ export default function Professional() {
     }
   }, [tradeUni, tradeAlgebra, parsedAmountIn, leverage])
 
-
-  // const [trade, parsedAmount] = Boolean(tradeUni) ? [tradeUni, parsedAmountUni] : [tradeAlgebra, parsedAmountAlgebra]
-
   const riskParams = useGetCompoundRiskParametersSlot(chainId, oracleState.data[SupportedChainId.POLYGON].chainLink)
 
   const riksParamsChange = useMemo(() => {
@@ -676,7 +668,7 @@ export default function Professional() {
   },
     [borrowAmount, depositAsset, trade, tradeIn, pair, depositMode, parsedAmountIn, riskParams])
 
-  console.log("RISK", riksParamsChange)
+  // console.log("RISK", riksParamsChange)
   const recipientAddress = recipient
 
   const parsedAmounts = useMemo(
@@ -741,7 +733,7 @@ export default function Professional() {
   const userHasSpecifiedInputOutput = Boolean(
     parsedAmountIn && parsedAmountIn?.greaterThan(JSBI.BigInt(0))
   )
-  const marginTraderContract = useGetMarginTraderContract(chainId, relevantAccount)
+  const slotFactoryContract = useGetSlotFactoryContract(chainId, relevantAccount)
 
 
 
@@ -788,23 +780,14 @@ export default function Professional() {
       return
     }
 
-    const { args, method, estimate, call } = generateCalldata(
-      currentProtocol,
-      MarginTradeType.Open,
-      account,
-      {
-        trade,
-        allowedSlippage,
-        sourceBorrowInterestMode: AaveInterestMode.NONE,
-        targetBorrowInterestMode: AaveInterestMode.NONE,
-        isMaxIn: maxInput,
-        isMaxOut: maxOutput,
-        marginTraderContract: marginTraderContract as AaveMarginTrader & AaveSweeper,
-        parsedAmount,
-        inIsETH: false,
-        outIsETH: false,
-        walletIsETH: false
-      }
+    const { args, method, estimate, call } = createSlotCalldata(
+      TradeAction.OPEN,
+      parsedAmountIn,
+      tradeIn,
+      trade,
+      allowedSlippage,
+      slotFactoryContract,
+      account
     )
 
 

@@ -35,7 +35,7 @@ import { compoundAddresses } from './addressesCompound'
 import { oVixAddresses } from './addresses0Vix'
 import { ETHEREUM_CHAINS, POLYGON_CHAINS } from 'constants/1delta'
 import { useWeb3React } from '@web3-react/core'
-import { AAVEPoolV3, Comet, MarginTrader, MoneyMarket, Sweeper } from 'abis/types'
+import { AAVEPoolV3, Comet, MarginTrader, MoneyMarket, SlotFactory, Sweeper } from 'abis/types'
 import { GhoOracle } from 'abis/types/GhoOracle'
 import { AAVEProtocolDataProvider } from 'abis/types/AAVEProtocolDataProvider'
 import { CometLens } from 'abis/types/CometLens'
@@ -483,12 +483,12 @@ export function getTokenManagerContract(
 }
 
 
-export function useGetSlotFactoryContract(chainId: number, account?: string): Contract {
+export function useGetSlotFactoryContract(chainId: number, account?: string): SlotFactory {
   const { provider } = useWeb3React()
   return getContract(
     slotFactoryAddresses[chainId] ?? defaultAddress,
     SLOT_FACTORY_ABI,
     provider ?? RPC_PROVIDERS[chainId as SupportedChainId],
     account
-  )
+  ) as SlotFactory
 }
