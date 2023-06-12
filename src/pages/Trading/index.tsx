@@ -40,7 +40,7 @@ import { AutoRow, RowFixed } from '../../components/Row'
 import confirmPriceImpactWithoutFee from '../../components/swap/confirmPriceImpactWithoutFee'
 import ConfirmSwapModal from '../../components/swap/ConfirmMarginTradeModal'
 import { Dots, SwapCallbackError } from '../../components/swap/styleds'
-import { ApprovalState } from '../../hooks/useApproveCallback'
+import { ApprovalState, useApproveCallback } from '../../hooks/useApproveCallback'
 import { useStablecoinDollarValue } from '../../hooks/useStablecoinPrice'
 import { useExpertModeManager, useIsDarkMode } from '../../state/user/hooks'
 import { LinkStyledButton, ThemedText } from '../../theme'
@@ -88,6 +88,7 @@ import { SlotData } from "./components/MarketTable/PositionRow";
 import RiskDetailsDropdown from "components/swap/RiskDetailsDropdown";
 import { fetchCompoundPublicDataAsync } from "state/1delta/compound/fetchCompoundPublicData";
 import { math } from "polished";
+import { useNextSlotAddress } from "hooks/useNexSlotAddress";
 
 export enum Mode {
   LONG = 'Long',
@@ -104,6 +105,10 @@ export const LoaderDots = (): React.ReactNode => {
 }
 
 
+export enum TradeAction {
+  OPEN = 'Open',
+  CLOSE = 'Close'
+}
 
 const dummyData: SlotData[] = [
   {
@@ -738,25 +743,7 @@ export default function Professional() {
   )
   const marginTraderContract = useGetMarginTraderContract(chainId, relevantAccount)
 
-  const {
-    approvalStateOfConcern,
-    handleApprove,
-    setApprovalSubmitted,
-    showApproveFlow,
-    approvalPending,
-    approvalSubmitted,
-    approveTokenButtonDisabled,
-  } = useMarginTradeApproval(
-    currentProtocol,
-    relevantAccount,
-    trade,
-    MarginTradeType.Open,
-    marginTraderContract.address,
-    allowedSlippage,
-    AaveInterestMode.NONE,
-    selectedAsset,
-    hasNoImplementation
-  )
+
 
   const maxInputAmount: CurrencyAmount<Currency> | undefined | null = useMemo(
     () => parsedAmountIn && maxAmountSpend(parsedAmountIn),
@@ -765,6 +752,33 @@ export default function Professional() {
 
   const showMaxButton =
     !maxInput && Boolean(maxInputAmount?.greaterThan(0) && !parsedAmounts[Field.INPUT]?.equalTo(maxInputAmount))
+
+
+  const nextAddr = useNextSlotAddress()
+
+  const [approvalState, approveCallback] = useApproveCallback(Boolean(tradeIn) ? tradeIn?.outputAmount : parsedAmount, nextAddr)
+  const [approvalSubmitted, setApprovalSubmitted] = useState<boolean>(false)
+
+  const showApproveFlow =
+    !hasNoImplementation &&
+    (approvalState === ApprovalState.NOT_APPROVED ||
+      approvalState === ApprovalState.PENDING ||
+      (approvalSubmitted && approvalState === ApprovalState.APPROVED))
+
+  const [approvalPending, setApprovalPending] = useState<boolean>(false)
+
+  const handleApprove = useCallback(async () => {
+    setApprovalPending(true)
+    try {
+      await approveCallback()
+    } finally {
+      setApprovalPending(false)
+    }
+  }, [approveCallback, trade?.inputAmount?.currency.symbol])
+
+  const approveTokenButtonDisabled =
+    approvalState !== ApprovalState.NOT_APPROVED ||
+    approvalSubmitted
 
   const handleSwap = useCallback(async () => {
     if (!trade) {
@@ -933,8 +947,6 @@ export default function Professional() {
       parsedAmountIn
     ]
   )
-  const chartPrices = usePrices(chartPair, chainId)
-
   const tradingViewSymbol = useMemo(() => getTradingViewSymbol(chartPair[0], chartPair[1]), [chartPair])
 
   const [leverageValidated, minVal, onLevChange, maxVal] = useMemo(() => {
@@ -1094,14 +1106,14 @@ export default function Professional() {
                     onClick={handleApprove}
                     disabled={approveTokenButtonDisabled}
                     width="100%"
-                    altDisabledStyle={approvalStateOfConcern === ApprovalState.PENDING} // show solid button while waiting
+                    altDisabledStyle={approvalState === ApprovalState.PENDING} // show solid button while waiting
                     confirmed={
-                      approvalStateOfConcern === ApprovalState.APPROVED
+                      approvalState === ApprovalState.APPROVED
                     }
                   >
                     <AutoRow justify="space-between" style={{ flexWrap: 'nowrap' }} height="20px">
                       <span style={{ display: 'flex', alignItems: 'center' }}>
-                        {approvalStateOfConcern === ApprovalState.APPROVED ? (
+                        {approvalState === ApprovalState.APPROVED ? (
                           <MarginTradingButtonText>
                             {approvalMessage}
                           </MarginTradingButtonText>
@@ -1111,9 +1123,9 @@ export default function Professional() {
                           </MarginTradingButtonText>
                         )}
                       </span>
-                      {approvalPending || approvalStateOfConcern === ApprovalState.PENDING ? (
+                      {approvalPending || approvalState === ApprovalState.PENDING ? (
                         <Loader stroke={theme.white} />
-                      ) : (approvalSubmitted && approvalStateOfConcern === ApprovalState.APPROVED) ? (
+                      ) : (approvalSubmitted && approvalState === ApprovalState.APPROVED) ? (
                         <CheckCircle size="20" color={theme.deprecated_green1} />
                       ) : (
                         <MouseoverTooltip
@@ -1149,7 +1161,7 @@ export default function Professional() {
                     disabled={
                       routeIsSyncing ||
                       routeIsLoading ||
-                      (approvalStateOfConcern !== ApprovalState.APPROVED) ||
+                      (approvalState !== ApprovalState.APPROVED) ||
                       buttonDisabled
                     }
                   >

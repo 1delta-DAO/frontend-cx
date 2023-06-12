@@ -29,7 +29,7 @@ import { getContract } from 'utils'
 import { Contract } from 'ethers'
 import { RPC_PROVIDERS } from '../../constants/providers'
 import { SupportedChainId } from 'constants/chains'
-import { aaveBrokerAddress, accountFactoryAddress, cometBrokerAddress } from './addresses1Delta'
+import { aaveBrokerAddress, accountFactoryAddress, cometBrokerAddress, slotFactoryAddresses } from './addresses1Delta'
 import { addressesAaveCore } from './addressesAave'
 import { compoundAddresses } from './addressesCompound'
 import { oVixAddresses } from './addresses0Vix'
@@ -44,6 +44,7 @@ import { OneDeltaTradeType, SupportedAssets } from 'types/1delta'
 import { LendingProtocol } from 'state/1delta/actions'
 import { useMemo } from 'react'
 import { CometExt } from 'abis/types/CometExt'
+import SLOT_FACTORY_ABI from 'abis/SlotFactory.json'
 
 const defaultAddress = '0xBA4e9BbEa023AcaE6b9De0322A5b274414e4705C'
 
@@ -477,6 +478,17 @@ export function getTokenManagerContract(
     deltaAccount ?? defaultAddress,
     TOKEN_MANAGER_ABI,
     library ?? RPC_PROVIDERS[chainId as SupportedChainId],
+    account
+  )
+}
+
+
+export function useGetSlotFactoryContract(chainId: number, account?: string): Contract {
+  const { provider } = useWeb3React()
+  return getContract(
+    slotFactoryAddresses[chainId] ?? defaultAddress,
+    SLOT_FACTORY_ABI,
+    provider ?? RPC_PROVIDERS[chainId as SupportedChainId],
     account
   )
 }

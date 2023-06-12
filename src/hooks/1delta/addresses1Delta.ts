@@ -14,3 +14,9 @@ export const accountFactoryAddress: { [chainId: number]: string } = {
   [SupportedChainId.POLYGON_MUMBAI]: '0xC2ef8d1288982451eEfB20671153CF14fa22e72A',
   [SupportedChainId.POLYGON]: '0x36E5e5e12782389359dFc89A7C3BAAA6E39666AA',
 }
+
+export const slotFactoryAddresses: { [chainId: number]: string } = {
+  [SupportedChainId.POLYGON_ZK_EVM]: '0xcB6Eb8df68153cebF60E1872273Ef52075a5C297',
+}
+
+
