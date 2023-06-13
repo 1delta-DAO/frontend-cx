@@ -226,7 +226,7 @@ export function AdvancedRiskDetails({
     trade.outputAmount.currency.symbol as SupportedAssets,
     trade.inputAmount.currency.symbol as SupportedAssets] : undefined
   const [priceReceived, priceCollateral, priceDebt] = usePrices(data ?? [], SupportedChainId.POLYGON)
-  console.log("DEPOSIT", depositCurrency, depositMode)
+
   const [safeLtv, safeHf, state] = useMemo(() => {
     const _safeLtv = Number(ltv * 100)
     const _safeHf = healthFactor === 0 ? 100 : Number(healthFactor)

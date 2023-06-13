@@ -483,8 +483,8 @@ export function getTokenManagerContract(
 }
 
 
-export function useGetSlotFactoryContract(chainId: number, account?: string): SlotFactory {
-  const { provider } = useWeb3React()
+export function useGetSlotFactoryContract(chainId: number): SlotFactory {
+  const { provider, account } = useWeb3React()
   return getContract(
     slotFactoryAddresses[chainId] ?? defaultAddress,
     SLOT_FACTORY_ABI,

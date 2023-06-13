@@ -23,15 +23,14 @@ export function encodeAlgebraPathEthersSimple(path: string[], flags: number[], f
   types.push('uint8')
   data.push(path[path.length - 1])
   data.push(String(flag))
-
+  // console.log(data)
+  // console.log(types)
   return ethers.utils.solidityPack(types, data)
 }
-
 
 export function encodeAddress(path: string): string {
   return ethers.utils.solidityPack(['address'], [path])
 }
-
 
 export const createSlotCalldata = (
   action: TradeAction,
@@ -57,30 +56,34 @@ export const createSlotCalldata = (
     }
 
   const v3RouteIn = tradeIn?.routes[0] as RouteV3<Currency, Currency>
-  const hasOnePool = v3Route.pools.length === 1
 
   if (action === TradeAction.OPEN) {
+    // console.log("params pathIn", v3RouteIn.path.map((p) => p.address), new Array(v3RouteIn.path.length - 1).fill(3), 0)
     const pathIn = tradeIn ?
       encodeAlgebraPathEthersSimple(v3RouteIn.path.map((p) => p.address), new Array(v3RouteIn.path.length - 1).fill(3), 0) :
       parsedAmountIn ? encodeAddress(parsedAmountIn.currency.wrapped.address) :
         '0x' // - should fail
-
-    const pathMargin = tradeIn ?
+    // console.log("params path amrgin", v3Route.path.map((p) => p.address), v3Route.path.length === 1 ? [0] : [0, ...new Array(v3Route.path.length - 2).fill(3)], 0)
+    const pathMargin = trade ?
       encodeAlgebraPathEthersSimple(v3Route.path.map((p) => p.address), v3Route.path.length === 1 ? [0] : [0, ...new Array(v3Route.path.length - 2).fill(3)], 0) :
       '0x' // - should fail
 
+
+    // console.log("PathIn", pathIn)
+    // console.log("pathMargin", pathMargin)
+
     args = {
       amountDeposited: tradeIn ? tradeIn.inputAmount.quotient.toString() : parsedAmountIn?.quotient.toString(),
-      minimumAmountDeposited: trade.minimumAmountOut(allowedSlippage).quotient.toString(),
+      minimumAmountDeposited: tradeIn?.minimumAmountOut(allowedSlippage).quotient.toString() ?? '0',
       borrowAmount: trade.inputAmount.quotient.toString(),
-      minimumMarginReceived: trade.minimumAmountOut(allowedSlippage),
+      minimumMarginReceived: trade.minimumAmountOut(allowedSlippage).quotient.toString(),
       // path to deposit - can be empty if depo ccy = collateral
       swapPath: pathIn,
       // path for margin trade
       marginPath: pathMargin
     }
-
-    method = slotFactoryContract.createSlot(args)
+    // console.log("ARGS", args)
+    method = undefined // slotFactoryContract.createSlot(args)
     estimate = async () => await slotFactoryContract.estimateGas.createSlot(args)
     contractCall = async (opts: any) => await slotFactoryContract.createSlot(args, opts)
   } else {

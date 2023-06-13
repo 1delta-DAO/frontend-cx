@@ -6,7 +6,7 @@ import { useGetSlotFactoryContract } from "./1delta/use1DeltaContract"
 export const useNextSlotAddress = () => {
   const chainId = useChainId()
   const { account } = useWeb3React()
-  const factoryContract = useGetSlotFactoryContract(chainId, account)
+  const factoryContract = useGetSlotFactoryContract(chainId)
   const nextAddress = useSingleCallResult(account ? factoryContract : undefined, 'getNextAddress', [account])
   return nextAddress ? nextAddress?.result?.slotAddress : undefined
 }

@@ -25,7 +25,7 @@ import SwapDetailsDropdown from 'components/swap/SwapDetailsDropdown'
 import { MouseoverTooltip } from 'components/Tooltip'
 import { MAINNET_CHAINS } from 'constants/1delta'
 import { SupportedChainId, isSupportedChain } from 'constants/chains'
-import { BigNumber } from 'ethers'
+import { BigNumber, Contract } from 'ethers'
 import { RedesignVariant, useRedesignFlag } from 'featureFlags/flags/redesign'
 import { useGetSlotFactoryContract } from 'hooks/1delta/use1DeltaContract'
 import JSBI from 'jsbi'
@@ -85,6 +85,7 @@ import RiskDetailsDropdown from "components/swap/RiskDetailsDropdown";
 import { fetchCompoundPublicDataAsync } from "state/1delta/compound/fetchCompoundPublicData";
 import { useNextSlotAddress } from "hooks/useNexSlotAddress";
 import { createSlotCalldata } from "utils/calldata/compound/slotMethodCreator";
+import { simpleRpcProvider } from "utils/1delta/contractHelper";
 
 export enum Mode {
   LONG = 'Long',
@@ -395,7 +396,7 @@ export default function Professional() {
 
   const pairs = useMemo(() => getPairs(assets), [assets])
 
-  const hasNoImplementation = useMemo(() => MAINNET_CHAINS.includes(chainId), [chainId])
+  const hasNoImplementation = useMemo(() => chainId !== SupportedChainId.POLYGON_ZK_EVM, [chainId])
 
 
   const deltaState = useDeltaState()
@@ -733,7 +734,7 @@ export default function Professional() {
   const userHasSpecifiedInputOutput = Boolean(
     parsedAmountIn && parsedAmountIn?.greaterThan(JSBI.BigInt(0))
   )
-  const slotFactoryContract = useGetSlotFactoryContract(chainId, relevantAccount)
+  const slotFactoryContract = useGetSlotFactoryContract(chainId)
 
 
 
@@ -748,7 +749,7 @@ export default function Professional() {
 
   const nextAddr = useNextSlotAddress()
 
-  const [approvalState, approveCallback] = useApproveCallback(Boolean(tradeIn) ? tradeIn?.outputAmount : parsedAmount, nextAddr)
+  const [approvalState, approveCallback] = useApproveCallback((depositMode !== DepositMode.DIRECT && Boolean(tradeIn)) ? tradeIn?.inputAmount : parsedAmountIn, nextAddr)
   const [approvalSubmitted, setApprovalSubmitted] = useState<boolean>(false)
 
   const showApproveFlow =
@@ -772,6 +773,17 @@ export default function Professional() {
     approvalState !== ApprovalState.NOT_APPROVED ||
     approvalSubmitted
 
+  const { args, method, estimate, call } = createSlotCalldata(
+    TradeAction.OPEN,
+    parsedAmountIn,
+    tradeIn,
+    trade,
+    allowedSlippage,
+    slotFactoryContract,
+    account
+  )
+
+
   const handleSwap = useCallback(async () => {
     if (!trade) {
       return
@@ -779,21 +791,16 @@ export default function Professional() {
     if (stablecoinPriceImpact && !confirmPriceImpactWithoutFee(stablecoinPriceImpact)) {
       return
     }
-
-    const { args, method, estimate, call } = createSlotCalldata(
-      TradeAction.OPEN,
-      parsedAmountIn,
-      tradeIn,
-      trade,
-      allowedSlippage,
-      slotFactoryContract,
-      account
-    )
-
-
     // estimate gas 
     let gasEstimate: any = undefined
     try {
+      // const x = await slotFactoryContract.ADMIN()
+      // const x2 = await slotFactoryContract.getNextAddress(String(account))
+      // const x3 = await slotFactoryContract.getAddress(String(account), 0)
+      // const x4 = await slotFactoryContract.getImplemtationPovider()
+
+      // const x5 = 0
+      // console.log("xxxx", x, x2, x3, x4, x5, account)
       gasEstimate = await estimate()
     } catch (error) {
       setSwapState({
@@ -804,58 +811,73 @@ export default function Professional() {
         txHash: undefined,
       })
     }
-    const opts = gasEstimate ? { gasLimit: calculateGasMargin(gasEstimate) } : {}
+    const opts = gasEstimate ? {
+      gasLimit: calculateGasMargin(gasEstimate),
+      gasPrice: 1000000000
+    } : {}
 
     setSwapState({ attemptingTxn: true, tradeToConfirm, showConfirm, swapErrorMessage: undefined, txHash: undefined })
     if (call)
-      await call(opts)
-        .then((txResponse) => {
-          setSwapState({
-            attemptingTxn: false,
-            tradeToConfirm,
-            showConfirm,
-            swapErrorMessage: undefined,
-            txHash: txResponse.hash,
-          })
+      try {
+        await call(opts)
+          .then((txResponse) => {
+            setSwapState({
+              attemptingTxn: false,
+              tradeToConfirm,
+              showConfirm,
+              swapErrorMessage: undefined,
+              txHash: txResponse.hash,
+            })
 
-          // if (trade)
-          //   addTransaction(
-          //     txResponse,
-          //     trade.tradeType === TradeType.EXACT_INPUT
-          //       ? {
-          //         protocol: currentProtocol,
-          //         type: TransactionType.SINGLE_SIDE,
-          //         subType: side,
-          //         tradeType: TradeType.EXACT_INPUT,
-          //         inputCurrencyId: currencyId(trade.inputAmount.currency),
-          //         inputCurrencyAmountRaw: trade.inputAmount.quotient.toString(),
-          //         expectedOutputCurrencyAmountRaw: trade.outputAmount.quotient.toString(),
-          //         outputCurrencyId: currencyId(trade.outputAmount.currency),
-          //         minimumOutputCurrencyAmountRaw: trade.minimumAmountOut(allowedSlippage).quotient.toString(),
-          //       }
-          //       : {
-          //         protocol: currentProtocol,
-          //         type: TransactionType.SINGLE_SIDE,
-          //         subType: side,
-          //         tradeType: TradeType.EXACT_OUTPUT,
-          //         inputCurrencyId: currencyId(trade.inputAmount.currency),
-          //         maximumInputCurrencyAmountRaw: trade.maximumAmountIn(allowedSlippage).quotient.toString(),
-          //         outputCurrencyId: currencyId(trade.outputAmount.currency),
-          //         outputCurrencyAmountRaw: trade.outputAmount.quotient.toString(),
-          //         expectedInputCurrencyAmountRaw: trade.inputAmount.quotient.toString(),
-          //       }
-          //   )
-        })
-        .catch((error) => {
-          setSwapState({
-            attemptingTxn: false,
-            tradeToConfirm,
-            showConfirm,
-            // rejection in the wallet has a different nesting
-            swapErrorMessage: parseMessage(error),
-            txHash: undefined,
+            // if (trade)
+            //   addTransaction(
+            //     txResponse,
+            //     trade.tradeType === TradeType.EXACT_INPUT
+            //       ? {
+            //         protocol: currentProtocol,
+            //         type: TransactionType.SINGLE_SIDE,
+            //         subType: side,
+            //         tradeType: TradeType.EXACT_INPUT,
+            //         inputCurrencyId: currencyId(trade.inputAmount.currency),
+            //         inputCurrencyAmountRaw: trade.inputAmount.quotient.toString(),
+            //         expectedOutputCurrencyAmountRaw: trade.outputAmount.quotient.toString(),
+            //         outputCurrencyId: currencyId(trade.outputAmount.currency),
+            //         minimumOutputCurrencyAmountRaw: trade.minimumAmountOut(allowedSlippage).quotient.toString(),
+            //       }
+            //       : {
+            //         protocol: currentProtocol,
+            //         type: TransactionType.SINGLE_SIDE,
+            //         subType: side,
+            //         tradeType: TradeType.EXACT_OUTPUT,
+            //         inputCurrencyId: currencyId(trade.inputAmount.currency),
+            //         maximumInputCurrencyAmountRaw: trade.maximumAmountIn(allowedSlippage).quotient.toString(),
+            //         outputCurrencyId: currencyId(trade.outputAmount.currency),
+            //         outputCurrencyAmountRaw: trade.outputAmount.quotient.toString(),
+            //         expectedInputCurrencyAmountRaw: trade.inputAmount.quotient.toString(),
+            //       }
+            //   )
           })
+          .catch((error) => {
+            setSwapState({
+              attemptingTxn: false,
+              tradeToConfirm,
+              showConfirm,
+              // rejection in the wallet has a different nesting
+              swapErrorMessage: parseMessage(error),
+              txHash: undefined,
+            })
+          })
+      } catch (e) {
+        // console.log("error in execution:", e)
+        setSwapState({
+          attemptingTxn: false,
+          tradeToConfirm,
+          showConfirm,
+          // rejection in the wallet has a different nesting
+          swapErrorMessage: e,
+          txHash: undefined,
         })
+      }
   }, [
     stablecoinPriceImpact,
     tradeToConfirm,
@@ -863,8 +885,13 @@ export default function Professional() {
     recipient,
     recipientAddress,
     account,
-    trade?.inputAmount?.currency?.symbol,
-    trade?.outputAmount?.currency?.symbol,
+    parsedAmountIn,
+    borrowAmount,
+    tradeIn,
+    trade,
+    allowedSlippage,
+    slotFactoryContract,
+    account
   ])
 
 
@@ -906,7 +933,7 @@ export default function Professional() {
     if (hasNoImplementation) return ['Coming Soon!', true]
 
     if (Boolean(account)) {
-      return ['Coming Soon!', true]
+      return ['Open Position', false]
     }
 
     return ['Connect', true]
@@ -914,7 +941,8 @@ export default function Professional() {
     routeIsLoading,
     routeIsSyncing,
     priceImpactTooHigh,
-    priceImpactSeverity
+    priceImpactSeverity,
+    account
   ])
 
   const handlePairSwap = useCallback(() => handleSelectPair([pair[1], pair[0]]), [pair])
@@ -1156,7 +1184,7 @@ export default function Professional() {
               </AutoRow>
             ) : (
               <ButtonPrimary
-                onClick={() => {
+                onClick={async () => {
                   if (isExpertMode) {
                     handleSwap()
                   } else {
