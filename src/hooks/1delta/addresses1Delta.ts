@@ -16,7 +16,7 @@ export const accountFactoryAddress: { [chainId: number]: string } = {
 }
 
 export const slotFactoryAddresses: { [chainId: number]: string } = {
-  [SupportedChainId.POLYGON_ZK_EVM]: '0x85D682FA4115f6a1Ed91170E705A50D532e3B6BD',
+  [SupportedChainId.POLYGON_ZK_EVM]: '0x925716D57c842B50806884EDb295bA3E3A8EBdFE',
 }
 
 
