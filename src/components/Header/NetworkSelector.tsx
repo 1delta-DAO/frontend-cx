@@ -297,10 +297,6 @@ function Row({
 
 const NETWORK_SELECTOR_CHAINS = [
   SupportedChainId.POLYGON_ZK_EVM,
-  SupportedChainId.MAINNET,
-  SupportedChainId.POLYGON,
-  SupportedChainId.GOERLI,
-  SupportedChainId.POLYGON_MUMBAI,
 ]
 
 export default function NetworkSelector() {

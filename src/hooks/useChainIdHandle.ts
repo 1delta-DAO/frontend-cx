@@ -1,4 +1,4 @@
-import { chainIds } from 'constants/chains'
+import { chainIds, SupportedChainId } from 'constants/chains'
 import { useEffect } from 'react'
 import { flushAccount, setToLoading } from 'state/1delta/actions'
 import { setAccount, setBlockNumber, setChainId, setIsSupported } from 'state/globalNetwork/actions'
@@ -13,7 +13,7 @@ export function useChainIdHandling(chainIdWeb3: number | undefined, accountFromW
   const dispatch = useAppDispatch()
 
   useEffect(() => {
-    if (chainIdWeb3 && chainId !== chainIdWeb3 && chainIds.includes(chainIdWeb3) && accountFromWeb3) {
+    if (chainIdWeb3 && chainId !== chainIdWeb3 && chainId === SupportedChainId.POLYGON_ZK_EVM && accountFromWeb3) {
       dispatch(setChainId({ chainId: chainIdWeb3 }))
       dispatch(setToLoading())
       dispatch(setOraclesToLoading())
@@ -26,6 +26,6 @@ export function useChainIdHandling(chainIdWeb3: number | undefined, accountFromW
   }, [dispatch, chainId, chainIdWeb3, accountFromWeb3])
 
   useEffect(() => {
-    dispatch(setIsSupported({ isSupported: chainIds.includes(Number(chainIdWeb3)) }))
+    dispatch(setIsSupported({ isSupported: SupportedChainId.POLYGON_ZK_EVM === Number(chainIdWeb3) }))
   }, [chainIdWeb3])
 }

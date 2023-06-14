@@ -264,7 +264,7 @@ export default function GeneralCurrencyInputPanel({
                           renderBalance(selectedCurrencyBalance)
                         ) : (<IconContainer>
                           <div style={{ marginRight: '10px' }}>
-                            <WalletIcon size={20} />
+                            <WalletIcon size={15} />
                           </div>
                           {formatCurrencyAmount(selectedCurrencyBalance, 4)}
                         </IconContainer>

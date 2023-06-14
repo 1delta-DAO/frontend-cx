@@ -14,7 +14,7 @@ import { useNetworkState } from "state/globalNetwork/hooks";
 import { LendingProtocol } from "state/1delta/actions";
 import { AutoColumn } from "components/Column";
 import { ArrowContainer, InputWrapper } from "./components/wrappers";
-import { ArrowDown, CheckCircle, HelpCircle } from "react-feather";
+import { ArrowDown, CheckCircle, HelpCircle, TrendingDown, TrendingUp } from "react-feather";
 import { Trans } from '@lingui/macro'
 import { Trade } from '@uniswap/router-sdk'
 import { Currency, CurrencyAmount, TradeType } from '@uniswap/sdk-core'
@@ -207,7 +207,7 @@ export const ButtonLightBoring = styled(BaseButton) <{ redesignFlag?: boolean }>
 const TypeButton = styled(ButtonLightBoring) <{ selected: boolean }>`
   border-radius: 0px;
   font-size: 14px;
-  width: 33%;
+  width: 50%;
   &:first-child {
     border-top-left-radius: 8px;
     padding-left: 10px;
@@ -215,7 +215,7 @@ const TypeButton = styled(ButtonLightBoring) <{ selected: boolean }>`
   &:last-child {
     border-top-right-radius: 8px;
     padding-right: 10px;
-    width: 34%;
+    width: 50%;
   }
   height: 40px;
   ${({ theme, selected }) =>
@@ -955,6 +955,7 @@ export default function Professional() {
               }}
               selected={selectedMode === Mode.LONG}
             >
+              <TrendingUp style={{ marginRight: '10px' }} size={15} />
               Long
             </TypeButton>
             <TypeButton
@@ -964,14 +965,15 @@ export default function Professional() {
               }}
               selected={selectedMode === Mode.SHORT}
             >
+              <TrendingDown style={{ marginRight: '10px' }} size={15} />
               Short
             </TypeButton>
-            <TypeButton
+            {/* <TypeButton
               onClick={() => setSelectedMode(Mode.EXPERT)}
               selected={selectedMode === Mode.EXPERT}
             >
               Expert
-            </TypeButton>
+            </TypeButton> */}
           </ButtonRow>
           <InputPanelContainer>
             <RowFixed style={{ width: '100%', zIndex: 5, paddingRight: '5px' }}>

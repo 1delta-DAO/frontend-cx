@@ -274,6 +274,6 @@ export function getChainInfoOrDefault(chainId: number | undefined) {
 }
 
 export function getRawChainInfo(chainId: number | undefined) {
-  if (chainId && chainIds.includes(chainId)) return CHAIN_INFO[chainId]
+  if (chainId && chainId === SupportedChainId.POLYGON_ZK_EVM) return CHAIN_INFO[chainId]
   return undefined
 }

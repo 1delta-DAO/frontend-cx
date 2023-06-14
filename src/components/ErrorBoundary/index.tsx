@@ -142,11 +142,9 @@ function getRelevantState(): null | keyof AppState {
     return null
   }
   const pieces = path.substring(2).split(/[/\\?]/)
-  switch (pieces[0]) {
-    case 'swap':
-      return 'swap'
-  }
-  return null
+
+  return 'user'
+
 }
 
 function issueBody(error: Error): string {
