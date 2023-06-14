@@ -12,10 +12,10 @@ import { compoundAddresses } from './addressesCompound'
 import { oVixAddresses } from './addresses0Vix'
 import { ETHEREUM_CHAINS, POLYGON_CHAINS } from 'constants/1delta'
 import { useWeb3React } from '@web3-react/core'
-import { SlotFactory, SlotLens } from 'abis/types'
+import { DeltaSlot, SlotFactory, SlotLens } from 'abis/types'
 import SLOT_FACTORY_ABI from 'abis/SlotFactory.json'
 import SLOT_LENS_ABI from 'abis/SlotLens.json'
-
+import SLOT_ABI from 'abis/DeltaSlot.json'
 
 const defaultAddress = '0xBA4e9BbEa023AcaE6b9De0322A5b274414e4705C'
 
@@ -75,4 +75,14 @@ export function getSlotLensContract(chainId: number, account?: string): SlotLens
     RPC_PROVIDERS[chainId as SupportedChainId],
     account
   ) as SlotLens
+}
+
+export function useGetSlotContract(chainId: number, slotAddress: string): DeltaSlot {
+  const { provider, account } = useWeb3React()
+  return getContract(
+    slotAddress,
+    SLOT_ABI,
+    provider ?? RPC_PROVIDERS[chainId as SupportedChainId],
+    account
+  ) as DeltaSlot
 }

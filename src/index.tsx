@@ -4,7 +4,6 @@ import 'polyfills'
 import 'components/analytics'
 
 import { FeatureFlagsProvider } from 'featureFlags'
-import RelayEnvironment from 'graphql/data/RelayEnvironment'
 import { MulticallUpdater } from 'lib/state/multicall'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
@@ -55,15 +54,13 @@ createRoot(container).render(
           <BrowserRouter>
             <LanguageProvider>
               <Web3Provider>
-                <RelayEnvironmentProvider environment={RelayEnvironment}>
-                  <Blocklist>
-                    <Updaters />
-                    <ThemeProvider>
-                      <ThemedGlobalStyle />
-                      <App />
-                    </ThemeProvider>
-                  </Blocklist>
-                </RelayEnvironmentProvider>
+                <Blocklist>
+                  <Updaters />
+                  <ThemeProvider>
+                    <ThemedGlobalStyle />
+                    <App />
+                  </ThemeProvider>
+                </Blocklist>
               </Web3Provider>
             </LanguageProvider>
           </BrowserRouter>

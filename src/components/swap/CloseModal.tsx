@@ -30,6 +30,7 @@ import { UniswapTrade } from 'utils/Types'
 
 
 let LAST_VALID_TRADE_CLOSE: UniswapTrade | undefined;
+let LAST_VALID_AMOUNT_OUT: CurrencyAmount<Currency> | undefined;
 
 export default function CloseModal({
   slot,
@@ -72,22 +73,20 @@ export default function CloseModal({
     tokenIn,
   )
 
-  // const [parsedAmount, trade] = useMemo(() => {
+  const [parsedAmount, trade] = useMemo(() => {
 
-  //   const currTrade =tradeAlgebra
-  //   const parsedAmount =  parsedAmountAlgebra
-  //   if (!currTrade) {
-  //     if (LAST_VALID_TRADE_MT && LAST_VALID_AMOUNT_IN && parsedAmount && LAST_VALID_AMOUNT_IN?.toFixed() === parsedAmountIn?.toFixed() && LAST_LEVERAGE === leverage)
-  //       return [parsedAmount, LAST_VALID_TRADE_MT]
-  //     else return [parsedAmount, undefined]
-  //   } else {
-  //     LAST_VALID_TRADE_MT = currTrade
-  //     LAST_LEVERAGE = leverage
-  //     LAST_VALID_AMOUNT_IN = parsedAmountIn
-  //     LAST_VALID_AMOUNT_MT = parsedAmount
-  //     return [parsedAmount, currTrade]
-  //   }
-  // }, [tradeUni, tradeAlgebra, parsedAmountIn, leverage])
+    const currTrade = tradeAlgebra
+    const parsedAmount = parsedAmountAlgebra
+    if (!currTrade) {
+      if (LAST_VALID_TRADE_CLOSE && LAST_VALID_AMOUNT_OUT && parsedAmount && LAST_VALID_AMOUNT_OUT?.toFixed() === outAmount?.toFixed())
+        return [parsedAmount, LAST_VALID_TRADE_CLOSE]
+      else return [parsedAmount, undefined]
+    } else {
+      LAST_VALID_TRADE_CLOSE = currTrade
+      LAST_VALID_AMOUNT_OUT = outAmount
+      return [parsedAmount, currTrade]
+    }
+  }, [tradeAlgebra, outAmount])
 
 
   // const onModalDismiss = useCallback(() => {

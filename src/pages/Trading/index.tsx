@@ -344,8 +344,6 @@ export default function Professional() {
   const { connectionIsSupported, chainId, account } = useNetworkState()
   const currentProtocol = LendingProtocol.COMPOUND
 
-  const relevantAccount = account
-
   const isDark = useIsDarkMode()
 
   const [selectedMode, setSelectedMode] = useState(Mode.LONG)
