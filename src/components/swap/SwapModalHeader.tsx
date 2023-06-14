@@ -9,7 +9,7 @@ import { Text } from 'rebass'
 import { InterfaceTrade } from 'state/routing/types'
 import styled, { useTheme } from 'styled-components/macro'
 
-import { useStablecoinValue } from '../../hooks/useStablecoinPrice'
+import { useStablecoinDollarValue } from '../../hooks/useStablecoinPrice'
 import { ThemedText } from '../../theme'
 import { isAddress, shortenAddress } from '../../utils'
 import { computeFiatValuePriceImpact } from '../../utils/computeFiatValuePriceImpact'
@@ -75,8 +75,8 @@ export default function SwapModalHeader({
   const [lastExecutionPrice, setLastExecutionPrice] = useState(trade.executionPrice)
   const [priceUpdate, setPriceUpdate] = useState<number | undefined>()
 
-  const fiatValueInput = useStablecoinValue(trade.inputAmount)
-  const fiatValueOutput = useStablecoinValue(trade.outputAmount)
+  const fiatValueInput = useStablecoinDollarValue(trade.inputAmount)
+  const fiatValueOutput = useStablecoinDollarValue(trade.outputAmount)
 
   useEffect(() => {
     if (!trade.executionPrice.equalTo(lastExecutionPrice)) {

@@ -1,30 +1,28 @@
 import { useMemo } from 'react'
-import { Anchor, ArrowRight, BarChart2, Check } from 'react-feather'
+import { Check } from 'react-feather'
 import styled, { useTheme } from 'styled-components/macro'
 import {
   CheckboxWrapper,
-  Circle,
-  YieldBox
+  Circle
 } from 'components/Styles/tableStyles'
 import {
-  AnimatedTokenPositionIcon, PairPosition
+  PairPosition
 } from 'components/TokenDetail'
 import {
   formatPriceString,
   formatSmallGeneralUSDValue,
-  formatSmallGeneralValue,
-  formatSmallUSDValue,
-  formatSmallValue
+  formatSmallUSDValue
 } from 'utils/tableUtils/format'
 import { useChainIdAndAccount } from 'state/globalNetwork/hooks'
-import { AssetCellPro, CheckboxCellPro, PnLCellPro, PositionCellPro, PositionCellWithChangePro, PositionRowPro, PriceCellPro, RewardsHeaderPro, TimeCellPro, TimeHeaderPro } from 'components/Styles/tableStylesProfessional'
-import { AaveInterestMode, SupportedAssets } from 'types/1delta'
+import { AssetCellPro, CheckboxCellPro, PnLCellPro, PositionCellPro, PositionRowPro, PriceCellPro, RewardsHeaderPro, TimeCellPro } from 'components/Styles/tableStylesProfessional'
+import { SupportedAssets } from 'types/1delta'
 import { Mode } from 'pages/Trading'
 import { TOKEN_SVGS } from 'constants/1delta'
 import { default as ovixStandalone } from 'assets/svg/logos/logo-0vix.svg'
-import { ExternalLinkIcon } from 'components/TokenSafety'
+import { ExternalLink as LinkIconFeather } from 'react-feather'
 import { ExtendedSlot } from 'state/slots/hooks'
 import { PNL_FLAG_ON } from './config'
+import { ExplorerDataType, getExplorerLink } from 'utils/getExplorerLink'
 
 export const ValueText = styled.div<{ positive: boolean }>`
   font-size: 14px;
@@ -68,6 +66,68 @@ text-align: left;
   color: #EF4444;
   `}
 `
+
+const ExplorerContainer = styled.div`
+  width: 100%;
+  height: 32px;
+  font-size: 20px;
+  border-radius: 8px;
+  padding: 2px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+`
+
+const ExplorerLinkWrapper = styled.div`
+  display: flex;
+  overflow: hidden;
+  align-items: center;
+  cursor: pointer;
+
+  :hover {
+    opacity: ${({ theme }) => theme.opacity.hover};
+  }
+  :active {
+    opacity: ${({ theme }) => theme.opacity.click};
+  }
+`
+
+const ExplorerLinkIcon = styled(LinkIconFeather)`
+  height: 16px;
+  width: 18px;
+  margin-left: 8px;
+`
+
+const LinkIconWrapper = styled.div`
+  justify-content: center;
+  display: flex;
+`
+
+
+export function ExternalLinkIcon() {
+  return (
+    <LinkIconWrapper>
+      <ExplorerLinkIcon />
+    </LinkIconWrapper>
+  )
+}
+
+function ExplorerView({ chainId, address }: { chainId: number, address: string }) {
+  if (address) {
+    const explorerLink = getExplorerLink(chainId, address, ExplorerDataType.ADDRESS)
+    return (
+      <ExplorerContainer>
+        <ExplorerLinkWrapper onClick={() => window.open(explorerLink, '_blank')}>
+          <ExternalLinkIcon />
+          {/* <CopyLinkIcon toCopy={explorerLink} /> */}
+        </ExplorerLinkWrapper>
+      </ExplorerContainer>
+    )
+  } else {
+    return null
+  }
+}
 
 const PnLCellUSD = styled(PnLCell)`
 opacity: 0.7;
@@ -170,8 +230,11 @@ export default function PositionRow(props: PositionProps) {
 
   const aprReward = useMemo(() => {
     return `${props.rewardApr.toFixed(props.isMobile ? 2 : 3)}%`
-  }, [chainId, props.rewardApr, props.isMobile])
 
+  }, [chainId, props.rewardApr, props.isMobile])
+  const openInNewTab = (url) => {
+    window.open(url, "_blank", "noreferrer");
+  };
 
   return (
     <PositionRowPro hasBalance={false} hasWalletBalance={false}>
@@ -248,7 +311,7 @@ export default function PositionRow(props: PositionProps) {
           <CloseButton>
             Close
           </CloseButton>
-          <ExternalLinkIcon />
+          <ExplorerView address={props.slot} chainId={chainId} />
         </LinkOutContainer>
       </CheckboxCellPro>
     </PositionRowPro >

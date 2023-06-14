@@ -10,7 +10,7 @@ import useNativeCurrency from 'lib/hooks/useNativeCurrency'
 import { useMemo } from 'react'
 import { InterfaceTrade } from 'state/routing/types'
 
-import useStablecoinPrice, { useStablecoinValue } from './useStablecoinPrice'
+import { useDollarPriceViaOracles, useStablecoinDollarValue } from './useStablecoinPrice'
 
 export const V3_SWAP_DEFAULT_SLIPPAGE = new Percent(50, 10_000) // .50%
 const ONE_TENTHS_PERCENT = new Percent(10, 10_000) // .10%
@@ -77,11 +77,11 @@ export default function useAutoSlippageTolerance(
 ): Percent {
   const { chainId } = useWeb3React()
   const onL2 = chainId && L2_CHAIN_IDS.includes(chainId)
-  const outputDollarValue = useStablecoinValue(trade?.outputAmount)
+  const outputDollarValue = useStablecoinDollarValue(trade?.outputAmount)
 
   const gasEstimate = guesstimateGas(trade)
   const nativeCurrency = useNativeCurrency()
-  const nativeCurrencyPrice = useStablecoinPrice((trade && nativeCurrency) ?? undefined)
+  const nativeCurrencyPrice = useDollarPriceViaOracles((trade && nativeCurrency) ?? undefined)
 
   return useMemo(() => {
     if (!trade || onL2) return DEFAULT_AUTO_SLIPPAGE

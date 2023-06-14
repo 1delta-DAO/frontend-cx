@@ -13,7 +13,6 @@ import { updateVersion } from './global/actions'
 import lists from './lists/reducer'
 import logs from './logs/slice'
 import { routingApi } from './routing/slice'
-import swap from './swap/reducer'
 import transactions from './transactions/reducer'
 import user from './user/reducer'
 import slots from './slots/reducer'
@@ -34,7 +33,6 @@ const store = configureStore({
     transactions,
     wallets,
     globalNetwork,
-    swap,
     delta,
     oracles,
     chart,

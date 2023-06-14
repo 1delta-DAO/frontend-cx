@@ -3,7 +3,7 @@ import { getConnection } from 'connection/utils'
 import { getChainInfoOrDefault } from 'constants/chainInfo'
 import { SupportedChainId } from 'constants/chains'
 import useCopyClipboard from 'hooks/useCopyClipboard'
-import useStablecoinPrice from 'hooks/useStablecoinPrice'
+import { useDollarPriceViaOracles } from 'hooks/useStablecoinPrice'
 import useNativeCurrency from 'lib/hooks/useNativeCurrency'
 import { useCallback, useMemo } from 'react'
 import { Copy, ExternalLink, Power } from 'react-feather'
@@ -29,16 +29,6 @@ const WalletButton = styled(ButtonPrimary)`
   margin-top: 12px;
   color: white;
   border: none;
-`
-
-const ProfileButton = styled(WalletButton)`
-  background: ${({ theme }) => theme.backgroundInteractive};
-  transition: ${({ theme }) => theme.transition.duration.fast} ${({ theme }) => theme.transition.timing.ease}
-    background-color;
-`
-
-const UNIButton = styled(WalletButton)`
-  background: linear-gradient(to right, #9139b0 0%, #4261d6 100%);
 `
 
 const Column = styled.div`
@@ -111,7 +101,7 @@ const AuthenticatedHeader = () => {
 
   const connectionType = getConnection(connector).type
   const nativeCurrency = useNativeCurrency()
-  const nativeCurrencyPrice = useStablecoinPrice(nativeCurrency ?? undefined) || 0
+  const nativeCurrencyPrice = useDollarPriceViaOracles(nativeCurrency ?? undefined) || 0
   const openClaimModal = useToggleModal(ApplicationModal.ADDRESS_CLAIM)
   const disconnect = useCallback(() => {
     if (connector && connector.deactivate) {

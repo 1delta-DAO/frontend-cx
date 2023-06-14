@@ -1,4 +1,4 @@
-import { ETHEREUM_CHAINS, getSupportedAssets, TEN } from "constants/1delta"
+import { getSupportedAssets, TEN } from "constants/1delta"
 import { SupportedChainId } from "constants/chains"
 import { BigNumber } from "ethers"
 import { formatEther } from "ethers/lib/utils"
@@ -88,7 +88,7 @@ export const useParsedSlots = (chainId?: number, account?: string): ExtendedSlot
         TimeScale.MS
       ),
       borrowApr: calculateRateToNumber(
-        cfs[s.collateralSymbol].bApr ?? '0',
+        cfs[s.debtSymbol].bApr ?? '0',
         chainId,
         TimeScale.MS
       ),
@@ -106,7 +106,7 @@ const calculateHealthFactor = (cf: number, cUSD: number, dUSD: number) => {
 }
 
 
-// hf = c* cf / d 
+// hf = cUSD* cf / dUSD -> solve for hf = 1
 const calculateLiqPrice = (cf: number, c: number, d: number, cUSD: number, dUSD: number, collateral: boolean) => {
   if (collateral) {
     return dUSD / c / cf
