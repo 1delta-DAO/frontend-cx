@@ -80,7 +80,7 @@ export const getTradingViewSymbol = (ccy1: SupportedAssets, ccy2: SupportedAsset
   const pair = [ccy1, ccy2]
 
   if ((pair[0] === SupportedAssets.WETH || pair[0] === SupportedAssets.ETH) && pair[1] === SupportedAssets.USDC)
-    return `${VENUES.BITSTAMP}:${SupportedAssets.ETH}${SupportedAssets.USDC}`
+    return `${VENUES.BINANCE}:${SupportedAssets.ETH}${SupportedAssets.USDC}`
 
 
   // standard ccys like network currencies should have uniswap pools

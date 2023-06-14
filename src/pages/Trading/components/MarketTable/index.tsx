@@ -179,10 +179,66 @@ export default function PositionTable({
                   setSelectedSlot(dat)
                   setShowCloseModal()
                 }}
+                topSep={false}
               />)
+          }
+          {assetData.filter(d => d.closeTime > 0).length > 0 &&
+            <>
+              <TablRowPro >
+                <SeparatorCell rowSpan={6}>
+                  <HistoryHeader>
+                    Your Trade History
+                  </HistoryHeader>
+                </SeparatorCell>
+              </TablRowPro>
+
+              {
+                assetData.filter(d => d.closeTime > 0)
+                  .map((dat, i) => <PositionRow
+                    isMobile={isMobile}
+                    {...dat}
+                    key={i}
+                    selectSlot={() => {
+                      setSelectedSlot(dat)
+                      setShowCloseModal()
+                    }}
+                    topSep={true}
+                  />)
+              }
+            </>
           }
         </TableBody>
       </Table>
     </TableContainerPro>
   )
 }
+
+const TablRowPro = styled.tr`
+  display: flex;
+  justify-content: space-between;
+  background-color: ${({ theme }) => theme.deprecated_bg2};
+  &:last-child {
+    padding-right: -10px;
+  }
+  &:first-child {
+
+  }
+  ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
+  font-size: 12px;
+  height: 25px;
+  `};
+  border-bottom: none;
+`
+const SeparatorCell = styled.td`
+  width: 100%;
+
+`
+
+const HistoryHeader = styled.div`
+border-top: 1px solid  ${({ theme }) => theme.backgroundOutline};
+border-bottom: none;
+  color: ${({ theme }) => theme.textSecondary};
+    font-weight: 400;
+  text-align: left;
+  padding: 10px;
+`

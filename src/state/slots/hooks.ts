@@ -59,11 +59,14 @@ export const useParsedSlots = (chainId?: number, account?: string): ExtendedSlot
   return slotData.slots.map(s => {
     const c = Number(formatEther(BigNumber.from(s.collateralBalance ?? '0').mul(TEN.pow(18 - s.collateralDecimals))))
     const d = Number(formatEther(BigNumber.from(s.debtBalance ?? '0').mul(TEN.pow(18 - s.debtDecimals))))
-    const cUSD = c * priceDict[s.collateralSymbol ?? '']
-    const dUSD = d * priceDict[s.debtSymbol ?? '']
+
+    const collateralAsset = safeSymbol(s.collateralSymbol as SupportedAssets)
+    const debtAsset = safeSymbol(s.debtSymbol as SupportedAssets)
+    const cUSD = c * priceDict[collateralAsset ?? '']
+    const dUSD = d * priceDict[debtAsset ?? '']
     const size = cUSD - dUSD
-    const cf = Number(formatEther(cfs[s.collateralSymbol]?.cf ?? '0'))
-    const mode = s.collateralSymbol.toUpperCase().includes('USD') ? Mode.SHORT : Mode.LONG
+    const cf = Number(formatEther(cfs[collateralAsset]?.cf ?? '0'))
+    const mode = collateralAsset.toUpperCase().includes('USD') ? Mode.SHORT : Mode.LONG
     return {
       ...s,
       collateralBalanceUsd: cUSD,
@@ -76,25 +79,25 @@ export const useParsedSlots = (chainId?: number, account?: string): ExtendedSlot
         d,
         cUSD,
         dUSD,
-        !s.collateralSymbol.toUpperCase().includes('USD')
+        !collateralAsset.toUpperCase().includes('USD')
       ),
-      pair: mode === Mode.LONG ? [s.collateralSymbol as SupportedAssets, s.debtSymbol as SupportedAssets] : [s.debtSymbol as SupportedAssets, s.collateralSymbol as SupportedAssets],
+      pair: mode === Mode.LONG ? [collateralAsset as SupportedAssets, debtAsset as SupportedAssets] : [debtAsset as SupportedAssets, collateralAsset as SupportedAssets],
       leverage: mode === Mode.LONG ? cUSD / size : dUSD / size,
       size,
       rewardApr: 0.20,
       supplyApr: calculateRateToNumber(
-        cfs[s.collateralSymbol].cApr ?? '0',
+        cfs[collateralAsset].cApr ?? '0',
         chainId,
         TimeScale.MS
       ),
       borrowApr: calculateRateToNumber(
-        cfs[s.debtSymbol].bApr ?? '0',
+        cfs[debtAsset].bApr ?? '0',
         chainId,
         TimeScale.MS
       ),
       direction: mode,
       pnl: 0,
-      price: mode === Mode.LONG ? priceDict[s.collateralSymbol ?? ''] : priceDict[s.debtSymbol ?? '']
+      price: mode === Mode.LONG ? priceDict[collateralAsset ?? ''] : priceDict[debtAsset ?? '']
     }
   })
 }
@@ -112,4 +115,11 @@ const calculateLiqPrice = (cf: number, c: number, d: number, cUSD: number, dUSD:
     return dUSD / c / cf
   }
   return cUSD * cf / d
+}
+
+
+const safeSymbol = (asset: SupportedAssets) => {
+  if (asset === SupportedAssets.MATIC)
+    return SupportedAssets.WMATIC
+  return asset
 }

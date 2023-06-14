@@ -30,7 +30,7 @@ export const Row = styled.tr`
   margin: 0px;
 `
 
-export const PositionRowPro = styled.tr<{ hasBalance: boolean, hasWalletBalance: boolean }>`
+export const PositionRowPro = styled.tr<{ hasBalance: boolean, hasWalletBalance: boolean, topSep?: boolean }>`
   box-shadow: ${({ theme }) => theme.shadow1};
   background: ${({ theme, hasBalance, hasWalletBalance }) =>
     hasBalance
@@ -42,6 +42,12 @@ export const PositionRowPro = styled.tr<{ hasBalance: boolean, hasWalletBalance:
   display: flex;
   justify-content: space-between;
   border-top: 1px solid  ${({ theme }) => theme.backgroundOutline};
+  ${({ topSep }) => !Boolean(topSep) ? '' : `
+    &:first-child {
+  border-top: none;
+    }
+  
+  `}
 `
 
 
@@ -357,7 +363,7 @@ export const TableHeaderPro = styled.thead``
 export const TableHeaderRowPro = styled.tr`
   display: flex;
   justify-content: space-between;
-  background-color: ${({ theme }) => theme.deprecated_bg0};
+  background-color: ${({ theme }) => theme.deprecated_bg2};
   &:last-child {
     padding-right: -10px;
   }

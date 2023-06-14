@@ -101,9 +101,13 @@ const Logo = styled.img`
 `
 
 export default function SlotSummary({
-  slot
+  slot,
+  onClose,
+  buttonDisabled
 }: {
-  slot?: ExtendedSlot
+  slot?: ExtendedSlot,
+  onClose: () => void
+  buttonDisabled: boolean
 }) {
   return (
     <StyledLightCard>
@@ -142,8 +146,8 @@ export default function SlotSummary({
           </ValueRow>
         </Column>}
         <ButtonError
-          onClick={() => null}
-          disabled={false}
+          onClick={onClose}
+          disabled={buttonDisabled}
           style={{ margin: '10px 0 0 0' }}
           id={"CONFIRM_SWAP_BUTTON"}
         >

@@ -113,11 +113,11 @@ export function ExternalLinkIcon() {
   )
 }
 
-function ExplorerView({ chainId, address }: { chainId: number, address: string }) {
+function ExplorerView({ chainId, address, narrow }: { chainId: number, address: string, narrow?: boolean }) {
   if (address) {
     const explorerLink = getExplorerLink(chainId, address, ExplorerDataType.ADDRESS)
     return (
-      <ExplorerContainer>
+      <ExplorerContainer style={Boolean(narrow) ? { marginLeft: '-10px', width: '50px' } : {}}>
         <ExplorerLinkWrapper onClick={() => window.open(explorerLink, '_blank')}>
           <ExternalLinkIcon />
           {/* <CopyLinkIcon toCopy={explorerLink} /> */}
@@ -215,6 +215,7 @@ const AprText = styled.div<{ pos: boolean }>`
 export interface PositionProps extends ExtendedSlot {
   isMobile: boolean
   selectSlot: () => void
+  topSep?: boolean
 }
 
 export default function PositionRow(props: PositionProps) {
@@ -238,7 +239,7 @@ export default function PositionRow(props: PositionProps) {
   };
 
   return (
-    <PositionRowPro hasBalance={false} hasWalletBalance={false}>
+    <PositionRowPro hasBalance={false} hasWalletBalance={false} topSep={props?.topSep}>
       <AssetCellPro>
         <PairPosition pair={props.pair} isMobile={props.isMobile} leverage={props.leverage} direction={props.direction} />
       </AssetCellPro>
@@ -270,7 +271,7 @@ export default function PositionRow(props: PositionProps) {
       </PriceCellPro>
       <PriceCellPro  >
         <LiqPriceText>
-          {formatPriceString(String(props.liquidationPrice))}
+          {isNaN(props.liquidationPrice) ? '-' : formatPriceString(String(props.liquidationPrice))}
         </LiqPriceText>
       </PriceCellPro>
       {/* // REWARDS */}
@@ -299,6 +300,9 @@ export default function PositionRow(props: PositionProps) {
       {/* // TIME */}
       <TimeCellPro >
         <SimpleCol>
+          <TimeText style={{ fontWeight: 'bold' }}>
+            Open
+          </TimeText>
           <TimeText>
             {new Date(props.creationTime * 1000).toLocaleTimeString()}
           </TimeText>
@@ -307,14 +311,27 @@ export default function PositionRow(props: PositionProps) {
           </DateText>
         </SimpleCol>
       </TimeCellPro>
-      <CheckboxCellPro>
+      {props.closeTime === 0 ? <CheckboxCellPro>
         <LinkOutContainer>
           <CloseButton onClick={props.selectSlot}>
             Close
           </CloseButton>
           <ExplorerView address={props.slot} chainId={chainId} />
         </LinkOutContainer>
-      </CheckboxCellPro>
+      </CheckboxCellPro> : <CheckboxCellPro >
+        <SimpleCol style={{ marginLeft: '-40px' }}>
+          <TimeText style={{ fontWeight: 'bold' }}>
+            Close
+          </TimeText>
+          <TimeText>
+            {new Date(props.closeTime * 1000).toLocaleTimeString()}
+          </TimeText>
+          <DateText>
+            {td(new Date(props.closeTime * 1000))}
+          </DateText>
+        </SimpleCol>
+        <ExplorerView address={props.slot} chainId={chainId} narrow />
+      </CheckboxCellPro>}
     </PositionRowPro >
   )
 }

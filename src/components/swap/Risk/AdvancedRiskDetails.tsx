@@ -258,7 +258,7 @@ export function AdvancedRiskDetails({
             <TextToImage>
               <ThemedText.DeprecatedBlack textAlign="right" fontSize={14}>
                 {expectedOutputAmount
-                  ? `${formatSmallUSDValue(Number(expectedOutputAmount.toExact()) * priceCollateral + (depositMode !== DepositMode.TO_COLLATERAL ? 0 : depositAmount))} in `
+                  ? `${formatSmallUSDValue(Number(expectedOutputAmount.toExact()) * priceCollateral + (!assetsAreEqual(depositCurrency, data[1]) ? 0 : depositAmount))} in `
                   : '-'}
 
               </ThemedText.DeprecatedBlack>
@@ -269,7 +269,7 @@ export function AdvancedRiskDetails({
           </TextWithLoadingPlaceholder>
 
         </RowBetween>
-        {trade && (depositMode !== DepositMode.TO_COLLATERAL) && <RowBetween>
+        {trade && (!assetsAreEqual(depositCurrency, data[1])) && <RowBetween>
           <TextWithLoadingPlaceholder syncing={syncing} width={65}>
             <TextToImage>
               <ThemedText.DeprecatedBlack textAlign="right" fontSize={14}>
@@ -316,7 +316,7 @@ export function AdvancedRiskDetails({
                 </SimpleRow>
 
               </TextWithLoadingPlaceholder>
-              {(depositMode !== DepositMode.TO_COLLATERAL) && <SimpleRow>
+              {!assetsAreEqual(depositCurrency, data[1]) && <SimpleRow>
                 <AprRow>
                   <StyledLogo src={ovixStandalone} />
                   <AprText pos>
@@ -455,4 +455,11 @@ export function AdvancedRiskDetails({
       </AutoColumn>
     </StyledCard>
   )
+}
+
+
+const assetsAreEqual = (asset0: SupportedAssets, asset1: SupportedAssets) => {
+  if (asset0 == SupportedAssets.WETH && asset1 == SupportedAssets.ETH) return true
+  if (asset1 == SupportedAssets.WETH && asset0 == SupportedAssets.ETH) return true
+  return asset0 === asset1
 }

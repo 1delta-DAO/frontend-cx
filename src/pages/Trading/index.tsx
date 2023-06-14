@@ -81,7 +81,7 @@ import SettingsTab from "components/Settings";
 import RiskDetailsDropdown from "components/swap/Risk/RiskDetailsDropdown";
 import { fetchCompoundPublicDataAsync } from "state/1delta/compound/fetchCompoundPublicData";
 import { useNextSlotAddress } from "hooks/useNexSlotAddress";
-import { createSlotCalldata } from "utils/calldata/compound/slotMethodCreator";
+import { createSlotFactoryCalldata } from "utils/calldata/compound/slotMethodCreator";
 import { fetchUserSlots } from "state/slots/fetchUserSlots";
 import { ExtendedSlot, useParsedSlots } from "state/slots/hooks";
 import useCurrencyBalance from "lib/hooks/useCurrencyBalance";
@@ -303,7 +303,6 @@ const InputPanelContainer = styled.div`
 `
 
 const getPairs = (assets: SupportedAssets[]): [SupportedAssets, SupportedAssets][] => {
-
   const pairs: [SupportedAssets, SupportedAssets][] = []
   const noAssets = assets.length
   for (let i = 0; i < noAssets; i++) {
@@ -316,6 +315,8 @@ const getPairs = (assets: SupportedAssets[]): [SupportedAssets, SupportedAssets]
 }
 
 export const assetToId = (asset: SupportedAssets, chainId: number, protocol: LendingProtocol) => {
+  if (asset === SupportedAssets.MATIC && chainId === SupportedChainId.POLYGON_ZK_EVM)
+    return getTokenAddresses(chainId, protocol)['WMATIC']
   if (asset === SupportedAssets.ETH && ETHEREUM_CHAINS.includes(chainId))
     return 'ETH'
   else if (asset === SupportedAssets.MATIC && POLYGON_CHAINS.includes(chainId))
@@ -395,7 +396,7 @@ export default function Professional() {
       dispatch(fetchUserSlots({ chainId, account }))
     }
     setTimeout(() => setRepeater((prevState) => prevState + 1), 10000)
-  }, [repeater, deltaState?.userMeta?.[chainId]?.loaded, chainId])
+  }, [repeater, deltaState?.userMeta?.[chainId]?.loaded, chainId, account])
 
   const dispatch = useAppDispatch()
 
@@ -432,6 +433,13 @@ export default function Professional() {
   const selectedAsset = selectedIsAsset ? selectedCurrencyOutside.symbol as SupportedAssets : undefined
 
   useEffect(() => {
+    if (selectedCurrency.isNative && pair[0] === SupportedAssets.WETH)
+      setDepositMode(DepositMode.DIRECT)
+
+    if (selectedCurrency.isNative && pair[1] === SupportedAssets.WETH)
+      setDepositMode(DepositMode.TO_COLLATERAL)
+
+
     if (depositMode === DepositMode.DIRECT && !selectedIsAsset)
       setDepositMode(DepositMode.TO_COLLATERAL)
 
@@ -723,7 +731,8 @@ export default function Professional() {
     approvalState !== ApprovalState.NOT_APPROVED ||
     approvalSubmitted
 
-  const { args, method, estimate, call } = createSlotCalldata(
+  const { args, method, estimate, call } = createSlotFactoryCalldata(
+    selectedCurrency.isNative,
     TradeAction.OPEN,
     parsedAmountIn,
     tradeIn,
@@ -943,8 +952,6 @@ export default function Professional() {
       <CloseModal
         slot={selectedSlot}
         isOpen={showCloseModal}
-        attemptingTxn={attemptingTxn}
-        txHash={txHash}
         onConfirm={handleSwap}
         onDismiss={() => setShowCloseModal(false)}
       />
@@ -987,7 +994,7 @@ export default function Professional() {
               <PanelLabel
                 options={availableDepoModes}
                 selectedOption={depositMode}
-                onSelect={setDepositMode}
+                onSelect={() => null}
               />
               <SettingsTab placeholderSlippage={allowedSlippage} />
             </RowFixed>
@@ -1248,7 +1255,6 @@ interface TopLabelProps {
   onSelect: (opt: DepositMode) => void
 }
 
-
 const PanelLabel = ({ selectedOption, onSelect, options }: TopLabelProps) => {
   return <PanelContainer>
     <DepositTypeDropdown selectedOption={selectedOption} onSelect={onSelect} options={options}></DepositTypeDropdown>
@@ -1261,7 +1267,8 @@ const PanelContainer = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  justify-content: flex-start;
   z-index: 5;
 `
 const StyledDropDown = styled(DropDown)`

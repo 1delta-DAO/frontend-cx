@@ -21,7 +21,7 @@ import SwapModalHeader from '../SwapModalHeader'
 import { WarningIcon } from 'nft/components/icons'
 import { ExtendedSlot } from 'state/slots/hooks'
 import { useDerivedSwapInfoMarginAlgebraClose } from 'state/professionalTradeSelection/tradeHooks'
-import { assetToId } from 'pages/Trading'
+import { assetToId, TradeAction } from 'pages/Trading'
 import { useChainId } from 'state/globalNetwork/hooks'
 import { LendingProtocol } from 'state/1delta/actions'
 import { SupportedAssets } from 'types/1delta'
@@ -34,6 +34,9 @@ import SlotSummary from './SlotSummary'
 import CloseModalHeader from './CloseModalHeader'
 import { PairPositionRow } from 'components/TokenDetail'
 import { useIsMobile } from 'hooks/useIsMobile'
+import { createSlotCalldata } from 'utils/calldata/compound/slotMethodCreator'
+import { calculateGasMargin } from 'utils/calculateGasMargin'
+import { parseMessage } from 'constants/errors'
 
 const HeaderLabel = styled.div`
   color: ${({ theme }) => theme.deprecated_text1};
@@ -65,16 +68,12 @@ let LAST_VALID_AMOUNT_OUT: CurrencyAmount<Currency> | undefined;
 
 export default function CloseModal({
   slot,
-  attemptingTxn,
-  txHash,
   onConfirm,
   onDismiss,
   isOpen,
 }: {
   slot?: ExtendedSlot
   isOpen: boolean
-  attemptingTxn: boolean
-  txHash: string | undefined
   onConfirm: () => void
   onDismiss: () => void
 }) {
@@ -107,6 +106,7 @@ export default function CloseModal({
     outAmount,
     tokenIn,
   )
+
   const isMobile = useIsMobile()
 
   const [parsedAmount, trade] = useMemo(() => {
@@ -152,6 +152,78 @@ export default function CloseModal({
     </Trans>
   )
 
+
+  // modal and loading
+  const [{ showConfirm, tradeToConfirm, swapErrorMessage, attemptingTxn, txHash }, setSwapState] = useState<{
+    showConfirm: boolean
+    tradeToConfirm: Trade<Currency, Currency, TradeType> | undefined
+    attemptingTxn: boolean
+    swapErrorMessage: string | undefined
+    txHash: string | undefined
+  }>({
+    showConfirm: false,
+    tradeToConfirm: undefined,
+    attemptingTxn: false,
+    swapErrorMessage: undefined,
+    txHash: undefined,
+  })
+
+  const onClose = useCallback(async () => {
+    if (!trade) return null
+    const { estimate, call } = createSlotCalldata(
+      TradeAction.CLOSE,
+      trade.outputAmount,
+      trade,
+      allowedSlippage,
+      slotContract,
+      account)
+
+    if (call) {
+      // estimate gas 
+      let gasEstimate: any = undefined
+      try {
+        gasEstimate = await estimate()
+      } catch (error) {
+        setSwapState({
+          attemptingTxn: false,
+          tradeToConfirm,
+          showConfirm,
+          swapErrorMessage: error.message,
+          txHash: undefined,
+        })
+      }
+      const opts = gasEstimate ? {
+        gasLimit: calculateGasMargin(gasEstimate),
+      } : {}
+      try {
+        await call(opts)
+          .then((txResponse) => {
+            setSwapState({
+              attemptingTxn: false,
+              tradeToConfirm,
+              showConfirm,
+              swapErrorMessage: undefined,
+              txHash: txResponse.hash,
+            })
+
+          }
+          )
+      } catch (e) {
+        setSwapState({
+          attemptingTxn: false,
+          tradeToConfirm,
+          showConfirm,
+          // rejection in the wallet has a different nesting
+          swapErrorMessage: parseMessage(e),
+          txHash: undefined,
+        })
+      }
+    }
+    return null
+  },
+    [trade]
+  )
+
   const confirmationContent = useCallback(
     () => <ConfirmationModalContent
       title={Boolean(trade) ? <HeaderLabel>Close your Position
@@ -159,7 +231,7 @@ export default function CloseModal({
       </HeaderLabel> : <>{LoaderDots()}</>}
       onDismiss={onModalDismiss}
       topContent={modalHeader}
-      bottomContent={() => <SlotSummary slot={slot} />}
+      bottomContent={() => <SlotSummary slot={slot} onClose={onClose} buttonDisabled={!Boolean(trade)} />}
     />
     ,
     [onModalDismiss, modalHeader]
@@ -207,14 +279,4 @@ export const Col = styled.div`
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-`
-
-
-const StyledButton = styled(ButtonLight)`
-  border: 1px solid ${({ theme }) => opacify(24, theme.deprecated_error)};
-  background: ${({ theme }) => theme.accentWarning};
-`
-
-const WarningText = styled(Text)`
-  color: ${({ theme }) => theme.deprecated_warning};
 `

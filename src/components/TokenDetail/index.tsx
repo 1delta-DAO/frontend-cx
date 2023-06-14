@@ -291,7 +291,7 @@ export function PairPositionRow({
       }
 
       <DirectionBanner isLong={direction === Mode.LONG}>
-        {direction.toLocaleUpperCase()} {Math.round(leverage * 10) / 10}x
+        {isNaN(leverage) ? '-' : `${direction.toLocaleUpperCase()} ${Math.round(leverage * 10) / 10}x`}
       </DirectionBanner>
 
     </PairWrapper>

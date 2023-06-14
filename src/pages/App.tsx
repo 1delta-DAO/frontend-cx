@@ -54,21 +54,6 @@ const Marginer = styled.div`
   margin-top: 5rem;
 `
 
-function getCurrentPageFromLocation(locationPathname: string): string | undefined {
-  switch (locationPathname) {
-    case '/swap':
-      return 'SWAP_PAGE'
-    case '/vote':
-      return 'VOTE_PAGE'
-    case '/pool':
-      return 'POOL_PAGE'
-    case '/tokens':
-      return 'TOKENS_PAGE'
-    default:
-      return undefined
-  }
-}
-
 export default function App() {
   const navBarFlag = useNavBarFlag()
   const redesignFlagEnabled = useRedesignFlag() === RedesignVariant.Enabled

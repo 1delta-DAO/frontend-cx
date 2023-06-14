@@ -1,5 +1,7 @@
 
+import { MouseoverTooltip } from 'components/Tooltip';
 import React, { FC, useState } from 'react';
+import { HelpCircle } from 'react-feather';
 import styled from 'styled-components';
 import { Z_INDEX } from 'theme/zIndex';
 
@@ -21,10 +23,10 @@ const DropdownButton = styled.button<{ isOpen: boolean }>`
   border: 1px solid ${({ theme }) => theme.deprecated_bg3};;
   background: none;
   color: ${({ theme }) => theme.textSecondary};
-  height: 20px;
+  height: 25px;
   border-radius: 4px;
   font-size: 12px;
-  width: 120px;
+  width: 140px;
   font-weight: 200;
   cursor: pointer;
   :hover & {
@@ -47,7 +49,7 @@ const DropdownContent = styled.div<{ isOpen: boolean }>`
   position: absolute;
   color: ${({ theme }) => theme.textSecondary};
   border-radius: 4px;
-  width: 120px;
+  width: 140px;
   font-size: 12px;
   font-weight: 200;
   cursor: pointer;
@@ -72,7 +74,7 @@ const DropdownContent = styled.div<{ isOpen: boolean }>`
 `;
 
 const DropdownItem = styled.div`
-  width: 120px;
+  width: 140px;
   height: 20px;
   margin-left: 10px;
   display: block;
@@ -97,13 +99,61 @@ interface DepositTypeSelectionProps {
   onSelect: (option: DepositMode) => void
 }
 
+const HelpCircleIconRaw = styled(HelpCircle)`
+  justify-self: center;
+  align-self: center;
+  height: 15px;
+  width: 15px;
+  margin-top: 3px;
+  margin-left: 5px;
+  color: ${({ theme }) => theme.backgroundOutline};
+  ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
+  width: 18px;
+  height: 18px;
+`};
+`
+
+const Row = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;  
+`
+
+const Text = styled.div`
+  margin :1px;
+  display: flex;
+  justify-content:center;
+  align-items: center;  
+
+`
+
+interface HelpCicleProps {
+  text: string
+}
+
+const HelpCircleIcon = ({ text }: HelpCicleProps) => {
+  return (
+    <MouseoverTooltip text={text} >
+      <HelpCircleIconRaw alignmentBaseline="middle" />
+    </MouseoverTooltip>
+  )
+}
+
+const dropdownDisabled = true
+
 const DepositTypeDropdown = ({ selectedOption, onSelect, options }: DepositTypeSelectionProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <DropdownContainer>
-      <DropdownButton onClick={() => options.length > 1 && setIsOpen(!isOpen)} isOpen={isOpen}>
-        {selectedOption}
+      <DropdownButton onClick={() => options.length > 1 && !dropdownDisabled && setIsOpen(!isOpen)} isOpen={isOpen}>
+        <Row>
+          <Text>
+            {selectedOption}
+          </Text>
+          <HelpCircleIcon text={selectedOption === DepositMode.DIRECT ? 'Supplies your pay currency directly' : 'Converts your pay currency to the collateral currency'} />
+        </Row>
       </DropdownButton>
       <DropdownContent isOpen={isOpen}>
         {options.filter(x => x !== selectedOption).map(option => (
