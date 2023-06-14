@@ -69,7 +69,7 @@ import GeneralCurrencyInputPanel from "components/CurrencyInputPanel/GeneralInpu
 import { useCurrency } from "hooks/Tokens";
 import { getTokenAddresses } from "hooks/1delta/addressGetter";
 import DepositTypeDropdown, { DepositMode } from "components/Dropdown/depositTypeDropdown";
-import { USDC_POLYGON, USDC_POLYGON_ZK_EVM } from "constants/tokens";
+import { USDC_POLYGON_ZK_EVM } from "constants/tokens";
 import useDebounce from "hooks/useDebounce";
 import { PairSearchDropdown } from "components/Dropdown/dropdownPairSearch";
 import { parseUnits } from "ethers/lib/utils";
@@ -78,15 +78,13 @@ import { calculateCompoundRiskChangeSlot, useGetCompoundRiskParametersSlot } fro
 import { useAlgebraClientSideV3 } from "hooks/professional/algebra/useClientSideV3Trade";
 import { UniswapTrade } from "utils/Types";
 import SettingsTab from "components/Settings";
-import { SlotData } from "./components/MarketTable/PositionRow";
 import RiskDetailsDropdown from "components/swap/RiskDetailsDropdown";
 import { fetchCompoundPublicDataAsync } from "state/1delta/compound/fetchCompoundPublicData";
 import { useNextSlotAddress } from "hooks/useNexSlotAddress";
 import { createSlotCalldata } from "utils/calldata/compound/slotMethodCreator";
-import { simpleRpcProvider } from "utils/1delta/contractHelper";
 import { fetchUserSlots } from "state/slots/fetchUserSlots";
 import { useParsedSlots } from "state/slots/hooks";
-import useCurrencyBalance, { useCurrencyBalances } from "lib/hooks/useCurrencyBalance";
+import useCurrencyBalance from "lib/hooks/useCurrencyBalance";
 
 export enum Mode {
   LONG = 'Long',
@@ -232,7 +230,6 @@ const TypeButton = styled(ButtonLightBoring) <{ selected: boolean }>`
   }
 `
 
-
 export const AutoColumnAdjusted = styled.div<{
   gap?: 'sm' | 'md' | 'lg' | string
   justify?: 'stretch' | 'center' | 'start' | 'end' | 'flex-start' | 'flex-end' | 'space-between'
@@ -259,14 +256,12 @@ const ChartContainer = styled.div`
 `};
 `
 
-
 const CartAndTableContainer = styled(AutoColumnAdjusted)`
   width: 100%;
   ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
   padding: 2px;
 `};
 `
-
 
 const Container = styled.div`
   width: 95vw;
@@ -319,9 +314,7 @@ const getPairs = (assets: SupportedAssets[]): [SupportedAssets, SupportedAssets]
   return pairs
 }
 
-
-
-const assetToId = (asset: SupportedAssets, chainId: number, protocol: LendingProtocol) => {
+export const assetToId = (asset: SupportedAssets, chainId: number, protocol: LendingProtocol) => {
   if (asset === SupportedAssets.ETH && ETHEREUM_CHAINS.includes(chainId))
     return 'ETH'
   else if (asset === SupportedAssets.MATIC && POLYGON_CHAINS.includes(chainId))
@@ -950,8 +943,10 @@ export default function Professional() {
           <ButtonRow>
             <TypeButton
               onClick={() => {
-                setSelectedMode(Mode.LONG)
-                handleSelectPair([pair[1], pair[0]])
+                if (selectedMode !== Mode.LONG) {
+                  setSelectedMode(Mode.LONG)
+                  handleSelectPair([pair[1], pair[0]])
+                }
               }}
               selected={selectedMode === Mode.LONG}
             >
@@ -960,8 +955,10 @@ export default function Professional() {
             </TypeButton>
             <TypeButton
               onClick={() => {
-                setSelectedMode(Mode.SHORT)
-                handleSelectPair([pair[1], pair[0]])
+                if (selectedMode !== Mode.SHORT) {
+                  setSelectedMode(Mode.SHORT)
+                  handleSelectPair([pair[1], pair[0]])
+                }
               }}
               selected={selectedMode === Mode.SHORT}
             >
