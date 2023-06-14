@@ -86,6 +86,7 @@ import { createSlotCalldata } from "utils/calldata/compound/slotMethodCreator";
 import { simpleRpcProvider } from "utils/1delta/contractHelper";
 import { fetchUserSlots } from "state/slots/fetchUserSlots";
 import { useParsedSlots } from "state/slots/hooks";
+import useCurrencyBalance, { useCurrencyBalances } from "lib/hooks/useCurrencyBalance";
 
 export enum Mode {
   LONG = 'Long',
@@ -641,17 +642,6 @@ export default function Professional() {
   // console.log("RISK", riksParamsChange)
   const recipientAddress = recipient
 
-  const parsedAmounts = useMemo(
-    () => {
-      return {
-        [Field.INPUT]: parsedAmount,
-        [Field.OUTPUT]: parsedAmount,
-      }
-    }
-    ,
-    [independentField, parsedAmount, trade]
-  )
-
   const [routeNotFound, routeIsLoading, routeIsSyncing] = useMemo(
     () => [
       !trade?.swaps,
@@ -670,16 +660,11 @@ export default function Professional() {
     [fiatValueInput, fiatValueOutput, routeIsSyncing]
   )
 
-  const [maxInput, setMaxInput] = useState(false)
-  const [maxOutput, setMaxOutput] = useState(false)
-
   const handleTypeInput = useCallback(
     (value: string) => {
       onUserInput(Field.INPUT, value)
-      maxInput && setMaxInput(false)
-      maxOutput && setMaxOutput(false)
     },
-    [onUserInput, maxInput, maxOutput]
+    [onUserInput]
   )
 
   const addTransaction = useTransactionAdder()
@@ -705,15 +690,19 @@ export default function Professional() {
   )
   const slotFactoryContract = useGetSlotFactoryContract(chainId)
 
+  // user balances
+  const currencyUserBalance = useCurrencyBalance(
+    account ?? undefined,
+    useMemo(() => selectedCurrency ?? undefined, [selectedCurrency])
+  )
 
 
   const maxInputAmount: CurrencyAmount<Currency> | undefined | null = useMemo(
-    () => parsedAmountIn && maxAmountSpend(parsedAmountIn),
-    [parsedAmountIn]
+    () => currencyUserBalance && maxAmountSpend(currencyUserBalance),
+    [currencyUserBalance]
   )
 
-  const showMaxButton =
-    !maxInput && Boolean(maxInputAmount?.greaterThan(0) && !parsedAmounts[Field.INPUT]?.equalTo(maxInputAmount))
+  const showMaxButton = parsedAmountIn?.quotient.toString() === '0' || (Boolean(maxInputAmount?.greaterThan(0) && !parsedAmountIn?.equalTo(maxInputAmount)))
 
 
   const nextAddr = useNextSlotAddress()
@@ -881,10 +870,8 @@ export default function Professional() {
 
 
   const handleMaxInput = useCallback(() => {
-    maxInputAmount && onUserInput(Field.INPUT, maxInputAmount.toExact())
-    !maxInput && setMaxInput(true)
-    maxOutput && setMaxOutput(false)
-  }, [maxInputAmount, onUserInput, maxInput, maxOutput])
+    maxInputAmount && handleTypeInput(maxInputAmount.toExact())
+  }, [maxInputAmount, onUserInput])
 
 
   const priceImpactTooHigh = priceImpactSeverity > 3 && !isExpertMode
