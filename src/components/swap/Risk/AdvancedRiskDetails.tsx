@@ -15,11 +15,11 @@ import { Z_INDEX } from 'theme/zIndex'
 import { SupportedAssets } from 'types/1delta'
 import { formatSmallUSDValue } from 'utils/tableUtils/format'
 import HelpCircleIcon from 'components/Help/HelpCircleIcon'
-import { Separator, ThemedText } from '../../theme'
-import { computeRealizedPriceImpact } from '../../utils/prices'
-import { AutoColumn } from '../Column'
-import { RowBetween, RowFixed } from '../Row'
-import { MouseoverTooltip } from '../Tooltip'
+import { Separator, ThemedText } from '../../../theme'
+import { computeRealizedPriceImpact } from '../../../utils/prices'
+import { AutoColumn } from '../../Column'
+import { RowBetween, RowFixed } from '../../Row'
+import { MouseoverTooltip } from '../../Tooltip'
 import { DepositMode } from 'components/Dropdown/depositTypeDropdown'
 import { default as ovixStandalone } from 'assets/svg/logos/logo-0vix.svg'
 
@@ -270,9 +270,6 @@ export function AdvancedRiskDetails({
 
         </RowBetween>
         {trade && (depositMode !== DepositMode.TO_COLLATERAL) && <RowBetween>
-          <RowFixed>
-
-          </RowFixed>
           <TextWithLoadingPlaceholder syncing={syncing} width={65}>
             <TextToImage>
               <ThemedText.DeprecatedBlack textAlign="right" fontSize={14}>

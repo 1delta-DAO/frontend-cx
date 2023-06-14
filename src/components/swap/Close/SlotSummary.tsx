@@ -12,11 +12,12 @@ import { useClientSideRouter, useUserSlippageTolerance } from 'state/user/hooks'
 import styled from 'styled-components'
 import { SupportedAssets } from 'types/1delta'
 import { formatSmallUSDValue } from 'utils/tableUtils/format'
-
+import { LightCard } from '../../Card'
 import { ButtonError } from '../../Button'
 import { AutoRow } from '../../Row'
 import { Dots, SwapCallbackError } from '../styleds'
 import { getTokenPath, RoutingDiagramEntry } from '../SwapRoute'
+import { Separator, ThemedText } from '../../../theme'
 
 
 export const LoaderDots = (): React.ReactNode => {
@@ -42,6 +43,7 @@ const ValueRow = styled.div`
   padding: 1px;
   justify-content: space-between;
   width: 100%;
+  margin: 2px;
 
 `
 
@@ -51,6 +53,40 @@ const Label = styled.div`
 
 const Value = styled.div`
 
+`
+
+export const SeparatorBase = styled(Separator)`
+ height: 2px;
+ opacity: 0.3;
+ background-color: ${({ theme }) => theme.deprecated_bg0};
+`
+
+export const SeparatorLight = styled(Separator)`
+ opacity: 0.7;
+ width: 70%;
+ margin-left: 50px;
+ margin-top: 5px;
+ margin-bottom: 5px;
+`
+
+
+
+const HeaderLabel = styled.div`
+  color: ${({ theme }) => theme.deprecated_text1};
+  position: relative;
+  font-weight: bold;
+  opacity: 0.8;
+`
+
+const HeaderValue = styled.div`
+  color: ${({ theme }) => theme.deprecated_green1};
+  position: relative;
+  font-weight: bold;
+  opacity: 0.8;
+`
+
+const StyledLightCard = styled(LightCard)`
+  margin-top: 10px;
 `
 
 const ValueWithIcon = styled.div`
@@ -70,27 +106,18 @@ export default function SlotSummary({
   slot?: ExtendedSlot
 }) {
   return (
-    <>
+    <StyledLightCard>
       <AutoRow>
-        <ButtonError
-          onClick={() => null}
-          disabled={false}
-          style={{ margin: '10px 0 0 0' }}
-          id={"CONFIRM_SWAP_BUTTON"}
-        >
-          <Text fontSize={20} fontWeight={500}>
-            {slot ? <Trans>Confirm Closing Your Position</Trans> : <>{LoaderDots()}</>}
-          </Text>
-        </ButtonError>
         {slot && <Column>
           <ValueRow>
-            <Label>
-              Position Value
-            </Label>
-            <Value>
+            <HeaderLabel>
+              Cash-out value
+            </HeaderLabel>
+            <HeaderValue>
               ${Math.round(slot.size * 100) / 100}
-            </Value>
+            </HeaderValue>
           </ValueRow>
+          <SeparatorBase />
           <ValueRow>
             <Label>
               Collateral
@@ -114,9 +141,18 @@ export default function SlotSummary({
             </ValueWithIcon>
           </ValueRow>
         </Column>}
-        {/* {swapErrorMessage ? <SwapCallbackError error={swapErrorMessage} /> : null} */}
+        <ButtonError
+          onClick={() => null}
+          disabled={false}
+          style={{ margin: '10px 0 0 0' }}
+          id={"CONFIRM_SWAP_BUTTON"}
+        >
+          <Text fontSize={20} fontWeight={500}>
+            {slot ? <Trans>Confirm Closing Your Position</Trans> : <>{LoaderDots()}</>}
+          </Text>
+        </ButtonError>
       </AutoRow>
-    </>
+    </StyledLightCard>
   )
 }
 

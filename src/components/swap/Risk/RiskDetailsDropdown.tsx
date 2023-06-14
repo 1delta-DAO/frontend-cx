@@ -18,12 +18,12 @@ import { HideSmall, ThemedText } from 'theme'
 import { SupportedAssets } from 'types/1delta'
 import { AdvancedRiskDetails } from './AdvancedRiskDetails'
 
-import { AdvancedSwapDetails } from './AdvancedSwapDetails'
-import GasEstimateBadge from './GasEstimateBadge'
+import { AdvancedSwapDetails } from '../AdvancedSwapDetails'
+import GasEstimateBadge from '../GasEstimateBadge'
 import RiskEstimate from './RiskEstimate'
-import { ResponsiveTooltipContainer } from './styleds'
-import SwapRoute from './SwapRoute'
-import TradePrice from './TradePrice'
+import { ResponsiveTooltipContainer } from '../styleds'
+import SwapRoute from '../SwapRoute'
+import TradePrice from '../TradePrice'
 
 const Wrapper = styled(Row)`
   width: 90%;

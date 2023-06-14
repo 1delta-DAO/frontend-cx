@@ -32,13 +32,31 @@ import { useGetSlotContract } from 'hooks/1delta/use1DeltaContract'
 import { Dots } from '../styleds'
 import SlotSummary from './SlotSummary'
 import CloseModalHeader from './CloseModalHeader'
+import { PairPositionRow } from 'components/TokenDetail'
+import { useIsMobile } from 'hooks/useIsMobile'
 
+const HeaderLabel = styled.div`
+  color: ${({ theme }) => theme.deprecated_text1};
+  position: relative;
+  margin: 5px;
+  font-weight: bold;
+  font-size: 20px;
+  opacity: 0.8;
+`
+
+const HeaderLabelDots = styled(Dots)`
+  color: ${({ theme }) => theme.deprecated_text1};
+  position: relative;
+  font-weight: bold;
+  margin: 5px;
+  opacity: 0.8;
+`
 
 export const LoaderDots = (): React.ReactNode => {
   return (
-    <Dots key={'loadingMM'} >
-      Calculating Trade
-    </Dots>
+    <HeaderLabelDots key={'loadingMM'} >
+      Calculation closing trade
+    </HeaderLabelDots>
   )
 }
 
@@ -89,6 +107,7 @@ export default function CloseModal({
     outAmount,
     tokenIn,
   )
+  const isMobile = useIsMobile()
 
   const [parsedAmount, trade] = useMemo(() => {
 
@@ -135,7 +154,9 @@ export default function CloseModal({
 
   const confirmationContent = useCallback(
     () => <ConfirmationModalContent
-      title={Boolean(trade) ? <Trans>Close your Position</Trans> : <>{LoaderDots()}</>}
+      title={Boolean(trade) ? <HeaderLabel>Close your Position
+        {slot && <PairPositionRow pair={slot.pair} direction={slot?.direction} isMobile={isMobile} leverage={slot.leverage} />}
+      </HeaderLabel> : <>{LoaderDots()}</>}
       onDismiss={onModalDismiss}
       topContent={modalHeader}
       bottomContent={() => <SlotSummary slot={slot} />}

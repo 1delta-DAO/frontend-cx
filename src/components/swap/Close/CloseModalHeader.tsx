@@ -106,8 +106,7 @@ export default function CloseModalHeader({
         <AutoColumn gap={'1px'} style={{ paddingLeft: '10px', paddingRight: '10px' }}>
           <RowBetween align="center" >
             <RowFixed gap={'0px'}>
-              <ValueText
-              >
+              <ValueText >
                 {trade.inputAmount.toSignificant(6)}
               </ValueText>
             </RowFixed>
@@ -152,30 +151,6 @@ export default function CloseModalHeader({
       <LightCard style={{ padding: '.75rem', marginTop: '0.5rem' }}>
         <AdvancedSwapDetails trade={trade} allowedSlippage={allowedSlippage} />
       </LightCard>
-
-      <AutoColumn justify="flex-start" gap="sm" style={{ padding: '.75rem 1rem' }}>
-        {trade.tradeType === TradeType.EXACT_INPUT ? (
-          <ThemedText.DeprecatedItalic fontWeight={400} textAlign="left" style={{ width: '100%' }}>
-            <Trans>
-              Output is estimated. You will receive at least{' '}
-              <b>
-                {trade.minimumAmountOut(allowedSlippage).toSignificant(6)} {trade.outputAmount.currency.symbol}
-              </b>{' '}
-              or the transaction will revert.
-            </Trans>
-          </ThemedText.DeprecatedItalic>
-        ) : (
-          <ThemedText.DeprecatedItalic fontWeight={400} textAlign="left" style={{ width: '100%' }}>
-            <Trans>
-              Input is estimated. You will sell at most{' '}
-              <b>
-                {trade.maximumAmountIn(allowedSlippage).toSignificant(6)} {trade.inputAmount.currency.symbol}
-              </b>{' '}
-              or the transaction will revert.
-            </Trans>
-          </ThemedText.DeprecatedItalic>
-        )}
-      </AutoColumn>
     </AutoColumn>
   )
 }

@@ -9,8 +9,6 @@ import { useCallback, useMemo } from 'react'
 import { shallowEqual } from 'react-redux'
 import { useChainId } from 'state/globalNetwork/hooks'
 import { useAppDispatch, useAppSelector } from 'state/hooks'
-import { SupportedAssets } from 'types/1delta'
-
 import { V2_FACTORY_ADDRESSES } from '../../constants/addresses'
 import { BASES_TO_TRACK_LIQUIDITY_FOR, PINNED_PAIRS } from '../../constants/routing'
 import { useAllTokens } from '../../hooks/Tokens'

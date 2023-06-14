@@ -264,3 +264,40 @@ export function PairPosition({
 }
 
 
+
+
+export function PairPositionRow({
+  pair,
+  direction,
+  leverage,
+  isMobile,
+}: {
+  pair: [SupportedAssets, SupportedAssets];
+  direction: Mode;
+  leverage: number;
+  isMobile: boolean;
+}) {
+  return useMemo(() => {
+
+    return (<PairWrapper style={{ flexDirection: 'row' }} >
+      {isMobile ?
+        <>
+          <Image src={getTokenIcon(pair[1])} width={isMobile ? '20px' : '30px'} height={isMobile ? '20px' : '30px'} />
+          <Image src={getTokenIcon(pair[0])} width={isMobile ? '20px' : '30px'} height={isMobile ? '20px' : '30px'} />
+        </> :
+        <PairName>
+          {pair[0]} / {pair[1]}
+        </PairName>
+      }
+
+      <DirectionBanner isLong={direction === Mode.LONG}>
+        {direction.toLocaleUpperCase()} {Math.round(leverage * 10) / 10}x
+      </DirectionBanner>
+
+    </PairWrapper>
+    )
+  },
+    [pair, direction, leverage, isMobile])
+}
+
+

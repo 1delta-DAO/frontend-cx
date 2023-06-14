@@ -78,7 +78,7 @@ import { calculateCompoundRiskChangeSlot, useGetCompoundRiskParametersSlot } fro
 import { useAlgebraClientSideV3 } from "hooks/professional/algebra/useClientSideV3Trade";
 import { UniswapTrade } from "utils/Types";
 import SettingsTab from "components/Settings";
-import RiskDetailsDropdown from "components/swap/RiskDetailsDropdown";
+import RiskDetailsDropdown from "components/swap/Risk/RiskDetailsDropdown";
 import { fetchCompoundPublicDataAsync } from "state/1delta/compound/fetchCompoundPublicData";
 import { useNextSlotAddress } from "hooks/useNexSlotAddress";
 import { createSlotCalldata } from "utils/calldata/compound/slotMethodCreator";
