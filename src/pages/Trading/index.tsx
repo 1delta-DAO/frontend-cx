@@ -4,11 +4,9 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import TradingViewWidget from 'react-tradingview-widget';
 import styled, { css, useTheme } from "styled-components";
 import {
-  AaveInterestMode,
   Field,
   PositionSides,
-  SupportedAssets,
-  MarginTradeType
+  SupportedAssets
 } from "types/1delta";
 import { ReactComponent as DropDown } from 'assets/images/dropdown.svg'
 import { getSupportedAssets, ETHEREUM_CHAINS, POLYGON_CHAINS } from "constants/1delta";
@@ -25,7 +23,7 @@ import SwapDetailsDropdown from 'components/swap/SwapDetailsDropdown'
 import { MouseoverTooltip } from 'components/Tooltip'
 import { MAINNET_CHAINS } from 'constants/1delta'
 import { SupportedChainId, isSupportedChain } from 'constants/chains'
-import { BigNumber, Contract } from 'ethers'
+import { BigNumber } from 'ethers'
 import { RedesignVariant, useRedesignFlag } from 'featureFlags/flags/redesign'
 import { useGetSlotFactoryContract } from 'hooks/1delta/use1DeltaContract'
 import JSBI from 'jsbi'
@@ -109,32 +107,6 @@ export enum TradeAction {
   CLOSE = 'Close'
 }
 
-const dummyData: SlotData[] = [
-  {
-    pair: [SupportedAssets.WBTC, SupportedAssets.USDC],
-    leverage: 2.0,
-    direction: Mode.LONG,
-    pnl: 1020.23,
-    healthFactor: 1.1,
-    price: 21123.2,
-    size: 100,
-    rewardApr: 0.12,
-    supplyApr: 0.12,
-    borrowApr: 0.12,
-  },
-  {
-    pair: [SupportedAssets.USDC, SupportedAssets.ETH],
-    leverage: 2.5,
-    direction: Mode.SHORT,
-    pnl: -23.28,
-    price: 1823.2,
-    healthFactor: 1.01,
-    size: 1500,
-    rewardApr: 0.12,
-    supplyApr: 0.12,
-    borrowApr: 0.12,
-  },
-]
 export const ArrowWrapper = styled.div<{ clickable: boolean; redesignFlag: boolean }>`
   display: flex;
   align-items: center;
@@ -405,19 +377,13 @@ export default function Professional() {
   const oracleState = useOracleState()
 
   const compoundLoadingState = useMemo(() => deltaState.loadingState.compound, [deltaState.loadingState.compound])
-  const aaveLoadingState = useMemo(() => deltaState.loadingState.aave, [deltaState.loadingState.aave])
   const oracleLoadingState = useMemo(() => oracleState.loadingState, [oracleState.loadingState])
 
   usePollLendingData(
     account,
-    undefined,
-    deltaState.loadingState,
-    deltaState.userMeta,
     chainId,
     connectionIsSupported,
-    aaveLoadingState,
     compoundLoadingState,
-    false,
     currentProtocol,
     oracleLoadingState
   )
@@ -972,7 +938,7 @@ export default function Professional() {
   )
 
   const slotData = useParsedSlots(chainId, account)
-  console.log("slotData", slotData)
+
   return (
     <Container >
       <ConfirmSwapModal

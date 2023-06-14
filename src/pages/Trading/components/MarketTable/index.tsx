@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { ChevronDown, ChevronUp } from 'react-feather'
 import { LendingProtocol } from 'state/1delta/actions'
-import { useCurrentLendingProtocol, useGetCurrentAccount, useIsUserLoaded } from 'state/1delta/hooks'
+import { useIsUserLoaded } from 'state/1delta/hooks'
 import { useChainIdAndAccount } from 'state/globalNetwork/hooks'
 import { useAppDispatch } from 'state/hooks'
 import { setFilterDebt } from 'state/tableFilter/actions'
@@ -15,7 +15,7 @@ import {
   Filter,
   FilterActive,
 } from 'utils/tableUtils/filters'
-import PositionRow, { SlotData } from './PositionRow'
+import PositionRow from './PositionRow'
 import {
   AssetHeaderPro,
   TimeHeaderPro,
@@ -25,7 +25,6 @@ import {
   PnLHeaderPro,
   PriceHeaderPro,
   CheckboxHeaderPro,
-  PositionCellWithChangePro,
   PositionHeaderPro
 } from 'components/Styles/tableStylesProfessional'
 import { AaveInterestMode } from 'types/1delta'
@@ -89,12 +88,11 @@ export default function PositionTable({
     setShowData(!show)
   }, [show])
 
-  const lendingProtocol = useCurrentLendingProtocol()
-  const selectedAccount = useGetCurrentAccount(chainId)
+  const lendingProtocol = LendingProtocol.COMPOUND
   const userLoaded = useIsUserLoaded(lendingProtocol)
   const { handleAprFilter, handleStableAprFilter, handleLiquidityFilter, handleUserBorrowFilter, handleUnInit } = useDebtFilterHandlers(lendingProtocol)
 
-  const relevantAccount = lendingProtocol === LendingProtocol.AAVE ? account : selectedAccount
+  const relevantAccount = account
 
   // initializes filter when account data loaded and account switches
   const [initialize, setInitialize] = useState(false)

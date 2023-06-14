@@ -22,9 +22,6 @@ import { Asset, SupportedAssets } from 'types/1delta'
 import { LendingProtocol, set1DeltaAccountMetaLoading, switchLendingProtocol } from './actions'
 import { OneDeltaAccount } from './reducer'
 import { useWeb3React } from '@web3-react/core'
-import { fetchAAVEUserReserveDataAsync } from './aave/fetchAAVEUserData'
-import { fetchCompoundAccountDataAsync } from './compound/fetchCompoundAccountData'
-import { fetchCometUserDataAsync } from './compound-v3/fetchCometUserData'
 
 export function useDeltaState(): AppState['delta'] {
   return useAppSelector((state) => state.delta)
@@ -231,13 +228,6 @@ export const useHasPosition = (chainId: number, asset: SupportedAssets): {
   // this allows a user that is not connected check out all available options
   if (!account) return { hasCollateral: true, hasDebt: true }
 
-  if (protocol === LendingProtocol.AAVE) {
-    return {
-      hasCollateral: assetData.aaveData[chainId]?.userData?.currentATokenBalance !== '0',
-      hasDebt: assetData.aaveData[chainId]?.userData?.currentStableDebt !== '0' ||
-        assetData.aaveData[chainId]?.userData?.currentVariableDebt !== '0'
-    }
-  }
   if (protocol === LendingProtocol.COMPOUND) {
     if (!deltaAccount?.accountAddress) return { hasCollateral: true, hasDebt: true }
     return {
@@ -261,56 +251,4 @@ export const useCometIsAllowed = (chainId: number, asset: SupportedAssets, baseA
   return Boolean(
     isAllowed
   )
-}
-
-export const useFetchUserData = (lendingProtocol: LendingProtocol, chainId: number, account: string | undefined, assets: SupportedAssets[]) => {
-  const dispatch = useAppDispatch()
-  return useCallback(() => {
-
-    switch (lendingProtocol) {
-      case LendingProtocol.AAVE: {
-
-        dispatch(
-          fetchAAVEUserReserveDataAsync({
-            chainId,
-            account: account ?? '',
-            assetsToQuery: assets,
-          }))
-        break;
-      }
-      case LendingProtocol.COMPOUND: {
-        dispatch(
-          fetchCompoundAccountDataAsync({
-            chainId,
-            accounts: account ? [account] : [],
-            assetIds: assets,
-          })
-        )
-        break;
-      }
-      case LendingProtocol.COMPOUNDV3: {
-        dispatch(
-          fetchCometUserDataAsync({
-            chainId,
-            account
-          })
-        )
-        break;
-      }
-    }
-  },
-    [lendingProtocol, assets, account, chainId])
-}
-
-export const useFetchCometData = (chainId: number, account: string | undefined, baseAsset: SupportedAssets) => {
-  const dispatch = useAppDispatch()
-  return useCallback(() => {
-    dispatch(
-      fetchCometUserDataAsync({
-        chainId,
-        account
-      })
-    )
-  },
-    [account, chainId])
 }

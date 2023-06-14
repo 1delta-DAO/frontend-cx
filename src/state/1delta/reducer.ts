@@ -11,22 +11,12 @@ import {
   switchLendingProtocol,
 } from './actions'
 import { fetchCompoundPublicDataAsync } from './compound/fetchCompoundPublicData'
-import {
-  fetchAAVEPublicDataAsync,
-  fetchAAVEReserveConfigDataAsync,
-  fetchAAVEReserveDataAsync,
-} from './aave/fetchAAVEPublicData'
-import { fetchAAVEUserReserveDataAsync } from './aave/fetchAAVEUserData'
-import { fetch1DeltaUserAccountDataAsync } from './fetch1DeltaAccountData'
-import { fetchCompoundAccountDataAsync } from './compound/fetchCompoundAccountData'
 import { addressesAaveTestnetTokens } from 'hooks/1delta/addressesAave'
 import { addressesCompoundTestnetTokens } from 'hooks/1delta/addressesCompound'
 import { addresses0VixTestnetTokens } from 'hooks/1delta/addresses0Vix'
 import { addressesTokens } from 'hooks/1delta/addressesTokens'
 import { chainIds, SupportedChainId } from 'constants/chains'
 import { fetchUserBalances } from './fetchAssetBalances'
-import { fetchCometReserveDataAsync } from './compound-v3/fetchCometPublicData'
-import { fetchCometUserDataAsync } from './compound-v3/fetchCometUserData'
 
 export interface OneDeltaAccount {
   accountAddress: string
@@ -70,22 +60,6 @@ export interface DeltaState {
       loading: boolean
     }
     compound: {
-      publicLoading: boolean
-      publicLoaded: boolean
-      userLoading: boolean
-      userLoaded: boolean
-    }
-    aave: {
-      configLoading: boolean
-      configLoaded: boolean
-      publicLoading: boolean
-      publicLoaded: boolean
-      userLoading: boolean
-      userLoaded: boolean
-      aggregatorLoaded: boolean
-      aggregatorLoading: boolean
-    }
-    compoundV3: {
       publicLoading: boolean
       publicLoaded: boolean
       userLoading: boolean
@@ -270,23 +244,7 @@ export const initialState: DeltaState = {
       userLoading: false,
       publicLoaded: false,
       userLoaded: false,
-    },
-    aave: {
-      configLoading: false,
-      configLoaded: false,
-      publicLoading: false,
-      userLoading: false,
-      publicLoaded: false,
-      userLoaded: false,
-      aggregatorLoaded: false,
-      aggregatorLoading: false,
-    },
-    compoundV3: {
-      publicLoading: false,
-      userLoading: false,
-      publicLoaded: false,
-      userLoaded: false,
-    },
+    }
   },
   userState: {
     selectedLendingProtocol: LendingProtocol.AAVE,
@@ -388,22 +346,6 @@ export default createReducer<DeltaState>(initialState, (builder) =>
           publicLoaded: false,
           userLoaded: false,
         },
-        aave: {
-          configLoading: false,
-          configLoaded: false,
-          publicLoading: false,
-          userLoading: false,
-          publicLoaded: false,
-          userLoaded: false,
-          aggregatorLoaded: false,
-          aggregatorLoading: false,
-        },
-        compoundV3: {
-          publicLoading: false,
-          userLoading: false,
-          publicLoaded: false,
-          userLoaded: false,
-        },
       }
     })
     .addCase(set1DeltaAccountMetaLoading, (state, action) => {
@@ -411,63 +353,6 @@ export default createReducer<DeltaState>(initialState, (builder) =>
     })
     .addCase(switchLendingProtocol, (state, action) => {
       state.userState.selectedLendingProtocol = action.payload.targetProtocol
-    })
-    // ==== Account Fetch
-    .addCase(fetch1DeltaUserAccountDataAsync.pending, (state) => {
-      state.loadingState.userMeta.loading = true
-    })
-    .addCase(fetch1DeltaUserAccountDataAsync.fulfilled, (state, action) => {
-      state.userMeta[action.payload.chainId].accounts1Delta = action.payload.accounts
-      state.userMeta[action.payload.chainId].loaded = true
-      state.loadingState.userMeta.loading = true
-    })
-    // account advanced data fetch
-    .addCase(fetchCompoundAccountDataAsync.pending, (state) => {
-      // state.userDataLoading = true
-      state.loadingState.compound.userLoading = true
-    })
-    .addCase(fetchCompoundAccountDataAsync.fulfilled, (state, action) => {
-      if (action.payload.data) {
-        const chainId = action.payload.chainId
-        const assetKeys = Object.keys(action.payload.data)
-        for (let i = 0; i < assetKeys.length; i++) {
-          const assetKey = assetKeys[i]
-          const accountKeys = Object.keys(action.payload.data[assetKey])
-          state.assets[assetKey].compoundData[chainId].userData = {}
-          for (let k = 0; k < accountKeys.length; k++) {
-            state.assets[assetKey].compoundData[chainId].userData[accountKeys[k]] = {
-              ...state.assets[assetKey].compoundData[chainId].userData[accountKeys[k]],
-              ...action.payload.data[assetKey][accountKeys[k]],
-            }
-          }
-        }
-
-        if (action.payload.summary) {
-          const accountKeys = Object.values(action.payload.summary)
-          for (let k = 0; k < accountKeys.length; k++) {
-            const assetKey = state.userMeta[action.payload.chainId].accounts1Delta[k]?.accountAddress
-            if (!assetKey) continue
-            state.userMeta[action.payload.chainId].accounts1Delta[k].compoundSummary = action.payload.summary[assetKey]
-          }
-        }
-
-        state.loadingState.compound.userLoaded = true
-        state.loadingState.compound.userLoading = false
-      }
-    })
-    // public data fetch
-    .addCase(fetchAAVEPublicDataAsync.pending, (state) => {
-      // state.userDataLoading = true
-    })
-    .addCase(fetchAAVEPublicDataAsync.fulfilled, (state, action) => {
-      const assetKeys = Object.keys(action.payload.data)
-      for (let i = 0; i < assetKeys.length; i++) {
-        state.assets[assetKeys[i]] = {
-          ...state.assets[assetKeys[i]],
-          ...action.payload.data[assetKeys[i]],
-        }
-      }
-      state.loadingState.publicDataLoaded = true
     })
     // public data fetch
     .addCase(fetchCompoundPublicDataAsync.pending, (state) => {
@@ -486,71 +371,8 @@ export default createReducer<DeltaState>(initialState, (builder) =>
       state.loadingState.compound.publicLoaded = true
       state.loadingState.compound.publicLoading = false
     })
-    // new reserve data-fetch using aave data provider
-    .addCase(fetchAAVEReserveDataAsync.fulfilled, (state, action) => {
-      const assetKeys = Object.keys(action.payload.data)
-      const chainId = action.payload.chainId
-      for (let i = 0; i < assetKeys.length; i++) {
-        state.assets[assetKeys[i]].aaveData[chainId].reserveData = {
-          ...state.assets[assetKeys[i]].aaveData[chainId].reserveData,
-          ...action.payload.data[assetKeys[i]],
-        }
-      }
-      state.loadingState.aave.publicLoaded = true
-      state.loadingState.aave.publicLoading = false
 
 
-      const assetKeysConfig = Object.keys(action.payload.config)
-      for (let i = 0; i < assetKeysConfig.length; i++) {
-        state.assets[assetKeysConfig[i]].aaveData[chainId].reserveData = {
-          ...state.assets[assetKeysConfig[i]].aaveData[chainId].reserveData,
-          ...action.payload.config[assetKeysConfig[i]],
-        }
-      }
-    })
-    .addCase(fetchAAVEReserveDataAsync.pending, (state) => {
-      state.loadingState.aave.publicLoading = true
-      //
-    })
-    // reserve config data
-    .addCase(fetchAAVEReserveConfigDataAsync.fulfilled, (state, action) => {
-      const assetKeys = Object.keys(action.payload.data)
-      const chainId = action.payload.chainId
-      for (let i = 0; i < assetKeys.length; i++) {
-        state.assets[assetKeys[i]].aaveData[chainId].reserveData = {
-          ...state.assets[assetKeys[i]].aaveData[chainId].reserveData,
-          ...action.payload.data[assetKeys[i]],
-        }
-
-        state.assets[assetKeys[i]].aaveData[chainId].reserveData = {
-          ...state.assets[assetKeys[i]].aaveData[chainId].reserveData,
-          ...action.payload.data[assetKeys[i]],
-        }
-      }
-      state.loadingState.aave.configLoaded = true
-      state.loadingState.aave.configLoading = false
-    })
-    .addCase(fetchAAVEReserveConfigDataAsync.pending, (state) => {
-      state.loadingState.aave.configLoading = true
-      //
-    })
-    // user data from provider
-    .addCase(fetchAAVEUserReserveDataAsync.fulfilled, (state, action) => {
-      const assetKeys = Object.keys(action.payload.data)
-      const chainId = action.payload.chainId
-      for (let i = 0; i < assetKeys.length; i++) {
-        state.assets[assetKeys[i]].aaveData[chainId].userData = {
-          ...state.assets[assetKeys[i]].aaveData[chainId].userData,
-          ...action.payload.data[assetKeys[i]],
-        }
-      }
-      state.userState.aaveTotals[chainId] = action.payload.totals
-      state.loadingState.aave.userLoaded = true
-      state.loadingState.aave.userLoading = false
-    })
-    .addCase(fetchAAVEUserReserveDataAsync.pending, (state) => {
-      state.loadingState.aave.userLoading = true
-    })
     // user data from provider
     .addCase(fetchUserBalances.fulfilled, (state, action) => {
       const assetKeys = Object.keys(action.payload.balances)
@@ -558,45 +380,6 @@ export default createReducer<DeltaState>(initialState, (builder) =>
         state.assets[assetKeys[i]].walletBalance = action.payload.balances[assetKeys[i]]
     })
     .addCase(fetchUserBalances.pending, (state) => {
-      //
-    })
-
-    // Compound V3
-    .addCase(fetchCometReserveDataAsync.fulfilled, (state, action) => {
-      const assetKeys = Object.keys(action.payload.data)
-      const chainId = action.payload.chainId
-      for (let i = 0; i < assetKeys.length; i++) {
-        state.assets[assetKeys[i]].compoundV3Data[chainId][SupportedAssets.USDC].reserveData = {
-          ...state.assets[assetKeys[i]].compoundV3Data[chainId][SupportedAssets.USDC].reserveData,
-          ...action.payload.data[assetKeys[i]][SupportedAssets.USDC],
-        }
-      }
-      state.loadingState.compoundV3.publicLoaded = true
-      state.loadingState.compoundV3.publicLoading = false
-
-
-    })
-    .addCase(fetchCometReserveDataAsync.pending, (state) => {
-      state.loadingState.compoundV3.publicLoading = true
-      //
-    })
-    // Compound V3
-    .addCase(fetchCometUserDataAsync.fulfilled, (state, action) => {
-      const assetKeys = Object.keys(action.payload.data)
-      const chainId = action.payload.chainId
-      for (let i = 0; i < assetKeys.length; i++) {
-        state.assets[assetKeys[i]].compoundV3Data[chainId][SupportedAssets.USDC].userData = {
-          ...state.assets[assetKeys[i]].compoundV3Data[chainId][SupportedAssets.USDC].userData,
-          ...action.payload.data[assetKeys[i]][SupportedAssets.USDC],
-        }
-      }
-      state.loadingState.compoundV3.userLoaded = true
-      state.loadingState.compoundV3.userLoading = false
-
-
-    })
-    .addCase(fetchCometUserDataAsync.pending, (state) => {
-      state.loadingState.compoundV3.userLoading = true
       //
     })
 )
