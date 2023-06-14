@@ -85,7 +85,7 @@ import { createSlotCalldata } from "utils/calldata/compound/slotMethodCreator";
 import { fetchUserSlots } from "state/slots/fetchUserSlots";
 import { ExtendedSlot, useParsedSlots } from "state/slots/hooks";
 import useCurrencyBalance from "lib/hooks/useCurrencyBalance";
-import CloseModal from "components/swap/CloseModal";
+import CloseModal from "components/swap/Close/CloseModal";
 
 export enum Mode {
   LONG = 'Long',
@@ -326,7 +326,7 @@ export const assetToId = (asset: SupportedAssets, chainId: number, protocol: Len
         return addressesTokens[String(asset)][chainId]
       return getTokenAddresses(chainId, protocol)[String(asset)]
     } catch (err) {
-      console.log("failed to get token address:", err)
+      // console.log("failed to get token address:", err)
       return 'ETH'
     }
   }

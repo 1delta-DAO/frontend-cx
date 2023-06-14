@@ -15,9 +15,9 @@ import { opacify } from 'theme/utils'
 import TransactionConfirmationModal, {
   ConfirmationModalContent,
   TransactionErrorContent,
-} from '../TransactionConfirmationModal'
-import SwapModalFooter from './SwapModalFooter'
-import SwapModalHeader from './SwapModalHeader'
+} from '../../TransactionConfirmationModal'
+import SwapModalFooter from '../SwapModalFooter'
+import SwapModalHeader from '../SwapModalHeader'
 import { WarningIcon } from 'nft/components/icons'
 import { ExtendedSlot } from 'state/slots/hooks'
 import { useDerivedSwapInfoMarginAlgebraClose } from 'state/professionalTradeSelection/tradeHooks'
@@ -29,7 +29,18 @@ import { useCurrency } from 'hooks/Tokens'
 import { UniswapTrade } from 'utils/Types'
 import { useWeb3React } from '@web3-react/core'
 import { useGetSlotContract } from 'hooks/1delta/use1DeltaContract'
+import { Dots } from '../styleds'
+import SlotSummary from './SlotSummary'
+import CloseModalHeader from './CloseModalHeader'
 
+
+export const LoaderDots = (): React.ReactNode => {
+  return (
+    <Dots key={'loadingMM'} >
+      Calculating Trade
+    </Dots>
+  )
+}
 
 let LAST_VALID_TRADE_CLOSE: UniswapTrade | undefined;
 let LAST_VALID_AMOUNT_OUT: CurrencyAmount<Currency> | undefined;
@@ -58,10 +69,10 @@ export default function CloseModal({
   const [lastTxnHashLogged, setLastTxnHashLogged] = useState<string | null>(null)
 
   const chainId = useChainId()
-  const [tokenInId, tokenOutId] = [
+  const [tokenInId, tokenOutId] = Boolean(slot) ? [
     assetToId(slot?.collateralSymbol as SupportedAssets, chainId, LendingProtocol.COMPOUND),
     assetToId(slot?.debtSymbol as SupportedAssets, chainId, LendingProtocol.COMPOUND)
-  ]
+  ] : [undefined, undefined]
 
   const tokenIn = useCurrency(tokenInId, LendingProtocol.COMPOUND)
   const tokenOut = useCurrency(tokenOutId, LendingProtocol.COMPOUND)
@@ -102,7 +113,7 @@ export default function CloseModal({
 
   const modalHeader = useCallback(() => {
     return trade ? (
-      <SwapModalHeader
+      <CloseModalHeader
         trade={trade}
         shouldLogModalCloseEvent={shouldLogModalCloseEvent}
         setShouldLogModalCloseEvent={setShouldLogModalCloseEvent}
@@ -124,10 +135,10 @@ export default function CloseModal({
 
   const confirmationContent = useCallback(
     () => <ConfirmationModalContent
-      title={<Trans>Confirm Swap</Trans>}
+      title={Boolean(trade) ? <Trans>Close your Position</Trans> : <>{LoaderDots()}</>}
       onDismiss={onModalDismiss}
       topContent={modalHeader}
-      bottomContent={() => null}
+      bottomContent={() => <SlotSummary slot={slot} />}
     />
     ,
     [onModalDismiss, modalHeader]

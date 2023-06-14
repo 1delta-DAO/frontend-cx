@@ -15,13 +15,21 @@ import { InterfaceTrade } from 'state/routing/types'
 import { useClientSideRouter, useUserSlippageTolerance } from 'state/user/hooks'
 import { computeRealizedPriceImpact } from 'utils/prices'
 
-import { ButtonError } from '../Button'
-import { AutoRow } from '../Row'
-import { SwapCallbackError } from './styleds'
-import { getTokenPath, RoutingDiagramEntry } from './SwapRoute'
+import { ButtonError } from '../../Button'
+import { AutoRow } from '../../Row'
+import { Dots, SwapCallbackError } from '../styleds'
+import { getTokenPath, RoutingDiagramEntry } from '../SwapRoute'
 
 
-export default function SwapModalFooter({
+export const LoaderDots = (): React.ReactNode => {
+  return (
+    <Dots key={'loadingMM'} >
+      Calculating Trade
+    </Dots>
+  )
+}
+
+export default function CloseModalFooter({
   trade,
   allowedSlippage,
   hash,
@@ -57,7 +65,7 @@ export default function SwapModalFooter({
           id={"CONFIRM_SWAP_BUTTON"}
         >
           <Text fontSize={20} fontWeight={500}>
-            <Trans>Confirm Swap</Trans>
+            {trade ? <Trans>Confirm Closing Your Position</Trans> : <>{LoaderDots()}</>}
           </Text>
         </ButtonError>
 

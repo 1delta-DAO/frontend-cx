@@ -257,7 +257,7 @@ export default function GeneralCurrencyInputPanel({
                       color={theme.deprecated_text3}
                       fontWeight={500}
                       fontSize={14}
-                      style={{ display: 'inline' }}
+                      style={{ display: 'inline', marginRight: '5px' }}
                     >
                       {!hideBalance && currency && selectedCurrencyBalance ? (
                         renderBalance ? (

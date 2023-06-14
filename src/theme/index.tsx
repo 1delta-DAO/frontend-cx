@@ -260,9 +260,9 @@ function oldColorsUpdated(darkMode: boolean): Colors {
 }
 
 function getTheme(darkMode: boolean, isNewColorsEnabled: boolean): DefaultTheme {
-  const useColors = isNewColorsEnabled ? oldColorsUpdated(darkMode) : oldColors(darkMode)
+  const useColors = isNewColorsEnabled ? oldColorsUpdated(true) : oldColors(true)
   return {
-    ...themeColors(darkMode),
+    ...themeColors(true),
     ...useColors,
 
     grids: {
@@ -272,7 +272,7 @@ function getTheme(darkMode: boolean, isNewColorsEnabled: boolean): DefaultTheme 
     },
 
     //shadows
-    shadow1: darkMode ? '#000' : '#2F80ED',
+    shadow1: '#000',
 
     // media queries
     deprecated_mediaWidth: deprecated_mediaWidthTemplates,
@@ -299,7 +299,7 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
   const redesignFlag = useRedesignFlag()
   const darkMode = useIsDarkMode()
   const themeObject = useMemo(
-    () => getTheme(darkMode, redesignFlag === RedesignVariant.Enabled),
+    () => getTheme(true, redesignFlag === RedesignVariant.Enabled),
     [darkMode, redesignFlag]
   )
   return <StyledComponentsThemeProvider theme={themeObject}>{children}</StyledComponentsThemeProvider>

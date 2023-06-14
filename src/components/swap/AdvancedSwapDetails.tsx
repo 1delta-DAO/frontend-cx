@@ -92,7 +92,7 @@ export function AdvancedSwapDetails({
             </ThemedText.DeprecatedBlack>
           </TextWithLoadingPlaceholder>
         </RowBetween>
-        <RowBetween>
+        {/* <RowBetween>
           <RowFixed>
             <MouseoverTooltip
               text={<Trans>The impact your trade has on the market price of this pool.</Trans>}
@@ -108,7 +108,7 @@ export function AdvancedSwapDetails({
               <FormattedPriceImpact priceImpact={priceImpact} />
             </ThemedText.DeprecatedBlack>
           </TextWithLoadingPlaceholder>
-        </RowBetween>
+        </RowBetween> */}
         <Separator redesignFlag={redesignFlagEnabled} />
         <RowBetween>
           <RowFixed style={{ marginRight: '20px' }}>

@@ -64,7 +64,7 @@ function pairKey(token0Address: string, token1Address: string) {
 export const initialState: UserState = {
   selectedWallet: undefined,
   matchesDarkMode: true,
-  userDarkMode: null,
+  userDarkMode: true,
   userExpertMode: false,
   userLocale: null,
   userClientSideRouter: false,
