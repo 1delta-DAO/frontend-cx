@@ -134,11 +134,7 @@ export const safeGetToken = (
   } else {
     // testet case - different addresses for each protocol
     tokenAddress =
-      (lendingProtocol === LendingProtocol.AAVE
-        ? addressesAaveTestnetTokens[asset]?.[safeChainId] :
-        lendingProtocol === LendingProtocol.COMPOUNDV3
-          ? addressesCompoundV3TestnetTokens[asset]?.[safeChainId] :
-          addressesCompoundTestnetTokens[asset]?.[safeChainId]) ?? '0x2e3A2fb8473316A02b8A297B982498E661E1f6f5'
+      addressesCompoundTestnetTokens[asset]?.[safeChainId] ?? '0x2e3A2fb8473316A02b8A297B982498E661E1f6f5'
   }
   try {
     return new Token(

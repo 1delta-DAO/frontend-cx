@@ -66,14 +66,6 @@ export interface DeltaState {
       userLoaded: boolean
     }
   }
-  readonly userState: {
-    selectedLendingProtocol: LendingProtocol
-    aaveTotals: AaveTotals
-    suppliedBalance: SerializedBigNumber
-    borrowBalance: SerializedBigNumber
-    borrowLimit: number
-    healthFactor: number
-  }
   readonly assets: { [key: string]: Asset }
 }
 const dummyCompoundData = {
@@ -97,47 +89,6 @@ const dummyCompoundData = {
     compSupplySpeed: '0',
     compBorrowSpeed: '0',
     borrowCap: '0',
-  },
-}
-
-const dummyAaveData = {
-  underlyingAddress: '',
-  userData: {
-    // fetched from provider
-    currentATokenBalance: '0',
-    currentStableDebt: '0',
-    currentVariableDebt: '0',
-    principalStableDebt: '0',
-    scaledVariableDebt: '0',
-    stableBorrowRate: '0',
-    liquidityRate: '0',
-    stableRateLastUpdated: 0,
-    usageAsCollateralEnabled: false,
-  },
-  reserveData: {
-    unbacked: '0',
-    accruedToTreasuryScaled: '0',
-    totalAToken: '0',
-    totalStableDebt: '0',
-    totalVariableDebt: '0',
-    liquidityRate: '0',
-    variableBorrowRate: '0',
-    stableBorrowRate: '0',
-    averageStableBorrowRate: '0',
-    liquidityIndex: '0',
-    variableBorrowIndex: '0',
-    lastUpdateTimestamp: 0,
-    // config
-    decimals: '0',
-    ltv: '0',
-    liquidationThreshold: '0',
-    liquidationBonus: '0',
-    reserveFactor: '0',
-    usageAsCollateralEnabled: false,
-    borrowingEnabled: false,
-    stableBorrowRateEnabled: false,
-    isActive: false,
-    isFrozen: false,
   },
 }
 
@@ -186,12 +137,6 @@ const dummyAssetBase = {
   interestRateStrategyAddress: '',
   user1DeltaAccountData: {},
   priceHist: [],
-  aaveData: Object.assign(
-    {},
-    ...chainIds.map((x) => {
-      return { [x]: dummyAaveData }
-    })
-  ),
   compoundData: Object.assign(
     {},
     ...chainIds.map((x) => {
@@ -246,19 +191,6 @@ export const initialState: DeltaState = {
       userLoaded: false,
     }
   },
-  userState: {
-    selectedLendingProtocol: LendingProtocol.AAVE,
-    aaveTotals: Object.assign(
-      {},
-      ...chainIds.map((x) => {
-        return { [x]: dummyAaveTotals }
-      })
-    ),
-    suppliedBalance: '0',
-    borrowBalance: '0',
-    borrowLimit: 0.0,
-    healthFactor: 2.0,
-  },
   assets: Object.assign(
     {},
     ...Object.values(SupportedAssets).map((x) => {
@@ -270,35 +202,18 @@ export const initialState: DeltaState = {
       ).includes(x)
         ? addressesCompoundTestnetTokens[x]?.[SupportedChainId.GOERLI]
         : {}
-      asset.aaveData[SupportedChainId.GOERLI].underlyingAddress = getSupportedAssets(
-        SupportedChainId.GOERLI,
-        LendingProtocol.AAVE
-      ).includes(x)
-        ? addressesAaveTestnetTokens[x][SupportedChainId.GOERLI]
-        : {}
       asset.compoundData[SupportedChainId.POLYGON_MUMBAI].underlyingAddress = getSupportedAssets(
         SupportedChainId.POLYGON_MUMBAI,
         LendingProtocol.COMPOUND
       ).includes(x)
         ? addresses0VixTestnetTokens[x]?.[SupportedChainId.POLYGON_MUMBAI]
         : {}
-      asset.aaveData[SupportedChainId.POLYGON_MUMBAI].underlyingAddress = getSupportedAssets(
-        SupportedChainId.POLYGON_MUMBAI,
-        LendingProtocol.AAVE
-      ).includes(x)
-        ? addressesAaveTestnetTokens[x]?.[SupportedChainId.POLYGON_MUMBAI]
-        : {}
+
       asset.compoundData[SupportedChainId.MAINNET].underlyingAddress = getSupportedAssets(
         1,
         LendingProtocol.COMPOUND
       ).includes(x)
         ? addressesTokens[x]?.[SupportedChainId.MAINNET]
-        : {}
-      asset.aaveData[SupportedChainId.POLYGON].underlyingAddress = getSupportedAssets(
-        SupportedChainId.POLYGON,
-        LendingProtocol.AAVE
-      ).includes(x)
-        ? addressesTokens[x]?.[SupportedChainId.POLYGON]
         : {}
       return {
         [x]: { id: x, ...dummyAssetBase, ...TOKEN_META[x] },
@@ -350,9 +265,6 @@ export default createReducer<DeltaState>(initialState, (builder) =>
     })
     .addCase(set1DeltaAccountMetaLoading, (state, action) => {
       state.userMeta[action.payload.chainId].loaded = action.payload.state
-    })
-    .addCase(switchLendingProtocol, (state, action) => {
-      state.userState.selectedLendingProtocol = action.payload.targetProtocol
     })
     // public data fetch
     .addCase(fetchCompoundPublicDataAsync.pending, (state) => {

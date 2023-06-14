@@ -3,7 +3,6 @@ import { ButtonPrimary, ButtonSecondary, ButtonYellow } from "."
 import { MarginTradeType, MarginTradeState, PositionEntry, PositionSides, SupportedAssets } from "types/1delta"
 import { useMemo } from "react"
 import { getTradeTypeDescription, useSetSingleInteraction } from "state/marginTradeSelection/hooks"
-import { useCurrentLendingProtocol } from "state/1delta/hooks"
 import { useChainId } from "state/globalNetwork/hooks"
 import { SupportedChainId } from "constants/chains"
 import { LendingProtocol } from "state/1delta/actions"
@@ -143,7 +142,7 @@ export const PositionEditingButton = (
     setCometMarginTradingActive
   }: EditingProps
 ) => {
-  const protocol = useCurrentLendingProtocol()
+  const protocol = LendingProtocol.COMPOUND
   const chainId = useChainId()
 
   const buttonText = useMemo(() => {
@@ -164,7 +163,7 @@ export const PositionEditingButton = (
   )
   const setSingle = useSetSingleInteraction()
 
-  return currentProtocol !== LendingProtocol.COMPOUNDV3 ? <ErrorContainer>
+  return <ErrorContainer>
     <ButtonContainer>
       {isEditingPosition && (
         <ButtonSecondary
@@ -179,102 +178,45 @@ export const PositionEditingButton = (
           Cancel
         </ButtonSecondary>
       )}
-      {(asset && isSingle) ?
-        (<ButtonRow>
-          <SingleButton disabled={firstDisabled} onClick={
-            () => {
-              setSingle(isCollateral ? MarginTradeType.Supply : MarginTradeType.Borrow)
-              handlePositionEditing()
-            }
-          }
-            padding="16px 16px"
-          >
-            {first}
-          </SingleButton>
-          <SingleButton disabled={secondDisabled} onClick={
-            () => {
-              setSingle(isCollateral ? MarginTradeType.Withdraw : MarginTradeType.Repay)
-              handlePositionEditing()
-            }
-          }
-            padding="16px 16px"
-          >
-            {second}
-          </SingleButton>
-        </ButtonRow>) :
-        (<ButtonPrimary
+
+      {(<ButtonRowFlex small={isSingle && asset === baseAsset}>
+        {((isSingle && asset !== baseAsset) || !isSingle) && <ButtonPrimary
           disabled={isEditingPosition && !isPositionValid}
           padding="16px 16px"
           width="100%"
           $borderRadius="12px"
+          marginRight="10px;"
           height="52px"
-          maxWidth='500px'
-          onClick={handlePositionEditing}
+          onClick={() => {
+            handlePositionEditing()
+            setCometMarginTradingActive()
+          }}
         >
-          <ButtonTextBox>{!isEditingPosition ? 'START TRADING' : buttonText}</ButtonTextBox>
-        </ButtonPrimary>)}
-      {!isMobile && chainId === SupportedChainId.POLYGON && protocol === LendingProtocol.COMPOUND && <Warning disabled={false}>
-        0VIX was exploited - Do not deposit any funds!
-      </Warning>}
+          <ButtonTextBox>{!isEditingPosition ? 'START TRADING' : (isSingle ? 'TRADE ON MARGIN' : 'SWAP COLLATERALS')}</ButtonTextBox>
+        </ButtonPrimary>}
+        {isSingle && isEditingPosition && asset && <SingleButtonComet disabled={firstDisabled} onClick={
+          () => {
+            setSingle(isCollateral ? MarginTradeType.Supply : MarginTradeType.Borrow)
+            handlePositionEditing()
+          }
+        }
+          padding="16px 16px"
+        >
+          {first}
+        </SingleButtonComet>}
+        {isSingle && isEditingPosition && asset && <SingleButtonComet disabled={secondDisabled} onClick={
+          () => {
+            setSingle(isCollateral ? MarginTradeType.Withdraw : MarginTradeType.Repay)
+            handlePositionEditing()
+          }
+        }
+          padding="16px 16px"
+        >
+          {second}
+        </SingleButtonComet>}
+      </ButtonRowFlex>)}
     </ButtonContainer>
-    {isMobile && chainId === SupportedChainId.POLYGON && protocol === LendingProtocol.COMPOUND && <Warning disabled={false}>
-      0VIX was exploited - Do not deposit any funds!
-    </Warning>}
-  </ErrorContainer> :
-    <ErrorContainer>
-      <ButtonContainer>
-        {isEditingPosition && (
-          <ButtonSecondary
-            disabled={false}
-            padding="16px 16px"
-            width="220px"
-            $borderRadius="12px"
-            marginRight="15px"
-            height="52px"
-            onClick={handleCancelPositionEditing}
-          >
-            Cancel
-          </ButtonSecondary>
-        )}
-
-        {(<ButtonRowFlex small={isSingle && asset === baseAsset}>
-          {((isSingle && asset !== baseAsset) || !isSingle) && <ButtonPrimary
-            disabled={isEditingPosition && !isPositionValid}
-            padding="16px 16px"
-            width="100%"
-            $borderRadius="12px"
-            marginRight="10px;"
-            height="52px"
-            onClick={() => {
-              handlePositionEditing()
-              setCometMarginTradingActive()
-            }}
-          >
-            <ButtonTextBox>{!isEditingPosition ? 'START TRADING' : (isSingle ? 'TRADE ON MARGIN' : 'SWAP COLLATERALS')}</ButtonTextBox>
-          </ButtonPrimary>}
-          {isSingle && isEditingPosition && asset && <SingleButtonComet disabled={firstDisabled} onClick={
-            () => {
-              setSingle(isCollateral ? MarginTradeType.Supply : MarginTradeType.Borrow)
-              handlePositionEditing()
-            }
-          }
-            padding="16px 16px"
-          >
-            {first}
-          </SingleButtonComet>}
-          {isSingle && isEditingPosition && asset && <SingleButtonComet disabled={secondDisabled} onClick={
-            () => {
-              setSingle(isCollateral ? MarginTradeType.Withdraw : MarginTradeType.Repay)
-              handlePositionEditing()
-            }
-          }
-            padding="16px 16px"
-          >
-            {second}
-          </SingleButtonComet>}
-        </ButtonRowFlex>)}
-      </ButtonContainer>
-    </ErrorContainer>
+  </ErrorContainer>
 }
 
 
@@ -347,7 +289,7 @@ export const MoneyMarketButtons = (
     onClick
   }: EditingPropsMinimal
 ) => {
-  const protocol = useCurrentLendingProtocol()
+  const protocol = LendingProtocol.COMPOUND
   const chainId = useChainId()
 
   const [first, second, third, fourth, secondDisabled, thirdDisabled, fourthDisabled] = useMemo(() => {

@@ -28,7 +28,6 @@ import { LendingProtocolLogo, LendingProtocolLogoRaw } from 'components/Protocol
 import { LendingProtocol } from 'state/1delta/actions'
 import { WarningIcon } from 'nft/components/icons'
 import { useChainId } from 'state/globalNetwork/hooks'
-import { useCurrentLendingProtocol } from 'state/1delta/hooks'
 
 
 export default function ConfirmMoneyMarketModal({
@@ -265,7 +264,7 @@ export function ConfirmDirectInteractionModal({
   // and an event triggered by modal closing should be logged.
   const [shouldLogModalCloseEvent, setShouldLogModalCloseEvent] = useState(false)
   const [acceptRisk, setAcceptRisk] = useState(false)
-  const protocol = useCurrentLendingProtocol()
+  const protocol = LendingProtocol.COMPOUND
   const [lastTxnHashLogged, setLastTxnHashLogged] = useState<string | null>(null)
   const chainId = useChainId()
   const onModalDismiss = useCallback(() => {

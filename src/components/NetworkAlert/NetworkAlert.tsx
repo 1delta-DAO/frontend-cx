@@ -5,7 +5,6 @@ import { getChainInfo } from 'constants/chainInfo'
 import { SupportedChainId, TESTNET_CHAIN_IDS } from 'constants/chains'
 import { ArrowUpRight } from 'react-feather'
 import { LendingProtocol } from 'state/1delta/actions'
-import { useCurrentLendingProtocol } from 'state/1delta/hooks'
 import { useChainId } from 'state/globalNetwork/hooks'
 import { useDarkModeManager } from 'state/user/hooks'
 import styled from 'styled-components/macro'
@@ -250,7 +249,7 @@ interface AlertProps {
 export function NetworkAlert({ isColumn = false }: AlertProps) {
   const chainId = useChainId()
   const [darkMode] = useDarkModeManager()
-  const lendingProtocol = useCurrentLendingProtocol()
+  const lendingProtocol = LendingProtocol.COMPOUND
 
   if (!shouldShowAlert(chainId)) {
     return null
@@ -278,51 +277,5 @@ export function NetworkAlert({ isColumn = false }: AlertProps) {
         </LinkOutToBridge>
       </ContentWrapper>
     </RootWrapper >
-  ) : (faucet && lendingProtocol === LendingProtocol.AAVE) ? <RootWrapper>
-    <ContentWrapper chainId={chainId} darkMode={darkMode} logoUrl={logoUrl} isColumn={isColumn}>
-      <Container isColumn={isColumn}>
-        <LinkOutToBridgeFirst href={faucet} isColumn={isColumn}>
-          <BodyText color={textColor}>
-            <div style={{ width: '50px', alignItems: 'center', justifyContent: 'center', display: 'flex' }}>
-              <L2Icon src={logoUrl} style={{ margin: '0px' }} />
-            </div>
-            <AutoColumn>
-              <Header>
-                <Trans> {label} faucet</Trans>
-              </Header>
-              <HideSmall>
-                <Trans>Get {label} test currency.</Trans>
-              </HideSmall>
-            </AutoColumn>
-          </BodyText>
-          <StyledArrowUpRight color={textColor} />
-        </LinkOutToBridgeFirst>
-      </Container>
-      <Line isColumn={isColumn} />
-      <Container isColumn={isColumn}>
-        <LinkOutToBridgeSecond href={FAUCET_LINKS[lendingProtocol]} isColumn={isColumn}>
-          <BodyText color={textColor}>
-            <div style={{ width: '50px' }}>
-              <LendingProtocolLogo
-                isSelected
-                chainId={chainId}
-                width={'100%'}
-                height={'40px'}
-                protocol={lendingProtocol}
-              />
-            </div>
-            <AutoColumn>
-              <Header>
-                <Trans> {lendingProtocol} faucet</Trans>
-              </Header>
-              <HideSmall>
-                <Trans>Get {lendingProtocol} testnet tokens.</Trans>
-              </HideSmall>
-            </AutoColumn>
-          </BodyText>
-          <StyledArrowUpRight color={textColor} />
-        </LinkOutToBridgeSecond>
-      </Container>
-    </ContentWrapper>
-  </RootWrapper > : null
+  ) : null
 }

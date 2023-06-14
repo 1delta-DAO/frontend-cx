@@ -53,12 +53,6 @@ export interface AaveTokenUserData {
   usageAsCollateralEnabled?: boolean
 }
 
-export interface AaveData {
-  underlyingAddress: string
-  userData: AaveTokenUserData
-  reserveData: AaveTokenMetadata
-}
-
 export interface CTokenMetadata {
   // this is what the lens provides
   cToken?: string
@@ -153,9 +147,7 @@ export interface Asset extends TokenMeta {
   walletBalance?: SerializedBigNumber
   tokenAddress?: string
   // core token data
-  aaveData: { [chainId: number]: AaveData }
   compoundData: { [chainId: number]: CompoundData }
-  compoundV3Data: { [chainId: number]: { [comet: string]: CompoundV3Data } }
   // 1delta account data
   user1DeltaAccountData: { [accountAddress: string]: User1DeltaAccountData }
 }

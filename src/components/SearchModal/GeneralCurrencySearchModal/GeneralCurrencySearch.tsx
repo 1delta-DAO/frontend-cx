@@ -31,7 +31,6 @@ import {
   getCompoundV3TokensByAddress,
 } from 'hooks/1delta/tokens'
 import { LendingProtocol } from 'state/1delta/actions'
-import { useCurrentLendingProtocol } from 'state/1delta/hooks'
 import { useChainId } from 'state/globalNetwork/hooks'
 import { SupportedChainId, TESTNET_CHAIN_IDS } from 'constants/chains'
 import { WRAPPED_NATIVE_CURRENCY } from 'constants/tokens'
@@ -82,7 +81,7 @@ export function CurrencySearch({
   const chainId = useChainId()
   const theme = useTheme()
 
-  const lendingProtocol = useCurrentLendingProtocol()
+  const lendingProtocol = LendingProtocol.COMPOUND
 
   const [tokenLoaderTimerElapsed, setTokenLoaderTimerElapsed] = useState(false)
 

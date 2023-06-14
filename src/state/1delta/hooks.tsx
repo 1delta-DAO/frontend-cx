@@ -27,10 +27,6 @@ export function useDeltaState(): AppState['delta'] {
   return useAppSelector((state) => state.delta)
 }
 
-export function useCurrentLendingProtocol(): LendingProtocol {
-  return useAppSelector((state) => state.delta).userState.selectedLendingProtocol
-}
-
 export const useSelectLendingProtocol = () => {
 
   const dispatch = useAppDispatch()
@@ -117,12 +113,7 @@ export function useDeltaAssetState(): {
 export function useLiquidationThreshold(assets: SupportedAssets[], chainId: number, protocol = LendingProtocol.AAVE): number[] {
   const assetsFromState = useAppSelector((state) => state.delta.assets)
   return assets.map((a) => assetsFromState[a]).map((a) => {
-    if (protocol === LendingProtocol.AAVE)
-      return getLiquidationThreshold(a, chainId)
-    if (protocol === LendingProtocol.COMPOUND)
-      return getCompoundLiquidationThreshold(a, chainId)
-
-    return getCompoundV3LiquidationThreshold(a, chainId)
+    return getCompoundLiquidationThreshold(a, chainId)
   })
 }
 
@@ -132,16 +123,8 @@ export function useCompoundLiquidationThreshold(assets: SupportedAssets[], chain
 }
 
 
-const getLiquidationThreshold = (asset: Asset, chainId: number): number => {
-  return Number(asset?.aaveData[chainId]?.reserveData?.liquidationThreshold ?? 0) / 1e4
-}
-
 const getCompoundLiquidationThreshold = (asset: Asset, chainId: number): number => {
   return Number(formatEther(asset?.compoundData[chainId]?.reserveData?.collateralFactorMantissa ?? '0'))
-}
-
-const getCompoundV3LiquidationThreshold = (asset: Asset, chainId: number, baseAsset = SupportedAssets.USDC): number => {
-  return Number(formatEther(asset?.compoundV3Data[chainId]?.[baseAsset]?.reserveData.liquidateCollateralFactor ?? '0'))
 }
 
 export const useGetCompoundAllowance = (chainId: number, account: string, asset: SupportedAssets): string => {
@@ -200,15 +183,6 @@ export function useIsUserLoaded(protocol: LendingProtocol): boolean {
 }
 
 
-export function useAssetIds(chainId: number): { assetsLong: SupportedAssets[], assetsShort: SupportedAssets[] } {
-  const assets = Object.values(useAppSelector((state) => state.delta.assets))
-  const assetsLong = assets.filter(a => a.aaveData[chainId].userData.currentATokenBalance !== '0').map(a => a.id)
-  const assetsShort = assets.filter(a => a.aaveData[chainId].userData.currentStableDebt !== '0' || a.aaveData[chainId].userData.currentVariableDebt !== '0').map(a => a.id)
-
-  return { assetsLong, assetsShort }
-
-}
-
 export function useAsset(asset: SupportedAssets): Asset {
   return useAppSelector((state) => state.delta.assets[asset])
 }
@@ -218,7 +192,7 @@ export const useHasPosition = (chainId: number, asset: SupportedAssets): {
   hasDebt: boolean
 } => {
   const account = useWeb3React()
-  const protocol = useCurrentLendingProtocol()
+  const protocol = LendingProtocol.COMPOUND
   const assetData = useAppSelector((state) => state.delta.assets)[asset]
 
   const deltaAccount = useGetCurrentAccount(chainId)
@@ -238,17 +212,4 @@ export const useHasPosition = (chainId: number, asset: SupportedAssets): {
 
   return { hasCollateral: true, hasDebt: true }
 
-}
-
-
-export const useAaveTotals = () => {
-  return useAppSelector((state) => state.delta.userState.aaveTotals)
-}
-
-
-export const useCometIsAllowed = (chainId: number, asset: SupportedAssets, baseAsset: SupportedAssets): boolean => {
-  const isAllowed = useAppSelector((state) => state.delta.assets[asset]?.compoundV3Data?.[chainId]?.[baseAsset]?.userData?.isAllowed)
-  return Boolean(
-    isAllowed
-  )
 }

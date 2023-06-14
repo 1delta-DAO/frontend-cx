@@ -1,10 +1,9 @@
 import { AsyncThunk, createAsyncThunk } from '@reduxjs/toolkit'
 import {
-  getAaveOracleContract, getGhoOracleContract,
+  getAaveOracleContract,
 } from 'hooks/1delta/use1DeltaContract'
 import { SerializedBigNumber, SupportedAssets } from 'types/1delta'
 import { getAAVETokenAddresses } from 'hooks/1delta/addressGetter'
-import { SupportedChainId } from 'constants/chains'
 
 export interface AAVEAggregatorResponse {
   chainId: number
@@ -51,22 +50,6 @@ export const fetchAAVEAggregatorDataAsync: AsyncThunk<AAVEAggregatorResponse, AA
         })
       )
 
-      let ghoPriceData = {}
-      if (chainId === SupportedChainId.GOERLI)
-        try {
-          const ghoOracleContract = getGhoOracleContract(chainId)
-          const rawGhoData = await ghoOracleContract.GHO_PRICE()
-          ghoPriceData = {
-            [SupportedAssets.GHO]: {
-              price: rawGhoData?.toString(),
-              time
-            }
-          }
-        } catch (err) {
-          console.log(err)
-          ghoPriceData = {}
-        }
-
-      return { data: { ...result, ...ghoPriceData }, chainId }
+      return { data: result, chainId }
     }
   )
