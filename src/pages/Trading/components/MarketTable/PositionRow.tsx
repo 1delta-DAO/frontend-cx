@@ -23,6 +23,8 @@ import { Mode } from 'pages/Trading'
 import { TOKEN_SVGS } from 'constants/1delta'
 import { default as ovixStandalone } from 'assets/svg/logos/logo-0vix.svg'
 import { ExternalLinkIcon } from 'components/TokenSafety'
+import { ExtendedSlot } from 'state/slots/hooks'
+import { PNL_FLAG_ON } from './config'
 
 export const ValueText = styled.div<{ positive: boolean }>`
   font-size: 14px;
@@ -150,7 +152,7 @@ const AprText = styled.div<{ pos: boolean }>`
   `}
 `
 
-export interface PositionProps extends SlotData {
+export interface PositionProps extends ExtendedSlot {
   isMobile: boolean
 }
 
@@ -176,7 +178,7 @@ export default function PositionRow(props: PositionProps) {
       <AssetCellPro>
         <PairPosition pair={props.pair} isMobile={props.isMobile} leverage={props.leverage} direction={props.direction} />
       </AssetCellPro>
-      <PnLCellPro  >
+      {PNL_FLAG_ON && <PnLCellPro  >
         <SimpleCol>
           <PnLCell pos={props.pnl > 0}>
             {props.pnl > 0 ? '+' : ''}{props.pnl}%
@@ -185,32 +187,29 @@ export default function PositionRow(props: PositionProps) {
             {props.pnl > 0 ? '+' : ''}{formatSmallGeneralUSDValue(props.pnl * props.price)}
           </PnLCellUSD>
         </SimpleCol>
-      </PnLCellPro>
+      </PnLCellPro>}
       <PositionCellPro>
         <PositionText>
           {formatSmallUSDValue(props.size)}
         </PositionText>
       </PositionCellPro>
-      <PriceCellPro  >
+      {/* // PRICES */}
+      {PNL_FLAG_ON && <PriceCellPro  >
         <PriceText>
           {formatPriceString(String(props.price * 1.01))}
         </PriceText>
-      </PriceCellPro>
+      </PriceCellPro>}
       <PriceCellPro  >
         <PriceText>
           {formatPriceString(String(props.price))}
         </PriceText>
       </PriceCellPro>
       <PriceCellPro  >
-        {/* <SimpleCol> */}
-        {/* <LiqPriceText>
-            Health:  {(Math.round(props.healthFactor * 10) / 10).toLocaleString()}
-          </LiqPriceText> */}
         <LiqPriceText>
-          {formatPriceString(String(props.price * 0.8))}
+          {formatPriceString(String(props.liquidationPrice))}
         </LiqPriceText>
-        {/* </SimpleCol> */}
       </PriceCellPro>
+      {/* // REWARDS */}
       <RewardsHeaderPro hasFilter={false} isEditing={false}>
         <SimpleCol>
           <SimpelRow>
@@ -233,13 +232,14 @@ export default function PositionRow(props: PositionProps) {
           </SimpelRow>
         </SimpleCol>
       </RewardsHeaderPro>
+      {/* // TIME */}
       <TimeCellPro >
         <SimpleCol>
           <TimeText>
-            {new Date(Date.now()).toLocaleTimeString()}
+            {new Date(props.creationTime * 1000).toLocaleTimeString()}
           </TimeText>
           <DateText>
-            {td(new Date(Date.now()))}
+            {td(new Date(props.creationTime * 1000))}
           </DateText>
         </SimpleCol>
       </TimeCellPro>

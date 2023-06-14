@@ -86,6 +86,8 @@ import { fetchCompoundPublicDataAsync } from "state/1delta/compound/fetchCompoun
 import { useNextSlotAddress } from "hooks/useNexSlotAddress";
 import { createSlotCalldata } from "utils/calldata/compound/slotMethodCreator";
 import { simpleRpcProvider } from "utils/1delta/contractHelper";
+import { fetchUserSlots } from "state/slots/fetchUserSlots";
+import { useParsedSlots } from "state/slots/hooks";
 
 export enum Mode {
   LONG = 'Long',
@@ -431,6 +433,7 @@ export default function Professional() {
     // fetch wallet balances
     if (account) {
       dispatch(fetchUserBalances({ chainId, account, lendingProtocol: currentProtocol }))
+      dispatch(fetchUserSlots({ chainId, account }))
     }
     setTimeout(() => setRepeater((prevState) => prevState + 1), 10000)
   }, [repeater, deltaState?.userMeta?.[chainId]?.loaded, chainId])
@@ -587,7 +590,7 @@ export default function Professional() {
       return CurrencyAmount.fromRawAmount(debtCurrency, numberValue.toString())
     }
     catch (e) {
-      console.log("Error determining borrow amount:", e)
+      // console.log("Error determining borrow amount:", e)
       return undefined
     }
   },
@@ -792,28 +795,21 @@ export default function Professional() {
       return
     }
     // estimate gas 
-    let gasEstimate: any = undefined
-    try {
-      // const x = await slotFactoryContract.ADMIN()
-      // const x2 = await slotFactoryContract.getNextAddress(String(account))
-      // const x3 = await slotFactoryContract.getAddress(String(account), 0)
-      // const x4 = await slotFactoryContract.getImplemtationPovider()
-
-      // const x5 = 0
-      // console.log("xxxx", x, x2, x3, x4, x5, account)
-      gasEstimate = await estimate()
-    } catch (error) {
-      setSwapState({
-        attemptingTxn: false,
-        tradeToConfirm,
-        showConfirm,
-        swapErrorMessage: error.message,
-        txHash: undefined,
-      })
-    }
+    const gasEstimate: any = undefined
+    // try {
+    //   gasEstimate = await estimate()
+    // } catch (error) {
+    //   setSwapState({
+    //     attemptingTxn: false,
+    //     tradeToConfirm,
+    //     showConfirm,
+    //     swapErrorMessage: error.message,
+    //     txHash: undefined,
+    //   })
+    // }
     const opts = gasEstimate ? {
       gasLimit: calculateGasMargin(gasEstimate),
-      gasPrice: 1000000000
+      // gasPrice: 1000000000
     } : {}
 
     setSwapState({ attemptingTxn: true, tradeToConfirm, showConfirm, swapErrorMessage: undefined, txHash: undefined })
@@ -975,6 +971,8 @@ export default function Professional() {
   ]
   )
 
+  const slotData = useParsedSlots(chainId, account)
+  console.log("slotData", slotData)
   return (
     <Container >
       <ConfirmSwapModal
@@ -1273,7 +1271,7 @@ export default function Professional() {
           </ChartContainer>
           <PositionTable
             isMobile={isMobile}
-            assetData={account ? dummyData : []}
+            assetData={account ? slotData : []}
           />
         </CartAndTableContainer>
       </ContentContainer>

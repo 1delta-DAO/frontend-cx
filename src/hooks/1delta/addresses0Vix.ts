@@ -64,7 +64,7 @@ export const oVixAddresses: AddressDictionary = {
   CompoundLens: {
     [SupportedChainId.POLYGON_MUMBAI]: '0xB07222F11819CEBf994dcfb28Edd4B2Fc77EA18b',
     [SupportedChainId.POLYGON]: '0x38294502a05D10cf9266964443212e8D535bd3E1',
-    [SupportedChainId.POLYGON_ZK_EVM]: '0xf9438f2b1c63D8dAC24311256F5483D7f7575863'
+    [SupportedChainId.POLYGON_ZK_EVM]: '0x830d7Fb34Cf45BD0F9A5A8f4D899998c692541e2'
   },
   oMAI: {
     [SupportedChainId.POLYGON]: '0xC57E5e261d49Af3026446de3eC381172f17bB799',

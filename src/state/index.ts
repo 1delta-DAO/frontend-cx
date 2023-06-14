@@ -16,6 +16,7 @@ import { routingApi } from './routing/slice'
 import swap from './swap/reducer'
 import transactions from './transactions/reducer'
 import user from './user/reducer'
+import slots from './slots/reducer'
 import wallets from './wallets/reducer'
 import chart from './chart/reducer'
 import marginTradeSelection from './marginTradeSelection/reducer'
@@ -44,6 +45,7 @@ const store = configureStore({
     multicall: multicall.reducer,
     lists,
     logs,
+    slots,
     [routingApi.reducerPath]: routingApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>

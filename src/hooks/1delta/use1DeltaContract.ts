@@ -35,7 +35,7 @@ import { compoundAddresses } from './addressesCompound'
 import { oVixAddresses } from './addresses0Vix'
 import { ETHEREUM_CHAINS, POLYGON_CHAINS } from 'constants/1delta'
 import { useWeb3React } from '@web3-react/core'
-import { AAVEPoolV3, Comet, MarginTrader, MoneyMarket, SlotFactory, Sweeper } from 'abis/types'
+import { AAVEPoolV3, Comet, MarginTrader, MoneyMarket, SlotFactory, SlotLens, Sweeper } from 'abis/types'
 import { GhoOracle } from 'abis/types/GhoOracle'
 import { AAVEProtocolDataProvider } from 'abis/types/AAVEProtocolDataProvider'
 import { CometLens } from 'abis/types/CometLens'
@@ -45,6 +45,8 @@ import { LendingProtocol } from 'state/1delta/actions'
 import { useMemo } from 'react'
 import { CometExt } from 'abis/types/CometExt'
 import SLOT_FACTORY_ABI from 'abis/SlotFactory.json'
+import SLOT_LENS_ABI from 'abis/SlotLens.json'
+
 
 const defaultAddress = '0xBA4e9BbEa023AcaE6b9De0322A5b274414e4705C'
 
@@ -491,4 +493,14 @@ export function useGetSlotFactoryContract(chainId: number): SlotFactory {
     provider ?? RPC_PROVIDERS[chainId as SupportedChainId],
     account
   ) as SlotFactory
+}
+
+
+export function getSlotLensContract(chainId: number, account?: string): SlotLens & Contract {
+  return getContract(
+    oVixAddresses.CompoundLens[chainId] ?? defaultAddress,
+    SLOT_LENS_ABI,
+    RPC_PROVIDERS[chainId as SupportedChainId],
+    account
+  ) as SlotLens
 }

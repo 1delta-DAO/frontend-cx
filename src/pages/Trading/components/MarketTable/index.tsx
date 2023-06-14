@@ -29,6 +29,8 @@ import {
   PositionHeaderPro
 } from 'components/Styles/tableStylesProfessional'
 import { AaveInterestMode } from 'types/1delta'
+import { ExtendedSlot } from 'state/slots/hooks'
+import { PNL_FLAG_ON } from './config'
 
 const Table = styled.table`
   border-collapse: collapse;
@@ -72,7 +74,7 @@ export interface MappedSwapAmounts {
 
 interface PositionTableProps {
   isMobile: boolean
-  assetData: SlotData[]
+  assetData: ExtendedSlot[]
 }
 
 export default function PositionTable({
@@ -131,7 +133,7 @@ export default function PositionTable({
                 Symbol
               </StyledText>
             </AssetHeaderPro>
-            <PnLHeaderPro hasFilter onClick={handleUserBorrowFilter}>
+            {PNL_FLAG_ON && <PnLHeaderPro hasFilter onClick={handleUserBorrowFilter}>
               <SimpleRow>
                 PnL
                 {filterStateChevrons.filter === FilterActive.USER && (
@@ -140,13 +142,13 @@ export default function PositionTable({
                   </ChevronContainer>
                 )}
               </SimpleRow>
-            </PnLHeaderPro>
+            </PnLHeaderPro>}
             <PositionHeaderPro hasFilter>
               Size
             </PositionHeaderPro>
-            <PriceHeaderPro hasFilter>
+            {PNL_FLAG_ON && <PriceHeaderPro hasFilter>
               Entry
-            </PriceHeaderPro>
+            </PriceHeaderPro>}
             <PriceHeaderPro hasFilter>
               Market
             </PriceHeaderPro>
@@ -166,8 +168,7 @@ export default function PositionTable({
         </TableHeaderPro>
         <TableBody>
           {
-            assetData
-              // .sort((a, b) => filterState.indexOf(a.pair[0]) - filterState.indexOf(b.assetId))
+            assetData.filter(d => d.closeTime === 0)
               .map((dat, i) => <PositionRow isMobile={isMobile} {...dat} key={i} />)
           }
         </TableBody>
