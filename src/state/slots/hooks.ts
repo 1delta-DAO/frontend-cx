@@ -78,7 +78,7 @@ export const useParsedSlots = (chainId?: number, account?: string): ExtendedSlot
         dUSD,
         !s.collateralSymbol.toUpperCase().includes('USD')
       ),
-      pair: [s.collateralSymbol as SupportedAssets, s.debtSymbol as SupportedAssets],
+      pair: mode === Mode.LONG ? [s.collateralSymbol as SupportedAssets, s.debtSymbol as SupportedAssets] : [s.debtSymbol as SupportedAssets, s.collateralSymbol as SupportedAssets],
       leverage: mode === Mode.LONG ? cUSD / size : dUSD / size,
       size,
       rewardApr: 0.20,
