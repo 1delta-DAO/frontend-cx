@@ -761,21 +761,20 @@ export default function Professional() {
       return
     }
     // estimate gas 
-    const gasEstimate: any = undefined
-    // try {
-    //   gasEstimate = await estimate()
-    // } catch (error) {
-    //   setSwapState({
-    //     attemptingTxn: false,
-    //     tradeToConfirm,
-    //     showConfirm,
-    //     swapErrorMessage: error.message,
-    //     txHash: undefined,
-    //   })
-    // }
+    let gasEstimate: any = undefined
+    try {
+      gasEstimate = await estimate()
+    } catch (error) {
+      setSwapState({
+        attemptingTxn: false,
+        tradeToConfirm,
+        showConfirm,
+        swapErrorMessage: error.message,
+        txHash: undefined,
+      })
+    }
     const opts = gasEstimate ? {
       gasLimit: calculateGasMargin(gasEstimate),
-      // gasPrice: 1000000000
     } : {}
 
     setSwapState({ attemptingTxn: true, tradeToConfirm, showConfirm, swapErrorMessage: undefined, txHash: undefined })

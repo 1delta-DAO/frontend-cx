@@ -79,7 +79,7 @@ export const useParsedSlots = (chainId?: number, account?: string): ExtendedSlot
         !s.collateralSymbol.toUpperCase().includes('USD')
       ),
       pair: [s.collateralSymbol as SupportedAssets, s.debtSymbol as SupportedAssets],
-      leverage: cUSD / size,
+      leverage: mode === Mode.LONG ? cUSD / size : dUSD / size,
       size,
       rewardApr: 0.20,
       supplyApr: calculateRateToNumber(
@@ -111,5 +111,5 @@ const calculateLiqPrice = (cf: number, c: number, d: number, cUSD: number, dUSD:
   if (collateral) {
     return dUSD / c / cf
   }
-  return c * cf / cUSD
+  return cUSD * cf / d
 }
