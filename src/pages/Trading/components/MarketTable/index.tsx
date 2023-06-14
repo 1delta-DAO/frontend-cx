@@ -74,11 +74,15 @@ export interface MappedSwapAmounts {
 interface PositionTableProps {
   isMobile: boolean
   assetData: ExtendedSlot[]
+  setShowCloseModal: () => void
+  setSelectedSlot: (slot: ExtendedSlot) => void
 }
 
 export default function PositionTable({
   assetData,
-  isMobile
+  isMobile,
+  setShowCloseModal,
+  setSelectedSlot,
 }: PositionTableProps) {
   const { account, chainId } = useChainIdAndAccount()
 
@@ -167,7 +171,15 @@ export default function PositionTable({
         <TableBody>
           {
             assetData.filter(d => d.closeTime === 0)
-              .map((dat, i) => <PositionRow isMobile={isMobile} {...dat} key={i} />)
+              .map((dat, i) => <PositionRow
+                isMobile={isMobile}
+                {...dat}
+                key={i}
+                selectSlot={() => {
+                  setSelectedSlot(dat)
+                  setShowCloseModal()
+                }}
+              />)
           }
         </TableBody>
       </Table>

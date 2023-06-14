@@ -42,7 +42,7 @@ export default function CloseModal({
   onDismiss,
   isOpen,
 }: {
-  slot: ExtendedSlot
+  slot?: ExtendedSlot
   isOpen: boolean
   attemptingTxn: boolean
   txHash: string | undefined
@@ -51,6 +51,105 @@ export default function CloseModal({
 }) {
   const { account } = useWeb3React()
 
+  // shouldLogModalCloseEvent lets the child SwapModalHeader component know when modal has been closed
+  // and an event triggered by modal closing should be logged.
+  const [shouldLogModalCloseEvent, setShouldLogModalCloseEvent] = useState(false)
+  const [acceptRisk, setAcceptRisk] = useState(false)
+  const [lastTxnHashLogged, setLastTxnHashLogged] = useState<string | null>(null)
+
+  const chainId = useChainId()
+  const [tokenInId, tokenOutId] = [
+    assetToId(slot?.collateralSymbol as SupportedAssets, chainId, LendingProtocol.COMPOUND),
+    assetToId(slot?.debtSymbol as SupportedAssets, chainId, LendingProtocol.COMPOUND)
+  ]
+
+  const tokenIn = useCurrency(tokenInId, LendingProtocol.COMPOUND)
+  const tokenOut = useCurrency(tokenOutId, LendingProtocol.COMPOUND)
+  const outAmount = tokenOut && CurrencyAmount.fromRawAmount(tokenOut, slot?.debtBalance ?? '0')
+
+  const slotContract = useGetSlotContract(chainId, slot?.slot)
+
+  const {
+    trade: { state: tradeStateAlgebra, trade: tradeAlgebra },
+    allowedSlippage,
+    parsedAmount: parsedAmountAlgebra,
+    inputError: swapInputErrorAlgebra,
+  } = useDerivedSwapInfoMarginAlgebraClose(
+    outAmount,
+    tokenIn,
+  )
+
+  const [parsedAmount, trade] = useMemo(() => {
+
+    const currTrade = tradeAlgebra
+    const parsedAmount = parsedAmountAlgebra
+    if (!currTrade) {
+      if (LAST_VALID_TRADE_CLOSE && LAST_VALID_AMOUNT_OUT && parsedAmount && LAST_VALID_AMOUNT_OUT?.toFixed() === outAmount?.toFixed())
+        return [parsedAmount, LAST_VALID_TRADE_CLOSE]
+      else return [parsedAmount, undefined]
+    } else {
+      LAST_VALID_TRADE_CLOSE = currTrade
+      LAST_VALID_AMOUNT_OUT = outAmount
+      return [parsedAmount, currTrade]
+    }
+  }, [tradeAlgebra, outAmount])
+
+
+  const onModalDismiss = useCallback(() => {
+    if (isOpen) setShouldLogModalCloseEvent(true)
+    onDismiss()
+  }, [isOpen, onDismiss])
+
+  const modalHeader = useCallback(() => {
+    return trade ? (
+      <SwapModalHeader
+        trade={trade}
+        shouldLogModalCloseEvent={shouldLogModalCloseEvent}
+        setShouldLogModalCloseEvent={setShouldLogModalCloseEvent}
+        allowedSlippage={allowedSlippage}
+        recipient={account ?? ''}
+        showAcceptChanges={false}
+        onAcceptChanges={() => null}
+      />
+    ) : null
+  }, [allowedSlippage, account, trade, shouldLogModalCloseEvent])
+
+  // text to show while loading
+  const pendingText = (
+    <Trans>
+      Swapping {trade?.inputAmount?.toSignificant(6)} {trade?.inputAmount?.currency?.symbol} for{' '}
+      {trade?.outputAmount?.toSignificant(6)} {trade?.outputAmount?.currency?.symbol}
+    </Trans>
+  )
+
+  const confirmationContent = useCallback(
+    () => <ConfirmationModalContent
+      title={<Trans>Confirm Swap</Trans>}
+      onDismiss={onModalDismiss}
+      topContent={modalHeader}
+      bottomContent={() => null}
+    />
+    ,
+    [onModalDismiss, modalHeader]
+  )
+
+  useEffect(() => {
+    if (!attemptingTxn && isOpen && txHash && trade && txHash !== lastTxnHashLogged) {
+      setLastTxnHashLogged(txHash)
+    }
+  }, [attemptingTxn, isOpen, txHash, trade, lastTxnHashLogged])
+
+  return (
+    <TransactionConfirmationModal
+      isOpen={isOpen}
+      onDismiss={onModalDismiss}
+      attemptingTxn={attemptingTxn}
+      hash={txHash}
+      content={confirmationContent}
+      pendingText={pendingText}
+      currencyToAdd={trade?.outputAmount.currency}
+    />
+  )
 }
 
 export const RowFlat = styled.div`
@@ -78,13 +177,6 @@ export const Col = styled.div`
   align-items: center;
 `
 
-export const ColInner = styled.div`
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-`
 
 const StyledButton = styled(ButtonLight)`
   border: 1px solid ${({ theme }) => opacify(24, theme.deprecated_error)};

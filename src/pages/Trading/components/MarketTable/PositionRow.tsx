@@ -214,6 +214,7 @@ const AprText = styled.div<{ pos: boolean }>`
 
 export interface PositionProps extends ExtendedSlot {
   isMobile: boolean
+  selectSlot: () => void
 }
 
 export default function PositionRow(props: PositionProps) {
@@ -308,7 +309,7 @@ export default function PositionRow(props: PositionProps) {
       </TimeCellPro>
       <CheckboxCellPro>
         <LinkOutContainer>
-          <CloseButton>
+          <CloseButton onClick={props.selectSlot}>
             Close
           </CloseButton>
           <ExplorerView address={props.slot} chainId={chainId} />

@@ -77,10 +77,10 @@ export function getSlotLensContract(chainId: number, account?: string): SlotLens
   ) as SlotLens
 }
 
-export function useGetSlotContract(chainId: number, slotAddress: string): DeltaSlot {
+export function useGetSlotContract(chainId: number, slotAddress?: string): DeltaSlot {
   const { provider, account } = useWeb3React()
   return getContract(
-    slotAddress,
+    slotAddress ?? defaultAddress,
     SLOT_ABI,
     provider ?? RPC_PROVIDERS[chainId as SupportedChainId],
     account

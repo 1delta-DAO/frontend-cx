@@ -83,8 +83,9 @@ import { fetchCompoundPublicDataAsync } from "state/1delta/compound/fetchCompoun
 import { useNextSlotAddress } from "hooks/useNexSlotAddress";
 import { createSlotCalldata } from "utils/calldata/compound/slotMethodCreator";
 import { fetchUserSlots } from "state/slots/fetchUserSlots";
-import { useParsedSlots } from "state/slots/hooks";
+import { ExtendedSlot, useParsedSlots } from "state/slots/hooks";
 import useCurrencyBalance from "lib/hooks/useCurrencyBalance";
+import CloseModal from "components/swap/CloseModal";
 
 export enum Mode {
   LONG = 'Long',
@@ -916,6 +917,9 @@ export default function Professional() {
 
   const slotData = useParsedSlots(chainId, account)
 
+  const [showCloseModal, setShowCloseModal] = useState(false)
+  const [selectedSlot, setSelectedSlot] = useState<ExtendedSlot | undefined>(undefined)
+
   return (
     <Container >
       <ConfirmSwapModal
@@ -935,6 +939,14 @@ export default function Professional() {
         onDismiss={handleConfirmDismiss}
         fiatValueInput={fiatValueInput}
         fiatValueOutput={fiatValueOutput}
+      />
+      <CloseModal
+        slot={selectedSlot}
+        isOpen={showCloseModal}
+        attemptingTxn={attemptingTxn}
+        txHash={txHash}
+        onConfirm={handleSwap}
+        onDismiss={() => setShowCloseModal(false)}
       />
       <ContentContainer>
         <SwapPanel>
@@ -1219,6 +1231,8 @@ export default function Professional() {
             />
           </ChartContainer>
           <PositionTable
+            setShowCloseModal={() => setShowCloseModal(true)}
+            setSelectedSlot={setSelectedSlot}
             isMobile={isMobile}
             assetData={account ? slotData : []}
           />
