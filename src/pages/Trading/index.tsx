@@ -814,6 +814,8 @@ export default function Professional() {
             //         expectedInputCurrencyAmountRaw: trade.inputAmount.quotient.toString(),
             //       }
             //   )
+
+            dispatch(fetchUserSlots({ chainId, account }))
           })
           .catch((error) => {
             setSwapState({

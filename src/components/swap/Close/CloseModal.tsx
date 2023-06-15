@@ -1,24 +1,11 @@
 import { Trans } from '@lingui/macro'
 import { Trade } from '@uniswap/router-sdk'
-import { Currency, CurrencyAmount, Percent, Token, TradeType } from '@uniswap/sdk-core'
-import { formatPercentInBasisPointsNumber, formatToDecimal, getTokenAddress } from 'analytics/utils'
-import { ButtonLight, ButtonYellow } from 'components/Button'
-import { AutoColumn } from 'components/Column'
-import Row from 'components/Row'
-import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
-import { Text } from 'rebass'
-import { InterfaceTrade } from 'state/routing/types'
-import { computeRealizedPriceImpact } from 'utils/prices'
-import { tradeMeaningfullyDiffers } from 'utils/tradeMeaningFullyDiffer'
+import { Currency, CurrencyAmount, TradeType } from '@uniswap/sdk-core'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components/macro'
-import { opacify } from 'theme/utils'
 import TransactionConfirmationModal, {
   ConfirmationModalContent,
-  TransactionErrorContent,
 } from '../../TransactionConfirmationModal'
-import SwapModalFooter from '../SwapModalFooter'
-import SwapModalHeader from '../SwapModalHeader'
-import { WarningIcon } from 'nft/components/icons'
 import { ExtendedSlot } from 'state/slots/hooks'
 import { useDerivedSwapInfoMarginAlgebraClose } from 'state/professionalTradeSelection/tradeHooks'
 import { assetToId, TradeAction } from 'pages/Trading'
@@ -37,6 +24,8 @@ import { useIsMobile } from 'hooks/useIsMobile'
 import { createSlotCalldata } from 'utils/calldata/compound/slotMethodCreator'
 import { calculateGasMargin } from 'utils/calculateGasMargin'
 import { parseMessage } from 'constants/errors'
+import { fetchUserSlots } from 'state/slots/fetchUserSlots'
+import { useAppDispatch } from 'state/hooks'
 
 const HeaderLabel = styled.div`
   color: ${({ theme }) => theme.deprecated_text1};
@@ -168,6 +157,8 @@ export default function CloseModal({
     txHash: undefined,
   })
 
+  const dispatch = useAppDispatch()
+
   const onClose = useCallback(async () => {
     if (!trade) return null
     const { estimate, call } = createSlotCalldata(
@@ -212,6 +203,8 @@ export default function CloseModal({
               swapErrorMessage: undefined,
               txHash: txResponse.hash,
             })
+
+            dispatch(fetchUserSlots({ chainId, account }))
 
           }
           )
