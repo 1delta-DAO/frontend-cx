@@ -23,6 +23,7 @@ import { replaceProfessionalState, selectProfessionalCurrency, setRecipient, swi
 import { ProfessionalTradeSelection } from './reducer'
 import { useClientSideV3Professional } from 'hooks/professional/useClientSideV3Trade'
 import { useAlgebraClientSideV3Margin } from 'hooks/professional/algebraMargin/useClientSideV3Trade'
+import { useAlgebraClientSideV3Close } from 'hooks/professional/algebraClose/useClientSideV3Trade'
 
 export function useProfessionalState(): AppState['professionalTradeSelection'] {
   return useAppSelector((state) => state.professionalTradeSelection)
@@ -493,7 +494,7 @@ export function useDerivedSwapInfoMarginAlgebraClose(
   const isExactIn = false
   const parsedAmount = outAmount
 
-  const tradeRaw = useAlgebraClientSideV3Margin(
+  const tradeRaw = useAlgebraClientSideV3Close(
     isExactIn ? TradeType.EXACT_INPUT : TradeType.EXACT_OUTPUT,
     parsedAmount,
     (isExactIn ? outputCurrency : inputCurrency) ?? undefined
