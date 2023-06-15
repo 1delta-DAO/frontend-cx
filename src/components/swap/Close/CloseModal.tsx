@@ -217,11 +217,11 @@ export default function CloseModal({
                   direction: slot.direction,
                   tradeAction: TradeAction.CLOSE,
                   collateralCurrencyId: currencyId(trade.inputAmount.currency),
-                  debtCurrencyId: trade.outputAmount.quotient.toString(),
+                  debtCurrencyId: trade.outputAmount.toExact(),
                   providedCurrencyId: currencyId(trade.inputAmount.currency),
                   slot: '',
-                  collateralAmountRaw: trade.outputAmount.quotient.toString(),
-                  debtAmountRaw: trade.inputAmount.quotient.toString(),
+                  collateralAmountRaw: trade.outputAmount.toExact(),
+                  debtAmountRaw: trade.inputAmount.toExact(),
                   providedAmountRaw: String(
                     Number(
                       toNumber(slot.collateralBalance, slot.collateralDecimals)) -

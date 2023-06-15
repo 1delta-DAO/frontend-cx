@@ -4,6 +4,7 @@ import { formatEther } from 'ethers/lib/utils'
 import JSBI from 'jsbi'
 import { Mode, TradeAction } from 'pages/Trading'
 import { MarginTradeType } from 'types/1delta'
+import { formatSmallGeneralValueWithDecs, formatSmallValue } from 'utils/tableUtils/format'
 
 import { nativeOnChain } from '../../constants/tokens'
 import { useCurrency, useToken } from '../../hooks/Tokens'
@@ -56,7 +57,22 @@ function FormattedCurrencyAmountManaged({
   ) : null
 }
 
+function ParseCurrencyAmount({
+  rawAmount,
+  currencyId,
+  sigFigs = 6,
+}: {
+  rawAmount: string
+  currencyId: string
+  sigFigs: number
+}) {
+  const currency = useCurrency(currencyId)
+  return currency ? (
+    <>
+      {formatSmallGeneralValueWithDecs(Number(rawAmount), sigFigs)} {currency.symbol}
+    </>) : null
 
+}
 
 function ApprovalSummary({ info }: { info: ApproveTransactionInfo }) {
   const token = useToken(info.tokenAddress)
@@ -76,7 +92,7 @@ function LeveragedPositionSummary({
     <>
       {action === TradeAction.OPEN && <>
         Deposit {
-          <FormattedCurrencyAmountManaged
+          <ParseCurrencyAmount
             rawAmount={info.providedAmountRaw}
             currencyId={info.providedCurrencyId}
             sigFigs={6}
@@ -85,21 +101,21 @@ function LeveragedPositionSummary({
       </>}
       <Trans>
         {`${action} ${info.direction} `}{' '}
-        <FormattedCurrencyAmountManaged
+        <ParseCurrencyAmount
           rawAmount={info.collateralAmountRaw}
           currencyId={info.collateralCurrencyId}
           sigFigs={6}
         />{' '}
         {'/ '}
-        <FormattedCurrencyAmountManaged
+        <ParseCurrencyAmount
           rawAmount={info.debtAmountRaw}
           currencyId={info.debtCurrencyId}
           sigFigs={6}
         />{' '}
       </Trans>
       {action === TradeAction.CLOSE && Number(info.providedAmountRaw) > 0 && <>
-        And Withdraw {
-          <FormattedCurrencyAmountManaged
+        and withdraw {
+          <ParseCurrencyAmount
             rawAmount={info.providedAmountRaw}
             currencyId={info.providedCurrencyId}
             sigFigs={6}

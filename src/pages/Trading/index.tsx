@@ -800,9 +800,9 @@ export default function Professional() {
                   debtCurrencyId: currencyId(trade.inputAmount.currency),
                   providedCurrencyId: currencyId(parsedAmountIn.currency),
                   slot: '',
-                  collateralAmountRaw: trade.outputAmount.quotient.toString(),
-                  debtAmountRaw: trade.inputAmount.quotient.toString(),
-                  providedAmountRaw: parsedAmountIn.quotient.toString(),
+                  collateralAmountRaw: trade.outputAmount.toExact(),
+                  debtAmountRaw: trade.inputAmount.toExact(),
+                  providedAmountRaw: parsedAmountIn.toExact(),
                 }
               )
 

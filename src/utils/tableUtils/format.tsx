@@ -60,6 +60,19 @@ export const formatSmallGeneralValue = (amount?: number, mobile = false) => {
   }) : amount.toLocaleString()
 }
 
+
+export const formatSmallGeneralValueWithDecs = (amount?: number, decs = 4) => {
+  if (!amount) return '-'
+  const n = Math.abs(Number(amount))
+  if (n < 0.0001) return '~0'
+  if (n < 0.001) return '~0.001'
+  if (n < 0.005) return '~0.005'
+  return amount.toLocaleString('en-EN', {
+    minimumFractionDigits: decs,
+    maximumFractionDigits: decs,
+  })
+}
+
 export const formatSmallUSDValue = (amount?: number) => {
   if (!amount) return '-'
   const n = Number(amount)
