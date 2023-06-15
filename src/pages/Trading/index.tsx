@@ -1243,6 +1243,7 @@ export default function Professional() {
               interval={'30'}
               hide_volume={true}
               style={'10'}
+              hide_legend={true}
               withdateranges={true}
               save_image={false}
               backgroundColor={'#000000'}
