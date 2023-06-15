@@ -887,11 +887,15 @@ export default function Professional() {
 
       if (currencyUserBalance && parsedAmountIn && currencyUserBalance.lessThan(parsedAmountIn))
         return ['Insufficient Balance', true]
+
+      if (riksParamsChange?.healthFactor && riksParamsChange.healthFactor <= 1)
+        return ['Health Factor Too Low', true]
       return ['Open Position', false]
     }
 
     return ['Connect', true]
   }, [
+    riksParamsChange,
     routeIsLoading,
     routeIsSyncing,
     priceImpactTooHigh,
