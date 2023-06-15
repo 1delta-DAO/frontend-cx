@@ -182,6 +182,13 @@ export default function CloseModal({
       // estimate gas 
       let gasEstimate: any = undefined
       try {
+        setSwapState({
+          attemptingTxn: true,
+          tradeToConfirm,
+          showConfirm,
+          swapErrorMessage: undefined,
+          txHash: undefined,
+        })
         gasEstimate = await estimate()
       } catch (error) {
         setSwapState({
@@ -227,13 +234,21 @@ export default function CloseModal({
   const confirmationContent = useCallback(
     () => <ConfirmationModalContent
       title={Boolean(trade) ? <HeaderLabel>Close your Position
-        {slot && <PairPositionRow pair={slot.pair} direction={slot?.direction} isMobile={isMobile} leverage={slot.leverage} />}
+        {slot && <PairPositionRow
+          pair={slot.pair}
+          direction={slot?.direction}
+          isMobile={isMobile}
+          leverage={slot.leverage}
+        />}
       </HeaderLabel> : <>{LoaderDots()}</>}
       onDismiss={onModalDismiss}
       topContent={modalHeader}
-      bottomContent={() => <SlotSummary slot={slot} onClose={onClose} buttonDisabled={!Boolean(trade)} />}
-    />
-    ,
+      bottomContent={() => <SlotSummary
+        slot={slot}
+        onClose={onClose}
+        buttonDisabled={!Boolean(trade)}
+      />}
+    />,
     [onModalDismiss, modalHeader]
   )
 

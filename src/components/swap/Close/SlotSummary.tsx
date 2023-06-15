@@ -103,7 +103,7 @@ const Logo = styled.img`
 export default function SlotSummary({
   slot,
   onClose,
-  buttonDisabled
+  buttonDisabled,
 }: {
   slot?: ExtendedSlot,
   onClose: () => void

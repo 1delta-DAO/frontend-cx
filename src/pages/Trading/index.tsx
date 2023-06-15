@@ -753,6 +753,13 @@ export default function Professional() {
     // estimate gas 
     let gasEstimate: any = undefined
     try {
+      setSwapState({
+        attemptingTxn: true,
+        tradeToConfirm,
+        showConfirm,
+        swapErrorMessage: undefined,
+        txHash: undefined,
+      })
       gasEstimate = await estimate()
     } catch (error) {
       setSwapState({
@@ -882,6 +889,8 @@ export default function Professional() {
     if (hasNoImplementation) return ['Coming Soon!', true]
 
     if (Boolean(account)) {
+      if (!parsedAmountIn || parsedAmountIn?.quotient.toString() === '0')
+        return ['Open Position', true]
       return ['Open Position', false]
     }
 
@@ -891,7 +900,8 @@ export default function Professional() {
     routeIsSyncing,
     priceImpactTooHigh,
     priceImpactSeverity,
-    account
+    account,
+    parsedAmountIn
   ])
 
   const handlePairSwap = useCallback(() => handleSelectPair([pair[1], pair[0]]), [pair])
