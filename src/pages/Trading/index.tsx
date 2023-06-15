@@ -86,6 +86,8 @@ import { fetchUserSlots } from "state/slots/fetchUserSlots";
 import { ExtendedSlot, useParsedSlots } from "state/slots/hooks";
 import useCurrencyBalance from "lib/hooks/useCurrencyBalance";
 import CloseModal from "components/swap/Close/CloseModal";
+import { currencyId } from "utils/currencyId";
+import { TransactionType } from "state/transactions/types";
 
 export enum Mode {
   LONG = 'Long',
@@ -787,33 +789,22 @@ export default function Professional() {
               txHash: txResponse.hash,
             })
 
-            // if (trade)
-            //   addTransaction(
-            //     txResponse,
-            //     trade.tradeType === TradeType.EXACT_INPUT
-            //       ? {
-            //         protocol: currentProtocol,
-            //         type: TransactionType.SINGLE_SIDE,
-            //         subType: side,
-            //         tradeType: TradeType.EXACT_INPUT,
-            //         inputCurrencyId: currencyId(trade.inputAmount.currency),
-            //         inputCurrencyAmountRaw: trade.inputAmount.quotient.toString(),
-            //         expectedOutputCurrencyAmountRaw: trade.outputAmount.quotient.toString(),
-            //         outputCurrencyId: currencyId(trade.outputAmount.currency),
-            //         minimumOutputCurrencyAmountRaw: trade.minimumAmountOut(allowedSlippage).quotient.toString(),
-            //       }
-            //       : {
-            //         protocol: currentProtocol,
-            //         type: TransactionType.SINGLE_SIDE,
-            //         subType: side,
-            //         tradeType: TradeType.EXACT_OUTPUT,
-            //         inputCurrencyId: currencyId(trade.inputAmount.currency),
-            //         maximumInputCurrencyAmountRaw: trade.maximumAmountIn(allowedSlippage).quotient.toString(),
-            //         outputCurrencyId: currencyId(trade.outputAmount.currency),
-            //         outputCurrencyAmountRaw: trade.outputAmount.quotient.toString(),
-            //         expectedInputCurrencyAmountRaw: trade.inputAmount.quotient.toString(),
-            //       }
-            //   )
+            if (trade && parsedAmountIn)
+              addTransaction(
+                txResponse,
+                {
+                  type: TransactionType.LEVERAGED_POSITION,
+                  direction: selectedMode,
+                  tradeAction: TradeAction.OPEN,
+                  collateralCurrencyId: currencyId(trade.outputAmount.currency),
+                  debtCurrencyId: currencyId(trade.inputAmount.currency),
+                  providedCurrencyId: currencyId(parsedAmountIn.currency),
+                  slot: '',
+                  collateralAmountRaw: trade.outputAmount.quotient.toString(),
+                  debtAmountRaw: trade.inputAmount.quotient.toString(),
+                  providedAmountRaw: parsedAmountIn.quotient.toString(),
+                }
+              )
 
             dispatch(fetchUserSlots({ chainId, account }))
           })
@@ -893,6 +884,9 @@ export default function Professional() {
     if (Boolean(account)) {
       if (!parsedAmountIn || parsedAmountIn?.quotient.toString() === '0')
         return ['Open Position', true]
+
+      if (currencyUserBalance && parsedAmountIn && currencyUserBalance.lessThan(parsedAmountIn))
+        return ['Insufficient Balance', true]
       return ['Open Position', false]
     }
 
@@ -1095,6 +1089,7 @@ export default function Professional() {
                     onClick={handleApprove}
                     disabled={approveTokenButtonDisabled}
                     width="100%"
+                    height='40px'
                     altDisabledStyle={approvalState === ApprovalState.PENDING} // show solid button while waiting
                     confirmed={
                       approvalState === ApprovalState.APPROVED
@@ -1121,7 +1116,7 @@ export default function Professional() {
                           text={
                             <Trans>
                               You must give the 1delta smart contracts permission to use your{' '}
-                              {parsedAmountIn?.currency.symbol}. You only have to do this once per token.
+                              {parsedAmountIn?.currency.symbol}.
                             </Trans>
                           }
                         >
@@ -1180,6 +1175,7 @@ export default function Professional() {
                   routeIsSyncing || routeIsLoading ||
                   buttonDisabled
                 }
+                height='40px'
               >
                 <Text fontSize={16} fontWeight={500}>
                   {validatedSwapText}

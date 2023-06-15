@@ -62,16 +62,12 @@ const getPriceUpdateBasisPoints = (
 
 export default function CloseModalHeader({
   trade,
-  shouldLogModalCloseEvent,
-  setShouldLogModalCloseEvent,
   allowedSlippage,
   recipient,
   showAcceptChanges,
   onAcceptChanges,
 }: {
   trade: InterfaceTrade<Currency, Currency, TradeType>
-  shouldLogModalCloseEvent: boolean
-  setShouldLogModalCloseEvent: (shouldLog: boolean) => void
   allowedSlippage: Percent
   recipient: string | null
   showAcceptChanges: boolean
@@ -94,11 +90,6 @@ export default function CloseModalHeader({
       setLastExecutionPrice(trade.executionPrice)
     }
   }, [lastExecutionPrice, setLastExecutionPrice, trade.executionPrice])
-
-  useEffect(() => {
-    if (shouldLogModalCloseEvent && showAcceptChanges)
-      setShouldLogModalCloseEvent(false)
-  }, [shouldLogModalCloseEvent, showAcceptChanges, setShouldLogModalCloseEvent, trade, priceUpdate])
 
   return (
     <AutoColumn gap={'4px'} style={{ marginTop: '1rem' }}>

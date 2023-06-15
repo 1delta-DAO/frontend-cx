@@ -89,12 +89,6 @@ export default function RiskEstimate({
       <HFBanner safe={healthFactor > 1.05} >
         {healthFactor > 1.05 ? 'Safe' : 'Risky'}
       </HFBanner>
-      {/* {ltv && (
-        <ThemedText.DeprecatedDarkGray>
-          <Trans>(
-            LTV: {formatPercent(ltv, 2)})</Trans>
-        </ThemedText.DeprecatedDarkGray>
-      )} */}
     </StyledPriceContainer>
   )
 }

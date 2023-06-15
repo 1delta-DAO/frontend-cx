@@ -1,6 +1,7 @@
 import { UNI_ADDRESS } from 'constants/addresses'
+import { TradeAction } from 'pages/Trading'
 import { useChainId } from 'state/globalNetwork/hooks'
-import { TransactionInfo, TransactionType } from 'state/transactions/types'
+import { ApproveTransactionInfo, TransactionInfo, TransactionType } from 'state/transactions/types'
 import styled, { css } from 'styled-components/macro'
 
 import { nativeOnChain } from '../../constants/tokens'
@@ -37,20 +38,15 @@ interface CurrencyPair {
 
 const getCurrency = ({ info, chainId }: { info: TransactionInfo; chainId: number | undefined }): CurrencyPair => {
   switch (info.type) {
-    case TransactionType.SWAP:
-      const { inputCurrencyId, outputCurrencyId } = info
-      return { currencyId0: inputCurrencyId, currencyId1: outputCurrencyId }
-    case TransactionType.WRAP:
-      const { unwrapped } = info
-      const native = info.chainId ? nativeOnChain(info.chainId) : undefined
-      const base = 'ETH'
-      const wrappedCurrency = native?.wrapped.address ?? 'WETH'
-      return { currencyId0: unwrapped ? wrappedCurrency : base, currencyId1: unwrapped ? base : wrappedCurrency }
+    case TransactionType.LEVERAGED_POSITION:
+      if (info.tradeAction === TradeAction.OPEN) {
+        const { debtCurrencyId, collateralCurrencyId } = info
+        return { currencyId0: debtCurrencyId, currencyId1: collateralCurrencyId }
+      }
+      const { collateralCurrencyId, debtCurrencyId } = info
+      return { currencyId0: collateralCurrencyId, currencyId1: debtCurrencyId }
     case TransactionType.APPROVAL:
-      return { currencyId0: info.tokenAddress, currencyId1: undefined }
-    case TransactionType.CLAIM:
-      const uniAddress = chainId ? UNI_ADDRESS[chainId] : undefined
-      return { currencyId0: uniAddress, currencyId1: undefined }
+      return { currencyId0: (info as ApproveTransactionInfo).tokenAddress, currencyId1: undefined }
     default:
       return { currencyId0: undefined, currencyId1: undefined }
   }

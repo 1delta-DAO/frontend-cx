@@ -159,6 +159,13 @@ export const USDT_POLYGON_ZK_EVM = new Token(
   'USDT',
   'Tether USD'
 )
+export const DAI_POLYGON_ZK_EVM = new Token(
+  SupportedChainId.POLYGON_ZK_EVM,
+  '0xC5015b9d9161Dca7e18e32f6f25C4aD850731Fd4',
+  18,
+  'DAI',
+  'Dai Stablecoin'
+)
 export const USDT_ARBITRUM_ONE = new Token(
   SupportedChainId.ARBITRUM_ONE,
   '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',

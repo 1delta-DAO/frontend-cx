@@ -17,7 +17,7 @@ import { UniswapTrade } from 'utils/Types'
 import { useWeb3React } from '@web3-react/core'
 import { useGetSlotContract } from 'hooks/1delta/use1DeltaContract'
 import { Dots } from '../styleds'
-import SlotSummary from './SlotSummary'
+import SlotSummary, { toNumber } from './SlotSummary'
 import CloseModalHeader from './CloseModalHeader'
 import { PairPositionRow } from 'components/TokenDetail'
 import { useIsMobile } from 'hooks/useIsMobile'
@@ -26,6 +26,9 @@ import { calculateGasMargin } from 'utils/calculateGasMargin'
 import { parseMessage } from 'constants/errors'
 import { fetchUserSlots } from 'state/slots/fetchUserSlots'
 import { useAppDispatch } from 'state/hooks'
+import { useTransactionAdder } from 'state/transactions/hooks'
+import { TransactionType } from "state/transactions/types";
+import { currencyId } from 'utils/currencyId'
 
 const HeaderLabel = styled.div`
   color: ${({ theme }) => theme.deprecated_text1};
@@ -70,8 +73,7 @@ export default function CloseModal({
 
   // shouldLogModalCloseEvent lets the child SwapModalHeader component know when modal has been closed
   // and an event triggered by modal closing should be logged.
-  const [shouldLogModalCloseEvent, setShouldLogModalCloseEvent] = useState(false)
-  const [acceptRisk, setAcceptRisk] = useState(false)
+
   const [lastTxnHashLogged, setLastTxnHashLogged] = useState<string | null>(null)
 
   const chainId = useChainId()
@@ -111,35 +113,7 @@ export default function CloseModal({
       LAST_VALID_AMOUNT_OUT = outAmount
       return [parsedAmount, currTrade]
     }
-  }, [tradeAlgebra, outAmount])
-
-
-  const onModalDismiss = useCallback(() => {
-    if (isOpen) setShouldLogModalCloseEvent(true)
-    onDismiss()
-  }, [isOpen, onDismiss])
-
-  const modalHeader = useCallback(() => {
-    return trade ? (
-      <CloseModalHeader
-        trade={trade}
-        shouldLogModalCloseEvent={shouldLogModalCloseEvent}
-        setShouldLogModalCloseEvent={setShouldLogModalCloseEvent}
-        allowedSlippage={allowedSlippage}
-        recipient={account ?? ''}
-        showAcceptChanges={false}
-        onAcceptChanges={() => null}
-      />
-    ) : null
-  }, [allowedSlippage, account, trade, shouldLogModalCloseEvent])
-
-  // text to show while loading
-  const pendingText = (
-    <Trans>
-      Swapping {trade?.inputAmount?.toSignificant(6)} {trade?.inputAmount?.currency?.symbol} for{' '}
-      {trade?.outputAmount?.toSignificant(6)} {trade?.outputAmount?.currency?.symbol}
-    </Trans>
-  )
+  }, [tradeAlgebra, outAmount, tokenInId, tokenOutId, slot])
 
 
   // modal and loading
@@ -157,6 +131,38 @@ export default function CloseModal({
     txHash: undefined,
   })
 
+  const onModalDismiss = useCallback(() => {
+    onDismiss()
+    setSwapState({
+      attemptingTxn,
+      tradeToConfirm,
+      showConfirm,
+      swapErrorMessage,
+      txHash: undefined,
+    })
+  }, [isOpen, onDismiss])
+
+  const modalHeader = useCallback(() => {
+    return trade ? (
+      <CloseModalHeader
+        trade={trade}
+        allowedSlippage={allowedSlippage}
+        recipient={account ?? ''}
+        showAcceptChanges={false}
+        onAcceptChanges={() => null}
+      />
+    ) : null
+  }, [allowedSlippage, account, trade, slot])
+
+  // text to show while loading
+  const pendingText = (
+    <Trans>
+      Swapping {trade?.inputAmount?.toSignificant(6)} {trade?.inputAmount?.currency?.symbol} for{' '}
+      {trade?.outputAmount?.toSignificant(6)} {trade?.outputAmount?.currency?.symbol}
+    </Trans>
+  )
+
+  const addTransaction = useTransactionAdder()
   const dispatch = useAppDispatch()
 
   const onClose = useCallback(async () => {
@@ -203,7 +209,26 @@ export default function CloseModal({
               swapErrorMessage: undefined,
               txHash: txResponse.hash,
             })
-
+            if (trade && slot)
+              addTransaction(
+                txResponse,
+                {
+                  type: TransactionType.LEVERAGED_POSITION,
+                  direction: slot.direction,
+                  tradeAction: TradeAction.CLOSE,
+                  collateralCurrencyId: currencyId(trade.inputAmount.currency),
+                  debtCurrencyId: trade.outputAmount.quotient.toString(),
+                  providedCurrencyId: currencyId(trade.inputAmount.currency),
+                  slot: '',
+                  collateralAmountRaw: trade.outputAmount.quotient.toString(),
+                  debtAmountRaw: trade.inputAmount.quotient.toString(),
+                  providedAmountRaw: String(
+                    Number(
+                      toNumber(slot.collateralBalance, slot.collateralDecimals)) -
+                    Number(trade.inputAmount.toExact())
+                  ),
+                }
+              )
             dispatch(fetchUserSlots({ chainId, account }))
 
           }

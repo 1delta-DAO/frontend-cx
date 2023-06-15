@@ -161,6 +161,6 @@ export default function SlotSummary({
 }
 
 
-const toNumber = (val: string, decs = 18, show = 2) => {
+export const toNumber = (val: string, decs = 18, show = 2) => {
   return Number(formatEther(BigNumber.from(val).mul(TEN.pow(18 - decs)))).toLocaleString(undefined, { maximumFractionDigits: show })
 } 

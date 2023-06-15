@@ -15,6 +15,7 @@ import {
   DAI_ARBITRUM_ONE,
   DAI_OPTIMISM,
   DAI_POLYGON,
+  DAI_POLYGON_ZK_EVM,
   ETH2X_FLI,
   FEI,
   FRAX,
@@ -101,6 +102,7 @@ export const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
   [SupportedChainId.POLYGON_ZK_EVM]: [
     ...WRAPPED_NATIVE_CURRENCIES_ONLY[SupportedChainId.POLYGON_ZK_EVM],
     ...Object.values(getCompoundTokensNoWETH(SupportedChainId.POLYGON_ZK_EVM)),
+    DAI_POLYGON_ZK_EVM
   ],
 }
 export const ADDITIONAL_BASES: { [chainId: number]: { [tokenAddress: string]: Token[] } } = {
