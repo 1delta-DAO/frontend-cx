@@ -181,7 +181,7 @@ export const PairSearchDropdown: React.FC<DropdownProps> = ({ selectedOption, op
         <Image src={TOKEN_SVGS[selectedOption?.[0] ?? placeholder]} style={{ width: '25px' }} />
         <Image src={TOKEN_SVGS[selectedOption?.[1] ?? placeholder]} style={{ marginLeft: '-10px', width: '25px' }} />
         <DropdownInput
-          style={{ maxWidth: '100px' }}
+          style={{ maxWidth: '110px' }}
           type="text"
           value={inputValue}
           onChange={handleInputChange}

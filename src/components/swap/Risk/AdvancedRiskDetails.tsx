@@ -461,5 +461,7 @@ export function AdvancedRiskDetails({
 const assetsAreEqual = (asset0: SupportedAssets, asset1: SupportedAssets) => {
   if (asset0 == SupportedAssets.WETH && asset1 == SupportedAssets.ETH) return true
   if (asset1 == SupportedAssets.WETH && asset0 == SupportedAssets.ETH) return true
+  if (asset0 == SupportedAssets.WMATIC && asset1 == SupportedAssets.MATIC) return true
+  if (asset1 == SupportedAssets.WMATIC && asset0 == SupportedAssets.MATIC) return true
   return asset0 === asset1
 }
