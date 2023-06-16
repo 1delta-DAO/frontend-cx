@@ -246,7 +246,7 @@ export default function CloseModal({
     }
     return null
   },
-    [trade]
+    [trade, slot, tokenInId, tokenOutId, chainId]
   )
 
   const confirmationContent = useCallback(

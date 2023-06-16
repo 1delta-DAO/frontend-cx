@@ -128,7 +128,7 @@ export const createSlotCalldata = (
 
     const amountRepay = 0 // repay all
     const pathMargin = trade ?
-      encodeAlgebraPathEthersSimple(v3Route.path.map((p) => p.address).reverse(), v3Route.path.length === 1 ? [0] : [1, ...new Array(v3Route.path.length - 2).fill(1)], 0) :
+      encodeAlgebraPathEthersSimple(v3Route.path.map((p) => p.address).reverse(), v3Route.path.length === 1 ? [0] : [1, ...new Array(v3Route.path.length - 2).fill(2)], 0) :
       '0x' // - should fail
 
     const maxIn = trade.maximumAmountIn(allowedSlippage).quotient.toString()
