@@ -88,6 +88,7 @@ import useCurrencyBalance from "lib/hooks/useCurrencyBalance";
 import CloseModal from "components/swap/Close/CloseModal";
 import { currencyId } from "utils/currencyId";
 import { TransactionType } from "state/transactions/types";
+import { assetsAreEqual } from "components/swap/Risk/AdvancedRiskDetails";
 
 export enum Mode {
   LONG = 'Long',
@@ -435,14 +436,10 @@ export default function Professional() {
   const selectedAsset = selectedIsAsset ? selectedCurrencyOutside.symbol as SupportedAssets : undefined
 
   useEffect(() => {
-    if (selectedCurrency.isNative && pair[0] === SupportedAssets.WETH)
+    if (selectedCurrencyOutside.isNative && pair[0] === SupportedAssets.WETH)
       setDepositMode(DepositMode.DIRECT)
 
-    if (selectedCurrency.isNative && pair[1] === SupportedAssets.WETH)
-      setDepositMode(DepositMode.TO_COLLATERAL)
-
-
-    if (depositMode === DepositMode.DIRECT && !selectedIsAsset)
+    if (selectedCurrencyOutside.isNative && pair[1] === SupportedAssets.WETH)
       setDepositMode(DepositMode.TO_COLLATERAL)
 
     if (pair[0] === SupportedAssets.USDC && selectedAsset === SupportedAssets.USDC)
@@ -450,8 +447,11 @@ export default function Professional() {
 
     if (depositMode !== DepositMode.DIRECT && pair[0] === selectedAsset)
       setDepositMode(DepositMode.DIRECT)
+
+    if (!assetsAreEqual(pair[0], selectedAsset))
+      setDepositMode(DepositMode.TO_COLLATERAL)
   },
-    [depositMode, selectedIsAsset, pair]
+    [depositMode, selectedIsAsset, pair, selectedCurrencyOutside]
   )
 
   const depositAsset = useMemo(() => {
