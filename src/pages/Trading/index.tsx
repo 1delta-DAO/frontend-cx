@@ -714,8 +714,6 @@ export default function Professional() {
     [trade, depositValue, selectedMode, riksParamsChange, prices]
   )
 
-  console.log("SLOT TO CREATE", slotToCreate)
-
   const stablecoinPriceImpact = useMemo(
     () => (routeIsSyncing ? undefined : computeFiatValuePriceImpact(fiatValueInput, fiatValueOutput)),
     [fiatValueInput, fiatValueOutput, routeIsSyncing]
