@@ -11,13 +11,14 @@ import { ExtendedSlot } from 'state/slots/hooks'
 import { useClientSideRouter, useUserSlippageTolerance } from 'state/user/hooks'
 import styled from 'styled-components'
 import { SupportedAssets } from 'types/1delta'
-import { formatSmallUSDValue } from 'utils/tableUtils/format'
+import { formatPriceString, formatSmallUSDValue } from 'utils/tableUtils/format'
 import { LightCard } from '../../Card'
 import { ButtonError } from '../../Button'
 import { AutoRow } from '../../Row'
 import { Dots, SwapCallbackError } from '../styleds'
 import { getTokenPath, RoutingDiagramEntry } from '../SwapRoute'
 import { Separator, ThemedText } from '../../../theme'
+import { NewSlot } from 'pages/Trading'
 
 
 export const LoaderDots = (): React.ReactNode => {
@@ -163,4 +164,58 @@ export default function SlotSummary({
 
 export const toNumber = (val: string, decs = 18, show = 2) => {
   return Number(formatEther(BigNumber.from(val).mul(TEN.pow(18 - decs)))).toLocaleString(undefined, { maximumFractionDigits: show })
-} 
+}
+
+
+export function NewSlotSummary({
+  slot
+}: {
+  slot?: NewSlot
+}) {
+  return (
+    <StyledLightCard>
+      {slot && <Column>
+        <ValueRow>
+          <HeaderLabel>
+            Size
+          </HeaderLabel>
+          <HeaderValue>
+            ${Math.round(slot.size * 100) / 100}
+          </HeaderValue>
+        </ValueRow>
+        <SeparatorBase />
+        <ValueRow>
+          <Label>
+            Collateral
+          </Label>
+          <ValueWithIcon>
+            <Logo src={TOKEN_SVGS[slot.pair[0]]} />
+            <Value>
+              {slot.collateralBalance.toLocaleString(undefined, { maximumFractionDigits: 4, minimumFractionDigits: 4 })}  / {formatSmallUSDValue(slot.collateralBalanceUsd)}
+            </Value>
+          </ValueWithIcon>
+        </ValueRow>
+        <ValueRow>
+          <Label>
+            Debt
+          </Label>
+          <ValueWithIcon>
+            <Logo src={TOKEN_SVGS[slot.pair[1]]} />
+            <Value>
+              {slot.debtBalance.toLocaleString(undefined, { maximumFractionDigits: 4, minimumFractionDigits: 4 })} / {formatSmallUSDValue(slot.debtBalanceUsd)}
+            </Value>
+          </ValueWithIcon>
+        </ValueRow>
+        <ValueRow>
+          <Label>
+            Liquidation Price
+          </Label>
+
+          <Value>
+            {formatPriceString(String(slot.liquidationPrice))}
+          </Value>
+        </ValueRow>
+      </Column>}
+    </StyledLightCard>
+  )
+}

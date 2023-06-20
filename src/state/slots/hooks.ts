@@ -110,7 +110,7 @@ const calculateHealthFactor = (cf: number, cUSD: number, dUSD: number) => {
 
 
 // hf = cUSD* cf / dUSD -> solve for hf = 1
-const calculateLiqPrice = (cf: number, c: number, d: number, cUSD: number, dUSD: number, collateral: boolean) => {
+export const calculateLiqPrice = (cf: number, c: number, d: number, cUSD: number, dUSD: number, collateral: boolean) => {
   if (collateral) {
     return dUSD / c / cf
   }

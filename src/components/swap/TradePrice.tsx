@@ -63,11 +63,11 @@ export default function TradePrice({ price, showInverted, setShowInverted }: Tra
       <Text fontWeight={500} color={theme.deprecated_text1}>
         {text}
       </Text>{' '}
-      {usdcPrice && (
+      {/* {usdcPrice && (
         <ThemedText.DeprecatedDarkGray>
           <Trans>(${usdcPrice.toFixed(visibleDecimalPlaces, { groupSeparator: ',' })})</Trans>
         </ThemedText.DeprecatedDarkGray>
-      )}
+      )} */}
     </StyledPriceContainer>
   )
 }

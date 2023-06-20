@@ -120,6 +120,7 @@ interface RiskDetailsProps {
   aprSupply: number
   aprDeposit: number
   aprBorrow: number
+  liquidationPrice: number
   rewardSupply: number
   rewardDeposit: number
   rewardBorrow: number
@@ -136,6 +137,7 @@ export default function RiskDetailsDropdown({
   depositAmount,
   healthFactor,
   depositMode,
+  liquidationPrice,
   depositCurrency,
   syncing,
   loading,
@@ -180,6 +182,7 @@ export default function RiskDetailsDropdown({
                     <ResponsiveTooltipContainer origin="top right" style={{ padding: '0', height: '40px' }}>
                       <Card padding="12px">
                         <AdvancedRiskDetails
+                          liquidationPrice={liquidationPrice}
                           aprSupply={aprSupply}
                           aprDeposit={aprDeposit}
                           aprBorrow={aprBorrow}
@@ -245,6 +248,7 @@ export default function RiskDetailsDropdown({
             {trade ? (
               <StyledCard redesignFlag={redesignFlagEnabled}>
                 <AdvancedRiskDetails
+                  liquidationPrice={liquidationPrice}
                   aprSupply={aprSupply}
                   aprDeposit={aprDeposit}
                   aprBorrow={aprBorrow}

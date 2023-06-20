@@ -1,7 +1,6 @@
 import { Trans } from '@lingui/macro'
 import { Trade } from '@uniswap/router-sdk'
 import { Currency, CurrencyAmount, Percent, Token, TradeType } from '@uniswap/sdk-core'
-import { formatPercentInBasisPointsNumber, formatToDecimal, getTokenAddress } from 'analytics/utils'
 import { ButtonLight, ButtonYellow } from 'components/Button'
 import { AutoColumn } from 'components/Column'
 import Row from 'components/Row'
@@ -18,13 +17,14 @@ import TransactionConfirmationModal, {
 } from '../TransactionConfirmationModal'
 import SwapModalFooter from './SwapModalFooter'
 import SwapModalHeader from './SwapModalHeader'
-import { WarningIcon } from 'nft/components/icons'
+import { NewSlot } from 'pages/Trading'
+import { NewSlotSummary } from './Close/SlotSummary'
 
 
 export default function ConfirmMarginTradeModal({
+  newSlot,
   healthFactor,
   hasRiskError,
-  riskMessage,
   trade,
   originalTrade,
   onAcceptChanges,
@@ -40,9 +40,9 @@ export default function ConfirmMarginTradeModal({
   fiatValueInput,
   fiatValueOutput,
 }: {
+  newSlot?: undefined | NewSlot
   healthFactor: number
   hasRiskError: boolean
-  riskMessage: string
   isOpen: boolean
   trade: InterfaceTrade<Currency, Currency, TradeType> | undefined
   originalTrade: Trade<Currency, Currency, TradeType> | undefined
@@ -90,28 +90,7 @@ export default function ConfirmMarginTradeModal({
   const modalBottom = useCallback(() => {
     return trade ? (
       <AutoColumn>
-        {hasRiskError && (
-          <WarningText fontSize={16} fontWeight={500} textAlign="center">
-            Your health factor might drop to {healthFactor.toLocaleString()}
-          </WarningText>
-        )}
-        {hasRiskError && !acceptRisk && (
-          <ButtonYellow
-            height="50px"
-            onClick={() => {
-              setAcceptRisk(true)
-            }}
-            style={{ margin: '10px 0 0 0' }}
-            id={"CONFIRM_SWAP_BUTTON"}
-          >
-            <Row justifyContent="center" alignItems="center">
-              <WarningIcon width="30px" height="30px" color="" />
-              <Text fontSize={14} fontWeight={500} color="red" marginLeft="5px">
-                Accept: {riskMessage}
-              </Text>
-            </Row>
-          </ButtonYellow>
-        )}
+        <NewSlotSummary slot={newSlot} />
         <SwapModalFooter
           onConfirm={onConfirm}
           trade={trade}
@@ -123,6 +102,7 @@ export default function ConfirmMarginTradeModal({
           fiatValueInput={fiatValueInput}
           fiatValueOutput={fiatValueOutput}
         />
+
       </AutoColumn>
     ) : null
   }, [
@@ -151,7 +131,7 @@ export default function ConfirmMarginTradeModal({
         <TransactionErrorContent onDismiss={onModalDismiss} message={swapErrorMessage} />
       ) : (
         <ConfirmationModalContent
-          title={<Trans>Confirm Swap</Trans>}
+          title={<Trans>Confirm Position</Trans>}
           onDismiss={onModalDismiss}
           topContent={modalHeader}
           bottomContent={modalBottom}

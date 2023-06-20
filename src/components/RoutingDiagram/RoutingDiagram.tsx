@@ -121,12 +121,16 @@ function Route({ entry: { percent, path, protocol } }: { entry: RoutingDiagramEn
           </MixedProtocolBadge>
         ) : (
           <ProtocolBadge>
-            <BadgeText fontSize={12}>{protocol.toUpperCase()}</BadgeText>
+            <MouseoverTooltip
+              text={<Trans>Quickswap</Trans>}
+            >
+              <BadgeText fontSize={12}>Q</BadgeText>
+            </MouseoverTooltip>
           </ProtocolBadge>
         )}
-        <BadgeText fontSize={14} style={{ minWidth: 'auto' }}>
+        {/* <BadgeText fontSize={14} style={{ minWidth: 'auto' }}>
           {percent.toSignificant(2)}%
-        </BadgeText>
+        </BadgeText> */}
       </OpaqueBadge>
       <AutoRow gap="1px" width="100%" style={{ justifyContent: 'space-evenly', zIndex: 2 }}>
         {path.map(([currency0, currency1, feeAmount], index) => (
@@ -144,14 +148,13 @@ function Pool({ currency0, currency1, feeAmount }: { currency0: Currency; curren
   // TODO - link pool icon to info.1delta.io via query params
   return (
     <MouseoverTooltip
-      text={<Trans>{tokenInfo0?.symbol + '/' + tokenInfo1?.symbol + ' ' + feeAmount / 10000}% pool</Trans>}
+      text={<Trans>{tokenInfo0?.symbol + '/' + tokenInfo1?.symbol} pool</Trans>}
     >
-      <PoolBadge>
-        <Box margin="0 4px 0 12px">
-          <DoubleCurrencyLogo currency0={tokenInfo1} currency1={tokenInfo0} size={20} />
-        </Box>
-        <ThemedText.DeprecatedSmall fontSize={14}>{feeAmount / 10000}%</ThemedText.DeprecatedSmall>
-      </PoolBadge>
+      {/* <PoolBadge> */}
+      <Box margin="0 2px 0 12px">
+        <DoubleCurrencyLogo currency0={tokenInfo1} currency1={tokenInfo0} size={20} />
+      </Box>
+      {/* </PoolBadge> */}
     </MouseoverTooltip>
   )
 }

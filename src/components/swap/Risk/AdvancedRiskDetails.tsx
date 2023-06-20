@@ -13,7 +13,7 @@ import { InterfaceTrade } from 'state/routing/types'
 import styled, { useTheme } from 'styled-components/macro'
 import { Z_INDEX } from 'theme/zIndex'
 import { SupportedAssets } from 'types/1delta'
-import { formatSmallUSDValue } from 'utils/tableUtils/format'
+import { formatPriceString, formatSmallUSDValue } from 'utils/tableUtils/format'
 import HelpCircleIcon from 'components/Help/HelpCircleIcon'
 import { Separator, ThemedText } from '../../../theme'
 import { computeRealizedPriceImpact } from '../../../utils/prices'
@@ -119,6 +119,7 @@ const AprRow = styled(SimpleRow)`
 interface AdvancedRiskDetailsProps {
   depositCurrency: SupportedAssets
   depositAmount: number
+  liquidationPrice: number
   aprSupply: number
   aprDeposit: number
   aprBorrow: number
@@ -194,6 +195,7 @@ export const SeparatorLight = styled(Separator)`
 
 export function AdvancedRiskDetails({
   trade,
+  liquidationPrice,
   depositAmount,
   healthFactor,
   ltv,
@@ -348,7 +350,7 @@ export function AdvancedRiskDetails({
           </RowFixed>
           <TextWithLoadingPlaceholder syncing={syncing} width={65}>
             <TextToImage>
-              <ThemedText.DeprecatedBlack textAlign="right" fontSize={14}>
+              <ThemedText.DeprecatedBlack textAlign="right" fontSize={14} >
                 {trade
                   ? `${formatSmallUSDValue(Number(trade.inputAmount.toExact()) * priceDebt)} in `
                   : '-'}
@@ -392,21 +394,26 @@ export function AdvancedRiskDetails({
         <SeparatorBase redesignFlag={redesignFlagEnabled} />
         <RowBetween>
           <BarCol>
-            <RowSpaceBetween>
-              <RowFromLeft>
-                <AccountCardHeading>Loan-to-Value</AccountCardHeading>
-                {HelpCircleIcon('Measures the $ value of your collateral in relation to your supplies. If it is higher than 100%, your account is flagged for liquidation.')}
-              </RowFromLeft>
-              <ProgressValue
-                level={state}
-              >{(isNaN(safeLtv)) ? '-' : `${(safeLtv).toLocaleString(undefined, { minimumFractionDigits: 2 })}%`}</ProgressValue>{' '}
-            </RowSpaceBetween>
-            <ProgressWrapper>
-              <Progress
-                percentageString={`${ltv * 100}%`}
-                level={state}
-              />
-            </ProgressWrapper>
+            <RowBetween>
+              <RowFixed>
+                <MouseoverTooltip
+                  text={<Trans>The price at which your position will get (partly) liquidated.</Trans>}
+                  disableHover={hideInfoTooltips}
+                >
+                  <ThemedText.DeprecatedSubHeader color={state === Level.AT_RISK ? theme.accentWarning : state === Level.CRITICAL ? theme.accentFailure : theme.accentSuccess}>
+                    <Trans>Liquidation Price</Trans>
+                  </ThemedText.DeprecatedSubHeader>
+                </MouseoverTooltip>
+              </RowFixed>
+              <TextWithLoadingPlaceholder syncing={syncing} width={65}>
+                <ThemedText.DeprecatedBlack textAlign="right" fontSize={14} color={state === Level.AT_RISK ? theme.accentWarning : state === Level.CRITICAL ? theme.accentFailure : theme.accentSuccess}>
+                  {trade
+                    ? `${formatPriceString(String(liquidationPrice))}`
+                    : '-'}
+
+                </ThemedText.DeprecatedBlack>
+              </TextWithLoadingPlaceholder>
+            </RowBetween>
             <div style={{ height: '10px' }} />
             <RowSpaceBetween>
               <RowFromLeft>

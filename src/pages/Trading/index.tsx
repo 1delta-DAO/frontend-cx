@@ -50,7 +50,7 @@ import { calculateGasMargin } from 'utils/calculateGasMargin'
 import { useTransactionAdder } from 'state/transactions/hooks'
 import { MarginTradingButtonText } from 'components/Styles'
 import { parseMessage } from 'constants/errors'
-import { useDeltaState } from "state/1delta/hooks";
+import { useAsset, useDeltaState } from "state/1delta/hooks";
 import { useDerivedSwapInfoMargin, useDerivedSwapInfoMarginAlgebra } from "state/professionalTradeSelection/tradeHooks";
 import { Text } from "rebass";
 import PairInput from "components/CurrencyInputPanel/PairInput";
@@ -72,7 +72,7 @@ import DepositTypeDropdown, { DepositMode } from "components/Dropdown/depositTyp
 import { USDC_POLYGON_ZK_EVM } from "constants/tokens";
 import useDebounce from "hooks/useDebounce";
 import { PairSearchDropdown } from "components/Dropdown/dropdownPairSearch";
-import { parseUnits } from "ethers/lib/utils";
+import { formatEther, parseUnits } from "ethers/lib/utils";
 import { addressesTokens } from "hooks/1delta/addressesTokens";
 import { calculateCompoundRiskChangeSlot, useGetCompoundRiskParametersSlot } from "hooks/riskParameters/useCompoundParameters";
 import { useAlgebraClientSideV3 } from "hooks/professional/algebra/useClientSideV3Trade";
@@ -83,7 +83,7 @@ import { fetchCompoundPublicDataAsync } from "state/1delta/compound/fetchCompoun
 import { useNextSlotAddress } from "hooks/useNexSlotAddress";
 import { createSlotFactoryCalldata } from "utils/calldata/compound/slotMethodCreator";
 import { fetchUserSlots } from "state/slots/fetchUserSlots";
-import { ExtendedSlot, useParsedSlots } from "state/slots/hooks";
+import { calculateLiqPrice, ExtendedSlot, useParsedSlots } from "state/slots/hooks";
 import useCurrencyBalance from "lib/hooks/useCurrencyBalance";
 import CloseModal from "components/swap/Close/CloseModal";
 import { currencyId } from "utils/currencyId";
@@ -104,6 +104,24 @@ export const LoaderDots = (): React.ReactNode => {
   )
 }
 
+
+export interface NewSlot {
+  collateralFactor: number
+  collateralBalance: number
+  collateralBalanceUsd: number
+  debtBalance: number
+  debtBalanceUsd: number
+  healthFactor: number
+  liquidationPrice: number
+  pair: [SupportedAssets, SupportedAssets]
+  leverage: number
+  size: number
+  rewardApr: number
+  supplyApr: number
+  borrowApr: number
+  direction: Mode
+  price: number
+}
 
 export enum TradeAction {
   OPEN = 'Open',
@@ -126,7 +144,6 @@ export const ArrowWrapper = styled.div<{ clickable: boolean; redesignFlag: boole
   background-color: ${({ theme, redesignFlag }) => (redesignFlag ? theme.backgroundInteractive : theme.deprecated_bg1)};
   border: 1px solid;
   border-color: #242B33;
-
   z-index: 2;
   ${({ clickable }) =>
     clickable
@@ -538,14 +555,19 @@ export default function Professional() {
       LAST_VALID_AMOUNT_IN = parsedAmountIn
       return currTrade
     }
-  }, [tradeInUni, algebraTradeIn, parsedAmountIn])
+  }, [tradeInUni, algebraTradeIn, parsedAmountIn, pair])
 
 
-  const depositDollarValue = useMemo(() => {
+  const [depositDollarValue, depositValue] = useMemo(() => {
     // case direct depo
-    if (depositMode === DepositMode.DIRECT) return Number(parsedAmountIn?.toExact()) * (selectedPrice?.[0] ? selectedPrice[0] : 1)
+    if (depositMode === DepositMode.DIRECT) {
+
+      const depoAmount = Number(parsedAmountIn?.toExact())
+      return [depoAmount * (selectedPrice?.[0] ? selectedPrice[0] : 1), depoAmount]
+    }
     // case swap to usdc or collateral
-    return Number(tradeIn?.outputAmount.toExact()) * (prices?.[2] ? prices[2] : 1)
+    const tradeAmount = Number(tradeIn?.outputAmount.toExact())
+    return [tradeAmount * (prices?.[2] ? prices[2] : 1), tradeAmount]
   },
     [parsedAmountIn, Boolean(tradeIn?.outputAmount), depositMode, Boolean(prices[2]), Boolean(selectedPrice?.[0]), pair]
   )
@@ -612,7 +634,7 @@ export default function Professional() {
       LAST_VALID_AMOUNT_MT = parsedAmount
       return [parsedAmount, currTrade]
     }
-  }, [tradeUni, tradeAlgebra, parsedAmountIn, leverage])
+  }, [tradeUni, tradeAlgebra, parsedAmountIn, leverage, pair])
 
   const riskParams = useGetCompoundRiskParametersSlot(chainId, oracleState.data[SupportedChainId.POLYGON].chainLink)
 
@@ -655,7 +677,44 @@ export default function Professional() {
   const fiatValueInput = useStablecoinDollarValue(trade?.inputAmount)
   const fiatValueOutput = useStablecoinDollarValue(trade?.outputAmount)
 
-  // console.log("FV", fiatValueInput?.toExact(), fiatValueOutput?.toExact())
+  const assetCollateral = useAsset(pair[0])
+
+  const slotToCreate: NewSlot | undefined = useMemo(() => {
+    if (!trade || !riksParamsChange) return undefined
+    const priceCollateral = prices[0]
+    const priceDebt = prices[1]
+    const collateralByTrade = Number(trade.outputAmount.toExact())
+    const debtBalance = Number(trade.inputAmount.toExact())
+    const cf = Number(formatEther(assetCollateral.compoundData[chainId]?.reserveData?.collateralFactorMantissa ?? '0'))
+    return {
+      collateralFactor: cf,
+      collateralBalance: collateralByTrade + depositValue,
+      collateralBalanceUsd: collateralByTrade * priceCollateral + depositDollarValue,
+      debtBalance,
+      debtBalanceUsd: debtBalance * priceDebt,
+      healthFactor: riksParamsChange?.healthFactor,
+      liquidationPrice: calculateLiqPrice(
+        cf,
+        collateralByTrade + depositValue,
+        debtBalance,
+        collateralByTrade * priceCollateral + depositDollarValue,
+        debtBalance * priceDebt,
+        pair[1].toUpperCase().includes('USD')
+      ),
+      pair,
+      leverage,
+      size: depositDollarValue,
+      rewardApr: riksParamsChange?.aprSupply ?? 0,
+      supplyApr: riksParamsChange?.aprSupply ?? 0,
+      borrowApr: riksParamsChange?.aprBorrow ?? 0,
+      direction: selectedMode,
+      price: selectedMode === Mode.SHORT ? prices[0] : prices[1]
+    }
+  },
+    [trade, depositValue, selectedMode, riksParamsChange, prices]
+  )
+
+  console.log("SLOT TO CREATE", slotToCreate)
 
   const stablecoinPriceImpact = useMemo(
     () => (routeIsSyncing ? undefined : computeFiatValuePriceImpact(fiatValueInput, fiatValueOutput)),
@@ -942,7 +1001,7 @@ export default function Professional() {
   return (
     <Container >
       <ConfirmSwapModal
-        riskMessage={"riskErrorText"}
+        newSlot={slotToCreate}
         hasRiskError={false}
         healthFactor={1}
         isOpen={showConfirm}
@@ -1199,6 +1258,7 @@ export default function Professional() {
               depositMode={depositMode}
               depositAmount={depositDollarValue}
               healthFactor={riksParamsChange?.healthFactor ?? 1.1}
+              liquidationPrice={slotToCreate?.liquidationPrice ?? 0}
               ltv={riksParamsChange?.ltv ?? 0.5}
               depositCurrency={depositAsset}
               trade={trade}

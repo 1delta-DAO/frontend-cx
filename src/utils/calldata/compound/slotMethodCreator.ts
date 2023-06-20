@@ -59,19 +59,15 @@ export const createSlotFactoryCalldata = (
   const v3RouteIn = tradeIn?.routes[0] as RouteV3<Currency, Currency>
 
   if (action === TradeAction.OPEN) {
-    // console.log("params pathIn", v3RouteIn.path.map((p) => p.address), new Array(v3RouteIn.path.length - 1).fill(3), 0)
     const pathIn = tradeIn ?
       encodeAlgebraPathEthersSimple(v3RouteIn.path.map((p) => p.address), new Array(v3RouteIn.path.length - 1).fill(3), 0) :
       parsedAmountIn ? encodeAddress(parsedAmountIn.currency.wrapped.address) :
         '0x' // - should fail
-    // console.log("params path amrgin", v3Route.path.map((p) => p.address), v3Route.path.length === 1 ? [0] : [0, ...new Array(v3Route.path.length - 2).fill(3)], 0)
     const pathMargin = trade ?
       encodeAlgebraPathEthersSimple(v3Route.path.map((p) => p.address), v3Route.path.length === 1 ? [0] : [0, ...new Array(v3Route.path.length - 2).fill(3)], 0) :
       '0x' // - should fail
 
 
-    // console.log("PathIn", pathIn)
-    // console.log("pathMargin", pathMargin)
 
     args = {
       amountDeposited: tradeIn ? tradeIn.inputAmount.quotient.toString() : parsedAmountIn?.quotient.toString(),
@@ -83,7 +79,6 @@ export const createSlotFactoryCalldata = (
       // path for margin trade
       marginPath: pathMargin
     }
-    // console.log("ARGS", args)
     method = undefined // slotFactoryContract.createSlot(args)
     if (inIsNative) {
       estimate = async () => await slotFactoryContract.estimateGas.createSlot(args, { value: args.amountDeposited })

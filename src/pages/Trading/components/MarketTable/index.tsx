@@ -120,7 +120,6 @@ export default function PositionTable({
   }, [lendingProtocol, relevantAccount])
 
   const filterStateChevrons = useDebtFilterSetting(lendingProtocol)
-  const filterState = useDebtFilterList(lendingProtocol)
 
   // handles change to sorted items
   // useHandleDebtFilter(lendingProtocol, assetData)
