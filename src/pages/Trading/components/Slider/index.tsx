@@ -91,6 +91,7 @@ const SliderMarker = styled.div`
   position: relative;
   font-size: 10px;
   text-align: center;
+  width: 95%;
   font-weight: 300;
   color: ${({ theme }) => theme.textSecondary};
 `
@@ -113,7 +114,7 @@ const DecimalSlider: React.FC<DecimalSliderProps> = ({ min, max, step, markers, 
 
   const fillPercent = ((value - min) / (max - min)) * 100;
 
-  const _markers = _.range(min, max, 0.7)
+  const _markers = _.range(min, max, 0.5)
 
   return (
     <SliderContainer>
