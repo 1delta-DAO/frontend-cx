@@ -23,6 +23,7 @@ import Modal from '../Modal'
 import { RowBetween, RowFixed } from '../Row'
 import AnimatedConfirmation from './AnimatedConfirmation'
 import { useWeb3React } from '@web3-react/core'
+import { useChainId } from 'state/globalNetwork/hooks'
 
 const Wrapper = styled.div<{ redesignFlag?: boolean }>`
   background-color: ${({ redesignFlag, theme }) => redesignFlag && theme.backgroundSurface};
@@ -446,7 +447,7 @@ export default function TransactionConfirmationModal({
   content,
   currencyToAdd,
 }: ConfirmationModalProps) {
-  const { chainId } = useWeb3React()
+  const chainId = useChainId()
   const redesignFlag = useRedesignFlag()
 
   if (!chainId) return null

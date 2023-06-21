@@ -1,7 +1,7 @@
-import { useWeb3React } from '@web3-react/core'
 import { DEFAULT_TXN_DISMISS_MS, L2_TXN_DISMISS_MS } from 'constants/misc'
 import LibUpdater from 'lib/hooks/transactions/updater'
 import { useCallback, useMemo } from 'react'
+import { useChainId } from 'state/globalNetwork/hooks'
 import { useAppDispatch, useAppSelector } from 'state/hooks'
 
 import { L2_CHAIN_IDS } from '../../constants/chains'
@@ -11,7 +11,7 @@ import { SerializableTransactionReceipt } from './types'
 
 
 export default function Updater() {
-  const { chainId } = useWeb3React()
+  const chainId = useChainId()
   const addPopup = useAddPopup()
   // speed up popup dismissal time if on L2
   const isL2 = Boolean(chainId && L2_CHAIN_IDS.includes(chainId))

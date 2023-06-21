@@ -77,14 +77,14 @@ export const RPC_PROVIDERS: { [chainId: number]: StaticJsonRpcProvider } = {
 
 // get second provider if exists
 export const getSecondaryProvider = (chainId: number) => {
-  if (!RPC_URLS[chainId][1]) return new AppJsonRpcProvider(chainId, 0)
+  if (!RPC_URLS[chainId]?.[1]) return new AppJsonRpcProvider(chainId, 0)
   return new AppJsonRpcProvider(chainId, 1)
 
 }
 
 // get 3rd provider if exists
 export const getThirdProvider = (chainId: number) => {
-  if (!RPC_URLS[chainId][2]) return getSecondaryProvider(chainId)
+  if (!RPC_URLS[chainId]?.[2]) return getSecondaryProvider(chainId)
   return new AppJsonRpcProvider(chainId, 2)
 
 }

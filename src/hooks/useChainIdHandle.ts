@@ -13,8 +13,8 @@ export function useChainIdHandling(chainIdWeb3: number | undefined, accountFromW
   const dispatch = useAppDispatch()
 
   useEffect(() => {
-    if (chainIdWeb3 && chainId !== chainIdWeb3 && chainId === SupportedChainId.POLYGON_ZK_EVM && accountFromWeb3) {
-      dispatch(setChainId({ chainId: chainIdWeb3 }))
+    if (chainIdWeb3 && chainId !== chainIdWeb3 && chainId !== SupportedChainId.POLYGON_ZK_EVM && accountFromWeb3) {
+      dispatch(setChainId({ chainId: SupportedChainId.POLYGON_ZK_EVM }))
       dispatch(setToLoading())
       dispatch(setOraclesToLoading())
     }

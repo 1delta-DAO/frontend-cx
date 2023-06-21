@@ -9,7 +9,7 @@ import { TransactionDetails } from '../../state/transactions/types'
 import Loader from '../Loader'
 import LogoView from './LogoView'
 import TransactionBody from './TransactionBody'
-import { useWeb3React } from '@web3-react/core'
+import { useChainId } from 'state/globalNetwork/hooks'
 
 export enum TransactionState {
   Pending,
@@ -47,7 +47,7 @@ const IconStyleWrap = styled.span`
 `
 
 export const TransactionSummary = ({ transactionDetails }: { transactionDetails: TransactionDetails }) => {
-  const { chainId } = useWeb3React()
+  const chainId = useChainId()
   const tx = transactionDetails
   const { explorer } = getChainInfoOrDefault(chainId ? chainId : SupportedChainId.MAINNET)
   const { info, receipt, hash } = tx

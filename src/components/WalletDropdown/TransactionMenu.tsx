@@ -10,7 +10,7 @@ import { clearAllTransactions } from '../../state/transactions/reducer'
 import { TransactionDetails } from '../../state/transactions/types'
 import { TransactionSummary } from '../AccountDetailsV2'
 import { SlideOutMenu } from './SlideOutMenu'
-import { useWeb3React } from '@web3-react/core'
+import { useChainId } from 'state/globalNetwork/hooks'
 
 const THIRTY_DAYS = ms`30 days`
 
@@ -121,7 +121,7 @@ const EmptyTransaction = styled.div`
 
 export const TransactionHistoryMenu = ({ onClose }: { onClose: () => void }) => {
   const allTransactions = useAllTransactions()
-  const { chainId } = useWeb3React()
+  const chainId = useChainId()
   const dispatch = useAppDispatch()
   const transactionGroupsInformation: any[] = []
 
