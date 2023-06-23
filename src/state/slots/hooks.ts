@@ -86,12 +86,12 @@ export const useParsedSlots = (chainId?: number, account?: string): ExtendedSlot
       size,
       rewardApr: 0.20,
       supplyApr: calculateRateToNumber(
-        cfs[collateralAsset].cApr ?? '0',
+        cfs[collateralAsset]?.cApr ?? '0',
         chainId,
         TimeScale.MS
       ),
       borrowApr: calculateRateToNumber(
-        cfs[debtAsset].bApr ?? '0',
+        cfs[debtAsset]?.bApr ?? '0',
         chainId,
         TimeScale.MS
       ),

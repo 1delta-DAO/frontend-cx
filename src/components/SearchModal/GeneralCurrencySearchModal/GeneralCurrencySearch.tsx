@@ -33,7 +33,7 @@ import {
 import { LendingProtocol } from 'state/1delta/actions'
 import { useChainId } from 'state/globalNetwork/hooks'
 import { SupportedChainId, TESTNET_CHAIN_IDS } from 'constants/chains'
-import { WRAPPED_NATIVE_CURRENCY } from 'constants/tokens'
+import { DAI_POLYGON_ZK_EVM, WBTC_POLYGON_ZK_EVM, WRAPPED_NATIVE_CURRENCY } from 'constants/tokens'
 
 const ContentWrapper = styled(Column) <{ redesignFlag?: boolean }>`
   background-color: ${({ theme, redesignFlag }) => redesignFlag && theme.backgroundSurface};
@@ -107,8 +107,17 @@ export function CurrencySearch({
     return {
       ...(isTestnet ? [] : validatedTokens),
       ...getCompoundTokensByAddress(chainId),
-      ...(chainId === SupportedChainId.POLYGON_ZK_EVM && WRAPPED_NATIVE_CURRENCY[chainId] ? { [WRAPPED_NATIVE_CURRENCY[SupportedChainId.POLYGON_ZK_EVM]?.address ?? '']: WRAPPED_NATIVE_CURRENCY[chainId] } : {})
-      ,
+      ...(chainId === SupportedChainId.POLYGON_ZK_EVM && WRAPPED_NATIVE_CURRENCY[chainId] ?
+        Object.assign({}, ...[
+          DAI_POLYGON_ZK_EVM,
+          WBTC_POLYGON_ZK_EVM,
+          WRAPPED_NATIVE_CURRENCY[chainId]
+        ].map(x => {
+          return {
+            [x?.address ?? '']: x
+          }
+        }
+        )) : {}),
     }
   }, [chainId, lendingProtocol])
   // if they input an address, use it

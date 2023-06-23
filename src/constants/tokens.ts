@@ -194,6 +194,13 @@ export const WBTC_ARBITRUM_ONE = new Token(
   'WBTC',
   'Wrapped BTC'
 )
+export const WBTC_POLYGON_ZK_EVM = new Token(
+  SupportedChainId.POLYGON_ZK_EVM,
+  '0xEA034fb02eB1808C2cc3adbC15f447B93CbE08e1',
+  8,
+  'WBTC',
+  'Wrapped BTC'
+)
 export const WBTC_OPTIMISM = new Token(
   SupportedChainId.OPTIMISM,
   '0x68f180fcCe6836688e9084f035309E29Bf0A2095',

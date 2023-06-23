@@ -40,6 +40,7 @@ import {
   WBTC_ARBITRUM_ONE,
   WBTC_OPTIMISM,
   WBTC_POLYGON,
+  WBTC_POLYGON_ZK_EVM,
   WETH_POLYGON,
   WRAPPED_NATIVE_CURRENCY,
 } from './tokens'
@@ -102,7 +103,8 @@ export const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
   [SupportedChainId.POLYGON_ZK_EVM]: [
     ...WRAPPED_NATIVE_CURRENCIES_ONLY[SupportedChainId.POLYGON_ZK_EVM],
     ...Object.values(getCompoundTokensNoWETH(SupportedChainId.POLYGON_ZK_EVM)),
-    DAI_POLYGON_ZK_EVM
+    DAI_POLYGON_ZK_EVM,
+    WBTC_POLYGON_ZK_EVM
   ],
 }
 export const ADDITIONAL_BASES: { [chainId: number]: { [tokenAddress: string]: Token[] } } = {
