@@ -30,12 +30,14 @@ import {
 import { AaveInterestMode } from 'types/1delta'
 import { ExtendedSlot } from 'state/slots/hooks'
 import { PNL_FLAG_ON } from './config'
+import { BaseButton } from 'components/Button'
 
 const Table = styled.table`
   border-collapse: collapse;
   border-spacing: 0px;
   width: 100%;
   border: 1px solid;
+  border-top: none;
   border-color: ${({ theme }) => theme.backgroundInteractive};
 `
 
@@ -59,9 +61,89 @@ const SimpleRow = styled.div`
 `
 
 const StyledText = styled.div`
-${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToExtraSmall`
-text-align: center;  
-`};
+  ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToExtraSmall`
+  text-align: center;  
+  `};
+`
+
+const ConnectText = styled.div`
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  font-size: 14px;
+  color: ${({ theme }) => theme.textPrimary};
+`
+
+
+
+const ButtonRow = styled.div`
+  height: 56x;
+  padding: 8px;
+  border-radius: 8px;
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
+  background: #0C0F12;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  border: 1px solid;
+  border-bottom: none;
+  border-color: ${({ theme }) => theme.backgroundInteractive};
+`
+
+export const ButtonLightBoring = styled(BaseButton) <{ redesignFlag?: boolean }>`
+  color: ${({ theme, redesignFlag }) => (redesignFlag ? theme.accentAction : theme.deprecated_primaryText1)};
+  font-size: ${({ redesignFlag }) => (redesignFlag ? '20px' : '16px')};
+  font-weight: ${({ redesignFlag }) => (redesignFlag ? '600' : '500')};
+
+  :disabled {
+    opacity: 0.4;
+    :hover {
+      cursor: auto;
+      background-color: ${({ theme, redesignFlag }) => (redesignFlag ? 'transparent' : theme.deprecated_primary5)};
+      box-shadow: none;
+      outline: none;
+    }
+  }
+`
+
+const TypeButton = styled(ButtonLightBoring) <{ selected: boolean }>`
+  padding: 0px;
+  border-radius: 8px;
+  font-size: 14px;
+  width: 140px;
+  background: none;
+  height: 40px;
+`
+
+const ModeSelectionCard = styled.div <{ selected: boolean }>`
+    border-radius: 10px;
+    width: 140px;
+    height: 40px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background: none;
+  ${({ theme, selected }) =>
+    selected ?
+      `
+    border: 1px solid ${({ theme }) => theme.backgroundInteractive};
+    border-bottom: none;
+    background-color: #242B33;
+    font-weight: bold;
+    `: `
+    opacity: 0.5;
+    background-color: transparent;
+    `
+  }
+`
+
+const HeaderText = styled.div`
+ font-size: 14px;
+ font-weight: 400;
 `
 
 const TableBody = styled.tbody`
@@ -120,12 +202,34 @@ export default function PositionTable({
   }, [lendingProtocol, relevantAccount])
 
   const filterStateChevrons = useDebtFilterSetting(lendingProtocol)
-
+  const [viewPositions, setViewPositions] = useState(true)
   // handles change to sorted items
   // useHandleDebtFilter(lendingProtocol, assetData)
 
   return (
     <TableContainerPro>
+      <ButtonRow>
+        <TypeButton
+          onClick={() => !viewPositions && setViewPositions(true)}
+          selected={viewPositions}
+        >
+          <ModeSelectionCard selected={viewPositions}>
+            <HeaderText>
+              Open Positions
+            </HeaderText>
+          </ModeSelectionCard>
+        </TypeButton>
+        <TypeButton
+          onClick={() => viewPositions && setViewPositions(false)}
+          selected={!viewPositions}
+        >
+          <ModeSelectionCard selected={!viewPositions}>
+            <HeaderText>
+              Trade History
+            </HeaderText>
+          </ModeSelectionCard>
+        </TypeButton>
+      </ButtonRow>
       <Table>
         <TableHeaderPro>
           <TableHeaderRowPro>
@@ -169,7 +273,7 @@ export default function PositionTable({
         </TableHeaderPro>
         <TableBody>
           {
-            assetData.filter(d => d.closeTime === 0)
+            viewPositions && assetData.filter(d => d.closeTime === 0)
               .map((dat, i) => <PositionRow
                 isMobile={isMobile}
                 {...dat}
@@ -181,16 +285,8 @@ export default function PositionTable({
                 topSep={false}
               />)
           }
-          {assetData.filter(d => d.closeTime > 0).length > 0 &&
+          {!viewPositions && assetData.filter(d => d.closeTime > 0).length > 0 &&
             <>
-              <TablRowPro >
-                <SeparatorCell rowSpan={6}>
-                  <HistoryHeader>
-                    Your Trade History
-                  </HistoryHeader>
-                </SeparatorCell>
-              </TablRowPro>
-
               {
                 assetData.filter(d => d.closeTime > 0)
                   .map((dat, i) => <PositionRow
@@ -205,6 +301,22 @@ export default function PositionTable({
                   />)
               }
             </>
+          }
+          {
+            !account && <TablRowPro >
+              <ConnectText>
+                <span style={{ fontWeight: 'bold' }}>
+                  Connect to see your positions
+                </span>
+              </ConnectText>
+            </TablRowPro>
+          }
+          {
+            account && assetData.length === 0 && <TablRowPro >
+              <ConnectText>
+                You don’t have any open position. <span style={{ fontWeight: 'bold' }}>Kickstart your earnings by <span style={{ color: '#967CC9' }}>opening a position.</span></span>
+              </ConnectText>
+            </TablRowPro>
           }
         </TableBody>
       </Table>

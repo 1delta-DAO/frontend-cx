@@ -157,10 +157,10 @@ export const ArrowWrapper = styled.div<{ clickable: boolean; redesignFlag: boole
 `
 
 const Row = styled.div`
-display: flex;
-flex-direction: row;
-align-items: flex-start;
-justify-content: space-between;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
 `
 
 const CurrencySelectionRow = styled.div`
@@ -199,12 +199,17 @@ const SwapPanel = styled.div`
 `
 
 const ButtonRow = styled.div`
-  width: 100%;
+  height: 56x;
+  padding: 8px;
+  border-radius: 8px;
+  background: #0C0F12;
+  margin-top: 20px;
+  width: 90%;
   display: flex;
   flex-direction: row;
   align-items:center;
   justify-content: space-between;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
 `
 
 export const ButtonLightBoring = styled(BaseButton) <{ redesignFlag?: boolean }>`
@@ -224,31 +229,40 @@ export const ButtonLightBoring = styled(BaseButton) <{ redesignFlag?: boolean }>
 `
 
 const TypeButton = styled(ButtonLightBoring) <{ selected: boolean }>`
-  border-radius: 0px;
+  padding: 0px;
+  border-radius: 8px;
   font-size: 14px;
-  width: 50%;
-  &:first-child {
-    border-top-left-radius: 8px;
-    padding-left: 10px;
-  }
-  &:last-child {
-    border-top-right-radius: 8px;
-    padding-right: 10px;
-    width: 50%;
-  }
+  width: 140px;
+  background: none;
   height: 40px;
+`
+
+const ModeSelectionCard = styled.div <{ selected: boolean }>`
+    border-radius: 10px;
+    width: 140px;
+    height: 40px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background: none;
   ${({ theme, selected }) =>
     selected ?
       `
     border: 1px solid ${({ theme }) => theme.backgroundInteractive};
     border-bottom: none;
-    background-color: ${theme.deprecated_bg0};
+    background-color: #242B33;
     font-weight: bold;
     `: `
     opacity: 0.5;
-    background-color: ${theme.deprecated_bg3};
+    background-color: transparent;
     `
   }
+`
+
+const HeaderText = styled.div`
+ font-size: 16px;
+ font-weight: 500;
 `
 
 export const AutoColumnAdjusted = styled.div<{
@@ -375,7 +389,14 @@ export default function Professional() {
 
   const handleSelectPair = (p: [SupportedAssets, SupportedAssets]) => {
     selectPair(p)
-    setChartPair(p)
+    // in non-expert mode, we do not switch the chart pair
+    // when only the pair order is changed
+    if (selectedMode !== Mode.EXPERT) {
+      if (pair.filter(a => p.includes(a)).length !== 2)
+        setChartPair(p)
+    } else {
+      setChartPair(p)
+    }
   }
 
   const [leverage, setLeverage] = useState(1.2)
@@ -1034,8 +1055,12 @@ export default function Professional() {
               }}
               selected={selectedMode === Mode.LONG}
             >
-              <TrendingUp style={{ marginRight: '10px' }} size={15} />
-              Long
+              <ModeSelectionCard selected={selectedMode === Mode.LONG}>
+                <TrendingUp style={{ marginRight: '10px' }} size={18} />
+                <HeaderText>
+                  Long
+                </HeaderText>
+              </ModeSelectionCard>
             </TypeButton>
             <TypeButton
               onClick={() => {
@@ -1046,8 +1071,12 @@ export default function Professional() {
               }}
               selected={selectedMode === Mode.SHORT}
             >
-              <TrendingDown style={{ marginRight: '10px' }} size={15} />
-              Short
+              <ModeSelectionCard selected={selectedMode === Mode.SHORT}>
+                <TrendingDown style={{ marginRight: '10px' }} size={18} />
+                <HeaderText>
+                  Short
+                </HeaderText>
+              </ModeSelectionCard>
             </TypeButton>
             {/* <TypeButton
               onClick={() => setSelectedMode(Mode.EXPERT)}
