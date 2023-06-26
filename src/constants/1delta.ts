@@ -75,7 +75,7 @@ export const TOKEN_META: { [key in SupportedAssets]: TokenMeta } = {
   [SupportedAssets.USDT]: { symbol: 'USDT', name: 'Tether', decimals: 6 },
   [SupportedAssets.AAVE]: { symbol: 'AAVE', name: 'AAVE', decimals: 18 },
   [SupportedAssets.EURS]: { symbol: 'EURS', name: 'EURS', decimals: 2 },
-  [SupportedAssets.WMATIC]: { symbol: 'WMATIC', name: 'WMATIC', decimals: 18 },
+  [SupportedAssets.WMATIC]: { symbol: 'WMATIC', name: 'Wrapped Matic', decimals: 18 },
   [SupportedAssets.AGEUR]: { symbol: 'AGEUR', name: 'AGEUR', decimals: 18 },
   [SupportedAssets.BAL]: { symbol: 'BAL', name: 'Balancer', decimals: 18 },
   [SupportedAssets.CRV]: { symbol: 'CRV', name: 'Curve', decimals: 18 },
