@@ -185,6 +185,7 @@ const SwapPanel = styled.div`
   justify-content: flex-start;
   align-items: center;
   margin: 5px;
+  margin-top: 0px;
   border-radius: 10px;
   min-width: 350px;
   max-width: 350px;
@@ -301,6 +302,7 @@ const CartAndTableContainer = styled(AutoColumnAdjusted)`
 const Container = styled.div`
   width: 95vw;
   max-width: 1600px;
+  margin-top: -20px;
 `
 
 const SliderContainer = styled.div`
