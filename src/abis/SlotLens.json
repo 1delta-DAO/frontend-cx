@@ -509,14 +509,29 @@
             "type": "uint256"
           },
           {
-            "internalType": "uint64",
-            "name": "creationTime",
-            "type": "uint64"
+            "internalType": "uint256",
+            "name": "collateralSwapped",
+            "type": "uint256"
           },
           {
-            "internalType": "uint64",
+            "internalType": "uint256",
+            "name": "debtSwapped",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint32",
+            "name": "creationTime",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
             "name": "closeTime",
-            "type": "uint64"
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint24",
+            "name": "feeDenominator",
+            "type": "uint24"
           }
         ],
         "internalType": "struct OVixLensZK.SlotData",
@@ -605,14 +620,29 @@
             "type": "uint256"
           },
           {
-            "internalType": "uint64",
-            "name": "creationTime",
-            "type": "uint64"
+            "internalType": "uint256",
+            "name": "collateralSwapped",
+            "type": "uint256"
           },
           {
-            "internalType": "uint64",
+            "internalType": "uint256",
+            "name": "debtSwapped",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint32",
+            "name": "creationTime",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
             "name": "closeTime",
-            "type": "uint64"
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint24",
+            "name": "feeDenominator",
+            "type": "uint24"
           }
         ],
         "internalType": "struct OVixLensZK.SlotData[]",

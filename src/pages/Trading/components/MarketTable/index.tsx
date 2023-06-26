@@ -238,29 +238,22 @@ export default function PositionTable({
                 Symbol
               </StyledText>
             </AssetHeaderPro>
-            {PNL_FLAG_ON && <PnLHeaderPro hasFilter onClick={handleUserBorrowFilter}>
-              <SimpleRow>
-                PnL
-                {filterStateChevrons.filter === FilterActive.USER && (
-                  <ChevronContainer>
-                    {filterStateChevrons.mode === Filter.DESC ? <ChevronDown /> : <ChevronUp />}
-                  </ChevronContainer>
-                )}
-              </SimpleRow>
+            {PNL_FLAG_ON && <PnLHeaderPro hasFilter={false}>
+              PnL
             </PnLHeaderPro>}
-            <PositionHeaderPro hasFilter>
+            <PositionHeaderPro hasFilter={false}>
               Size
             </PositionHeaderPro>
-            {PNL_FLAG_ON && <PriceHeaderPro hasFilter>
+            {PNL_FLAG_ON && <PriceHeaderPro hasFilter={false}>
               Entry
             </PriceHeaderPro>}
-            <PriceHeaderPro hasFilter>
+            <PriceHeaderPro hasFilter={false}>
               Market
             </PriceHeaderPro>
-            <PriceHeaderPro hasFilter>
+            <PriceHeaderPro hasFilter={false}>
               Liq. Price
             </PriceHeaderPro>
-            <TimeHeaderPro hasFilter>
+            <TimeHeaderPro hasFilter={false}>
               Rewards
             </TimeHeaderPro>
             <TimeHeaderPro hasFilter={false}>

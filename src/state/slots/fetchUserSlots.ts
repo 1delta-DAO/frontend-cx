@@ -54,6 +54,9 @@ export const fetchUserSlots: AsyncThunk<SlotData, SlotQueryParams, any> =
             debtBalance: s.debtBalance.toString(),
             creationTime: Number(s.creationTime.toString()),
             closeTime: Number(s.closeTime),
+            collateralSwapped: s.collateralSwapped.toString(),
+            debtSwapped: s.debtSwapped.toString(),
+            feeDenominator: Number(s.feeDenominator)
           }
 
         }),

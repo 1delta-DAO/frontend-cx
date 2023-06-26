@@ -31,6 +31,8 @@ export interface ExtendedSlot extends Slot {
   pnl: number
   direction: Mode
   price: number
+  entryPrice: number
+  originalSize: number
 }
 
 export const useParsedSlots = (chainId?: number, account?: string): ExtendedSlot[] => {
@@ -67,6 +69,13 @@ export const useParsedSlots = (chainId?: number, account?: string): ExtendedSlot
     const size = cUSD - dUSD
     const cf = Number(formatEther(cfs[collateralAsset]?.cf ?? '0'))
     const mode = collateralAsset.toUpperCase().includes('USD') ? Mode.SHORT : Mode.LONG
+
+    const collateralIn = Number(formatEther(BigNumber.from(s.collateralSwapped ?? '0').mul(TEN.pow(18 - s.collateralDecimals))))
+    const debtOut = Number(formatEther(BigNumber.from(s.debtSwapped ?? '0').mul(TEN.pow(18 - s.debtDecimals))))
+
+    const entryPrice = debtOut / collateralIn;
+    const originalSize = (c - collateralIn) * priceDict[collateralAsset ?? '']
+
     return {
       ...s,
       collateralBalanceUsd: cUSD,
@@ -96,8 +105,10 @@ export const useParsedSlots = (chainId?: number, account?: string): ExtendedSlot
         TimeScale.MS
       ),
       direction: mode,
-      pnl: 0,
-      price: mode === Mode.LONG ? priceDict[collateralAsset ?? ''] : priceDict[debtAsset ?? '']
+      pnl: (size - originalSize) / originalSize,
+      price: mode === Mode.LONG ? priceDict[collateralAsset ?? ''] : priceDict[debtAsset ?? ''],
+      entryPrice,
+      originalSize
     }
   })
 }

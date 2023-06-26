@@ -665,7 +665,7 @@ export default function Professional() {
     }
     return calculateCompoundRiskChangeSlot(
       {
-        asset: depositAsset,
+        asset: pair[0],
         delta: depositMode === DepositMode.DIRECT ? BigNumber.from(parsedAmountIn?.quotient.toString()) : BigNumber.from(tradeIn?.outputAmount?.quotient.toString() ?? '0'),
         side: PositionSides.Collateral
       },
@@ -684,7 +684,7 @@ export default function Professional() {
   },
     [borrowAmount, depositAsset, trade, tradeIn, pair, depositMode, parsedAmountIn, riskParams])
 
-  // console.log("RISK", riksParamsChange)
+
   const recipientAddress = recipient
 
   const [routeNotFound, routeIsLoading, routeIsSyncing] = useMemo(
@@ -999,7 +999,7 @@ export default function Professional() {
 
   const [leverageValidated, minVal, onLevChange, maxVal] = useMemo(() => {
 
-    if (depositMode === DepositMode.TO_COLLATERAL && selectedMode === Mode.LONG) {
+    if ((depositMode === DepositMode.TO_COLLATERAL || depositMode === DepositMode.DIRECT) && selectedMode === Mode.LONG) {
       return [leverage + 1, 1.2, (n: number) => setLeverage(n - 1), 4]
     }
 

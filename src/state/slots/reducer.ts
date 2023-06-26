@@ -16,6 +16,9 @@ export interface Slot {
   debtBalance: string;
   creationTime: number;
   closeTime: number;
+  collateralSwapped: number;
+  debtSwapped: number;
+  feeDenominator: number;
 }
 
 interface SlotState {

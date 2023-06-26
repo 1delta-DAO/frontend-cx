@@ -23,6 +23,7 @@ import { ExternalLink as LinkIconFeather } from 'react-feather'
 import { ExtendedSlot } from 'state/slots/hooks'
 import { PNL_FLAG_ON } from './config'
 import { ExplorerDataType, getExplorerLink } from 'utils/getExplorerLink'
+import { formatPercent } from 'utils/1delta/generalFormatters'
 
 export const ValueText = styled.div<{ positive: boolean }>`
   font-size: 14px;
@@ -51,7 +52,6 @@ export const NewValWithArrow = styled.div`
 `
 
 const SimpleCol = styled.div`
-  margin-left: -10px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -244,14 +244,14 @@ export default function PositionRow(props: PositionProps) {
         <PairPosition pair={props.pair} isMobile={props.isMobile} leverage={props.leverage} direction={props.direction} />
       </AssetCellPro>
       {PNL_FLAG_ON && <PnLCellPro  >
-        <SimpleCol>
+        {props.closeTime === 0 ? <SimpleCol>
           <PnLCell pos={props.pnl > 0}>
-            {props.pnl > 0 ? '+' : ''}{props.pnl}%
+            {props.pnl > 0 ? '+' : ''}{formatPercent(props.pnl, 2)}
           </PnLCell>
           <PnLCellUSD pos={props.pnl > 0}>
-            {props.pnl > 0 ? '+' : ''}{formatSmallGeneralUSDValue(props.pnl * props.price)}
+            {props.pnl > 0 ? '+' : ''}{formatSmallGeneralUSDValue(props.pnl * props.originalSize)}
           </PnLCellUSD>
-        </SimpleCol>
+        </SimpleCol> : '-'}
       </PnLCellPro>}
       <PositionCellPro>
         <PositionText>
@@ -261,7 +261,7 @@ export default function PositionRow(props: PositionProps) {
       {/* // PRICES */}
       {PNL_FLAG_ON && <PriceCellPro  >
         <PriceText>
-          {formatPriceString(String(props.price * 1.01))}
+          {formatPriceString(String(props.entryPrice))}
         </PriceText>
       </PriceCellPro>}
       <PriceCellPro  >
@@ -276,7 +276,7 @@ export default function PositionRow(props: PositionProps) {
       </PriceCellPro>
       {/* // REWARDS */}
       <RewardsHeaderPro hasFilter={false} isEditing={false}>
-        <SimpleCol>
+        <SimpleCol style={{ marginLeft: '-10px' }}>
           <SimpelRow>
             <StyledLogo src={ovixStandalone} />
             <AprText pos>
