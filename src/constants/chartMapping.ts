@@ -84,7 +84,7 @@ export const getTradingViewSymbol = (ccy1: SupportedAssets, ccy2: SupportedAsset
 
 
   // standard ccys like network currencies should have uniswap pools
-  if (pair.includes(SupportedAssets.WETH)) return `${VENUES.UNISWAP3ETH}:${ccy1}${ccy2}`
+  if (pair.includes(SupportedAssets.WETH)) return `${VENUES.UNISWAP3POLYGON}:${ccy1}${ccy2}`
   if (pair.includes(SupportedAssets.WMATIC) && !pair.includes(SupportedAssets.AGEUR)) return `${VENUES.UNISWAP3POLYGON}:${ccy1}${ccy2}`
 
   if (pair.includes(SupportedAssets.GHST)) {
