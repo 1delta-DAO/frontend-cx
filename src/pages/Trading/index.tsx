@@ -381,7 +381,6 @@ export default function Professional() {
   const redesignFlagEnabled = redesignFlag === RedesignVariant.Enabled
   const { connectionIsSupported, chainId, account } = useNetworkState()
   const currentProtocol = LendingProtocol.COMPOUND
-
   const isDark = useIsDarkMode()
 
   const [selectedMode, setSelectedMode] = useState(Mode.LONG)

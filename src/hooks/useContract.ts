@@ -114,15 +114,6 @@ export function useTokenContract(tokenAddress?: string, withSignerIfPossible?: b
   return useContract<Erc20>(tokenAddress, ERC20_ABI, withSignerIfPossible)
 }
 
-export function useWETHContract(withSignerIfPossible?: boolean) {
-  const { chainId } = useWeb3React()
-  return useContract<Weth>(
-    chainId ? WRAPPED_NATIVE_CURRENCY[chainId]?.address : undefined,
-    WETH_ABI,
-    withSignerIfPossible
-  )
-}
-
 export function useERC721Contract(nftAddress?: string) {
   return useContract<Erc721>(nftAddress, ERC721_ABI, false)
 }
