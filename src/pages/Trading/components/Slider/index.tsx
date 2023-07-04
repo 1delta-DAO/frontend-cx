@@ -23,15 +23,15 @@ const SliderInput = styled.input<{ fillPercent: number }>`
 
   &::-webkit-slider-thumb {
     appearance: none;
-    width: 12px;
-    height: 12px;
-    margin-bottom: 5px;
+    width: 18px;
+    height: 18px;
+    margin-bottom: 8px;
     border-radius: 50%;
     background: #AC90E3;  // Thumb color
     border: 3px solid #1B2126;
     cursor: pointer;
     vertical-align: baseline;
-    margin-top: -3px; /* alignment fix for Chrome */
+    margin-top: -6px; /* alignment fix for Chrome */
   }
 
   &::-moz-range-thumb {

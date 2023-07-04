@@ -312,18 +312,37 @@ const SliderContainer = styled.div`
   padding: 2px;
   align-items: center;
   justify-content: center;
-  margin-top: 10px;
   margin-left: 10px;
   margin-right: 10px;
 `
+
+const LeverageTag = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  font-weight: 400;
+  align-items: center;
+  justify-content: flex-start;
+  margin-top: 10px;
+  margin-left: 40px;
+  margin-bottom: 5px;
+  font-size: 14px;
+  color: ${({ theme }) => theme.textSecondary};
+  `
+
 const SliderValue = styled.div`
-  width: 40px;
+  width: 53px;
+  height: 31px;
   padding: 2px;
   color: ${({ theme }) => (theme.textSecondary)};
-  background-color: ${({ theme }) => theme.deprecated_bg1};
-  border-radius: 2px;
+  background-color: #0C0F12;
+  border-radius: 4px;
   margin-left: 10px;
   padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  border: 1px solid #1B2127;
 `
 
 const ContentContainer = styled(Row)`
@@ -334,8 +353,11 @@ flex-direction: column;
 `
 
 const InputPanelContainer = styled.div`
-  width: 90%;
+  width: 100%;
   margin: 2px;
+  padding: 0px 16px 0px 16px;
+  gap: 16px;
+
 `
 
 const getPairs = (assets: SupportedAssets[]): [SupportedAssets, SupportedAssets][] => {
@@ -1000,7 +1022,7 @@ export default function Professional() {
 
   const [leverageValidated, minVal, onLevChange, maxVal] = useMemo(() => {
 
-    if ((depositMode === DepositMode.TO_COLLATERAL || depositMode === DepositMode.DIRECT) && selectedMode === Mode.LONG) {
+    if (selectedMode === Mode.LONG) {
       return [leverage + 1, 1.2, (n: number) => setLeverage(n - 1), 4]
     }
 
@@ -1009,7 +1031,8 @@ export default function Professional() {
     leverage,
     setLeverage,
     depositMode,
-    selectedMode
+    selectedMode,
+    pair
   ]
   )
 
@@ -1143,22 +1166,15 @@ export default function Professional() {
               />
             </InputWrapper>
           </InputPanelContainer>
-          {recipient !== null ? (
-            <>
-              <AutoRow justify="space-between" style={{ padding: '0 1rem' }}>
-                <ArrowWrapper clickable={false} redesignFlag={redesignFlagEnabled}>
-                  <ArrowDown size="16" color={theme.deprecated_text2} />
-                </ArrowWrapper>
-                <LinkStyledButton id="remove-recipient-button" onClick={() => onChangeRecipient(null)}>
-                  <Trans>- Remove recipient</Trans>
-                </LinkStyledButton>
-              </AutoRow>
-              <AddressInputPanel id="recipient" value={recipient} onChange={onChangeRecipient} />
-            </>
-          ) : null}
+          <LeverageTag>
+            Leverage
+          </LeverageTag>
           <SliderContainer >
             <SliderValue>
-              {leverageValidated}x
+              <span style={{ fontSize: '13px', color: 'white' }}>
+                {leverageValidated}
+              </span><span style={{ fontSize: '13px', color: 'white', opacity: 0.6 }}>x</span>
+
             </SliderValue>
             <DecimalSlider min={minVal} max={maxVal} step={0.1} markers={[0, 1, 2, 3, 4, 5]} onChange={onLevChange} value={leverageValidated} />
           </SliderContainer>
@@ -1180,7 +1196,7 @@ export default function Professional() {
                     onClick={handleApprove}
                     disabled={approveTokenButtonDisabled}
                     width="100%"
-                    height='40px'
+                    height='48px'
                     altDisabledStyle={approvalState === ApprovalState.PENDING} // show solid button while waiting
                     confirmed={
                       approvalState === ApprovalState.APPROVED
@@ -1232,7 +1248,7 @@ export default function Professional() {
                     }}
                     width="100%"
                     id="swap-button"
-                    height='40px'
+                    height='48px'
                     disabled={
                       routeIsSyncing ||
                       routeIsLoading ||
@@ -1266,7 +1282,7 @@ export default function Professional() {
                   routeIsSyncing || routeIsLoading ||
                   buttonDisabled
                 }
-                height='40px'
+                height='48px'
               >
                 <Text fontSize={16} fontWeight={500}>
                   {validatedSwapText}
@@ -1328,7 +1344,7 @@ export default function Professional() {
               theme={isDark ? 'DARK' : 'LIGHT'}
               allow_symbol_change={false}
               autosize={true}
-              interval={'30'}
+              interval={'D'}
               hide_volume={true}
               style={'10'}
               hide_legend={true}

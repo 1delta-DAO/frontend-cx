@@ -59,13 +59,13 @@ const CurrencySelect = styled(ButtonGray) <{
   hideInput?: boolean
   disabled?: boolean
 }>`
+  height: 52px;
   align-items: center;
   background-color: #1B2127;
   opacity: ${({ disabled }) => (!disabled ? 1 : 0.4)};
   box-shadow: ${({ selected }) => (selected ? 'none' : '0px 6px 10px rgba(0, 0, 0, 0.075)')};
   color: ${({ selected, theme }) => (selected ? theme.deprecated_text1 : theme.deprecated_white)};
   cursor: pointer;
-  height: ${({ hideInput }) => hideInput ? '2.8rem' : '2.4rem'};
   border-radius: 10px;
   outline: none;
   user-select: none;
@@ -82,6 +82,7 @@ const CurrencySelect = styled(ButtonGray) <{
 `
 
 export const InputRow = styled.div<{ selected: boolean; }>`
+  height: 52px;
   ${({ theme }) => theme.flexRowNoWrap}
   align-items: center;
   justify-content: space-between;
@@ -161,7 +162,7 @@ const IconContainer = styled.span`
 `
 
 const SimpleRow = styled.div`
-height: 32px;
+  height: 40px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;

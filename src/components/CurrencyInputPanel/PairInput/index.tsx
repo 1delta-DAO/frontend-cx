@@ -30,7 +30,7 @@ const PairSelect = styled(ButtonGray) <{
   box-shadow: ${({ selected }) => (selected ? 'none' : '0px 6px 10px rgba(0, 0, 0, 0.075)')};
   color: ${({ selected, theme }) => (selected ? theme.deprecated_text1 : theme.deprecated_white)};
   cursor: pointer;
-  height: ${({ hideInput }) => hideInput ? '2.8rem' : '2.4rem'};
+  height: 52px;
   border-radius: 10px;
   border-top-right-radius: 0px;
   outline: none;
@@ -65,21 +65,11 @@ const StyledNumericalInput = styled(NumericalInput) <{ $loading: boolean; }>`
 `
 
 const SimpleRow = styled.div`
-  height: 32px;
+  height: 40px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-`
-
-const StyledDropDown = styled.img <{ selected: boolean; }>`
-  margin: 0 0.0rem 0 0.0rem;
-  height: 35%;
-
-  path {
-    stroke: ${({ selected, theme }) => (selected ? theme.deprecated_text1 : theme.deprecated_white)};
-    stroke-width: 2px;
-  }
 `
 
 const Image = styled.img`
@@ -211,6 +201,7 @@ export default function PairInput({
           {trade && pair && !simpleVersion && <Image src={TOKEN_SVGS[(showCollateral ? pair[0] : pair[1])]} onClick={() => setShowCollateral(!showCollateral)} />}
           {!hideInput && (
             <StyledNumericalInput
+              spellCheck={false}
               className="token-amount-input"
               value={isNaN(Number(value)) ? '0.0' : value ?? '0.0'}
               onUserInput={onUserInput}
