@@ -258,7 +258,7 @@ export function AdvancedRiskDetails({
             <MouseoverTooltip
               text={
                 <Trans>
-                  The APR of the position.
+                  The annual cost or income of the position.
                 </Trans>
               }
               disableHover={hideInfoTooltips}
@@ -274,8 +274,7 @@ export function AdvancedRiskDetails({
             </AprText>
           </TextWithLoadingPlaceholder>
         </RowBetween>
-        <SeparatorLight />
-
+        <SeparatorBase redesignFlag={redesignFlagEnabled} />
         <RowBetween >
           <RowFixed>
             <MouseoverTooltip
