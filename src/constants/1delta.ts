@@ -515,5 +515,7 @@ export const QUOTE_GAS_OVERRIDES: { [chainId: number]: number } = {
   [SupportedChainId.CELO_ALFAJORES]: 50_000_000,
   [SupportedChainId.POLYGON]: 1_000_000,
   [SupportedChainId.POLYGON_MUMBAI]: 50_000_000,
-  [SupportedChainId.POLYGON_ZK_EVM]: 50_000_000,
+  [SupportedChainId.POLYGON_ZK_EVM]: 100_000_000,
 }
+
+export const SHOW_VIX_REWARDS = false

@@ -2,7 +2,7 @@ import { Trans } from '@lingui/macro'
 import { Currency, Percent, TradeType } from '@uniswap/sdk-core'
 import Card from 'components/Card'
 import { LoadingRows } from 'components/Loader/styled'
-import { TOKEN_SVGS } from 'constants/1delta'
+import { SHOW_VIX_REWARDS, TOKEN_SVGS } from 'constants/1delta'
 import { SupportedChainId, SUPPORTED_GAS_ESTIMATE_CHAIN_IDS } from 'constants/chains'
 import { RedesignVariant, useRedesignFlag } from 'featureFlags/flags/redesign'
 import useNativeCurrency from 'lib/hooks/useNativeCurrency'
@@ -238,9 +238,44 @@ export function AdvancedRiskDetails({
   }, [ltv, healthFactor])
 
 
+  // output amount incl. deposit
+  const outputUsd = useMemo(() => (expectedOutputAmount ? Number(expectedOutputAmount.toExact()) * priceCollateral
+    + (!assetsAreEqual(depositCurrency, data?.[1]) ? 0 : depositAmount) : 0),
+    [expectedOutputAmount, data, priceCollateral]
+  )
+
+  const inputUsd = useMemo(() => trade ? Number(trade.inputAmount.toExact()) * priceDebt : 0, [trade, priceDebt])
+
+  const cfPerYear = outputUsd * aprSupply - inputUsd * aprBorrow
+  const netYield = cfPerYear / depositAmount
+
   return (!trade || !data) ? null : (
     <StyledCard>
       <AutoColumn gap="8px">
+
+        <RowBetween >
+          <RowFixed>
+            <MouseoverTooltip
+              text={
+                <Trans>
+                  The APR of the position.
+                </Trans>
+              }
+              disableHover={hideInfoTooltips}
+            >
+              <ThemedText.DeprecatedSubHeader color={theme.deprecated_text1}>
+                <Trans>Position APR</Trans>
+              </ThemedText.DeprecatedSubHeader>
+            </MouseoverTooltip>
+          </RowFixed>
+          <TextWithLoadingPlaceholder syncing={syncing} width={65}>
+            <AprText pos={netYield > 0} style={{ fontSize: '14px', fontWeight: 400 }}>
+              {`${netYield > 0 ? '+' : ''}${netYield.toFixed(2)}%`}
+            </AprText>
+          </TextWithLoadingPlaceholder>
+        </RowBetween>
+        <SeparatorLight />
+
         <RowBetween >
           <RowFixed>
             <MouseoverTooltip
@@ -295,7 +330,7 @@ export function AdvancedRiskDetails({
               disableHover={hideInfoTooltips}
             >
               <ThemedText.DeprecatedSubHeader color={theme.textSecondary} fontWeight={'300'}>
-                <Trans>Yields</Trans>
+                <Trans>Yield</Trans>
               </ThemedText.DeprecatedSubHeader>
             </MouseoverTooltip>
           </RowFixed>
@@ -303,12 +338,12 @@ export function AdvancedRiskDetails({
             <SimpleCol>
               <TextWithLoadingPlaceholder syncing={syncing} width={65}>
                 <SimpleRow>
-                  <AprRow>
+                  {SHOW_VIX_REWARDS && <AprRow>
                     <StyledLogo src={ovixStandalone} />
                     <AprText pos>
                       +{`${rewardSupply.toFixed(2)}%`}
                     </AprText>
-                  </AprRow>
+                  </AprRow>}
                   <AprRow>
                     <StyledLogo src={TOKEN_SVGS[data[1]]} />
                     <AprText pos>
@@ -319,12 +354,12 @@ export function AdvancedRiskDetails({
 
               </TextWithLoadingPlaceholder>
               {!assetsAreEqual(depositCurrency, data[1]) && <SimpleRow>
-                <AprRow>
+                {SHOW_VIX_REWARDS && <AprRow>
                   <StyledLogo src={ovixStandalone} />
                   <AprText pos>
                     +{`${rewardDeposit.toFixed(2)}%`}
                   </AprText>
-                </AprRow>
+                </AprRow>}
                 <AprRow>
                   <StyledLogo src={TOKEN_SVGS[depositMode === DepositMode.DIRECT ? data[0] : SupportedAssets.USDC]} />
                   <AprText pos>
@@ -369,18 +404,18 @@ export function AdvancedRiskDetails({
               disableHover={hideInfoTooltips}
             >
               <ThemedText.DeprecatedSubHeader color={theme.textSecondary} fontWeight={'300'}>
-                <Trans>Yields</Trans>
+                <Trans>Yield</Trans>
               </ThemedText.DeprecatedSubHeader>
             </MouseoverTooltip>
           </RowFixed>
           <TextWithLoadingPlaceholder syncing={syncing} width={65}>
             <SimpleRow>
-              <AprRow>
+              {SHOW_VIX_REWARDS && <AprRow>
                 <StyledLogo src={ovixStandalone} />
                 <AprText pos>
                   +{`${rewardBorrow.toFixed(2)}%`}
                 </AprText>
-              </AprRow>
+              </AprRow>}
               <AprRow>
                 <StyledLogo src={TOKEN_SVGS[data[2]]} />
                 <AprText pos={false}>

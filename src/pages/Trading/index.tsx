@@ -1341,7 +1341,7 @@ export default function Professional() {
           <ChartContainer>
             <TradingViewWidget
               symbol={tradingViewSymbol}
-              theme={isDark ? 'DARK' : 'LIGHT'}
+              theme={'DARK'}
               allow_symbol_change={false}
               autosize={true}
               interval={'D'}

@@ -17,7 +17,7 @@ import { useChainIdAndAccount } from 'state/globalNetwork/hooks'
 import { AssetCellPro, CheckboxCellPro, PnLCellPro, PositionCellPro, PositionRowPro, PriceCellPro, RewardsHeaderPro, TimeCellPro } from 'components/Styles/tableStylesProfessional'
 import { SupportedAssets } from 'types/1delta'
 import { Mode } from 'pages/Trading'
-import { TOKEN_SVGS } from 'constants/1delta'
+import { SHOW_VIX_REWARDS, TOKEN_SVGS } from 'constants/1delta'
 import { default as ovixStandalone } from 'assets/svg/logos/logo-0vix.svg'
 import { ExternalLink as LinkIconFeather } from 'react-feather'
 import { ExtendedSlot } from 'state/slots/hooks'
@@ -276,13 +276,13 @@ export default function PositionRow(props: PositionProps) {
       </PriceCellPro>
       {/* // REWARDS */}
       <RewardsHeaderPro hasFilter={false} isEditing={false}>
-        <SimpleCol style={{ marginLeft: '-10px' }}>
-          <SimpelRow>
+        <SimpleCol style={{ marginLeft: '-10px', gap: '5px' }}>
+          {SHOW_VIX_REWARDS && <SimpelRow>
             <StyledLogo src={ovixStandalone} />
             <AprText pos>
               +{aprReward}
             </AprText>
-          </SimpelRow>
+          </SimpelRow>}
           <SimpelRow>
             <StyledLogo src={TOKEN_SVGS[props.pair[props.direction === Mode.LONG ? 0 : 1]]} />
             <AprText pos>
