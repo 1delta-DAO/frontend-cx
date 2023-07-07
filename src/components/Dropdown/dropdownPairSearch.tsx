@@ -39,12 +39,11 @@ const DropdownList = styled(ScrollBar)`
   max-height: 200px;
   overflow-y: auto;
   padding: 0;
-  opacity: 0.9;
+  opacity: 0.99;
   margin: 0;
-  background: ${({ theme }) => theme.deprecated_bg6};
   backdrop-filter: blur(10px);
   border-top: none;
-  border-radius: 5px;
+  border-radius: 8px;
   z-index: ${Z_INDEX.modal};
   max-width: 180px;
 `;
@@ -59,7 +58,7 @@ const Row = styled.div`
 `
 
 const RowPair = styled.div`
-  padding: 1px;
+  padding: 4px;
   margin-left: 4px;
   display: flex;
   flex-direction: row;
@@ -181,6 +180,7 @@ export const PairSearchDropdown: React.FC<DropdownProps> = ({ selectedOption, op
         <Image src={TOKEN_SVGS[selectedOption?.[0] ?? placeholder]} style={{ width: '25px' }} />
         <Image src={TOKEN_SVGS[selectedOption?.[1] ?? placeholder]} style={{ marginLeft: '-10px', width: '25px' }} />
         <DropdownInput
+          spellCheck={false}
           style={{ maxWidth: '110px' }}
           type="text"
           value={inputValue}

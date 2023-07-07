@@ -854,33 +854,33 @@ export default function Professional() {
       return
     }
     // estimate gas 
-    let gasEstimate: any = undefined
-    try {
-      setSwapState({
-        attemptingTxn: true,
-        tradeToConfirm,
-        showConfirm,
-        swapErrorMessage: undefined,
-        txHash: undefined,
-      })
-      gasEstimate = await estimate()
-    } catch (error) {
-      setSwapState({
-        attemptingTxn: false,
-        tradeToConfirm,
-        showConfirm,
-        swapErrorMessage: error.message,
-        txHash: undefined,
-      })
-    }
-    const opts = gasEstimate ? {
-      gasLimit: calculateGasMargin(gasEstimate),
-    } : {}
+    // let gasEstimate: any = undefined
+    // try {
+    //   setSwapState({
+    //     attemptingTxn: true,
+    //     tradeToConfirm,
+    //     showConfirm,
+    //     swapErrorMessage: undefined,
+    //     txHash: undefined,
+    //   })
+    //   gasEstimate = await estimate()
+    // } catch (error) {
+    //   setSwapState({
+    //     attemptingTxn: false,
+    //     tradeToConfirm,
+    //     showConfirm,
+    //     swapErrorMessage: error.message,
+    //     txHash: undefined,
+    //   })
+    // }
+    // const opts = gasEstimate ? {
+    //   gasLimit: calculateGasMargin(gasEstimate),
+    // } : {}
 
     setSwapState({ attemptingTxn: true, tradeToConfirm, showConfirm, swapErrorMessage: undefined, txHash: undefined })
     if (call)
       try {
-        await call(opts)
+        await call({})
           .then((txResponse) => {
             setSwapState({
               attemptingTxn: false,
@@ -1346,7 +1346,7 @@ export default function Professional() {
               autosize={true}
               interval={'D'}
               hide_volume={true}
-              style={'10'}
+              style={'1'}
               hide_legend={true}
               withdateranges={true}
               save_image={false}

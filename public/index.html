@@ -31,7 +31,7 @@
 
   <style>
     * {
-      font-family: 'Inter', sans-serif;
+      font-family: 'Outfit', sans-serif;
       box-sizing: border-box;
     }
 
@@ -39,19 +39,17 @@
           Explicitly load Inter var from public/ so it does not block LCP's critical path.
         */
     @font-face {
-      font-family: 'Inter custom';
+      font-family: 'Outfit';
       font-weight: 100 900;
       font-style: normal;
       font-display: block;
       font-named-instance: 'Regular';
-      src: url(%PUBLIC_URL%/fonts/Inter-roman.var.woff2) format('woff2 supports variations(gvar)'),
-        url(%PUBLIC_URL%/fonts/Inter-roman.var.woff2) format('woff2-variations'),
-        url(%PUBLIC_URL%/fonts/Inter-roman.var.woff2) format('woff2');
+      src: url(%PUBLIC_URL%/fonts/Outfit-VariableFont_wght.ttf) format('truetype');
     }
 
     @supports (font-variation-settings: normal) {
       * {
-        font-family: 'Inter custom', sans-serif;
+        font-family: 'Outfit', sans-serif;
       }
     }
 

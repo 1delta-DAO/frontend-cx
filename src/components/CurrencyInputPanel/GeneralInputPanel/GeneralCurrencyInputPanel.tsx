@@ -74,7 +74,7 @@ const CurrencySelect = styled(ButtonGray) <{
   font-size: 24px;
   font-weight: 400;
   width: 110px;
-  padding: ${({ selected }) => selected ? '4px 8px 4px 4px' : '6px 6px 6px 8px'};
+  padding: 8px;
   gap: 0px;
   justify-content: space-between;
   margin-left: ${({ hideInput }) => (hideInput ? '0' : '12px')};
@@ -104,7 +104,7 @@ const FiatRow = styled(LabelRow)`
   justify-content: flex-end;
 `
 
-const Aligner = styled.span`
+const Aligner = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -319,7 +319,7 @@ export default function GeneralCurrencyInputPanel({
             <Aligner>
               <RowFixed>
                 {currency ? (
-                  <CurrencyLogo style={{ marginRight: '2px' }} currency={currency} size={'24px'} />
+                  <CurrencyLogo style={{ marginRight: '2px', marginLeft: '5px;' }} currency={currency} size={'24px'} />
                 ) : null}
 
                 <StyledTokenName

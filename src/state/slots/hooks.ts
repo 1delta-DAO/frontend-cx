@@ -68,7 +68,7 @@ export const useParsedSlots = (chainId?: number, account?: string): ExtendedSlot
     const dUSD = d * priceDict[debtAsset ?? '']
     const size = cUSD - dUSD
     const cf = Number(formatEther(cfs[collateralAsset]?.cf ?? '0'))
-    const mode = collateralAsset.toUpperCase().includes('USD') ? Mode.SHORT : Mode.LONG
+    const mode = collateralAsset.toUpperCase().includes('USDC') ? Mode.SHORT : Mode.LONG
 
     const collateralIn = Number(formatEther(BigNumber.from(s.collateralSwapped ?? '0').mul(TEN.pow(18 - s.collateralDecimals))))
     const debtOut = Number(formatEther(BigNumber.from(s.debtSwapped ?? '0').mul(TEN.pow(18 - s.debtDecimals))))
@@ -88,7 +88,7 @@ export const useParsedSlots = (chainId?: number, account?: string): ExtendedSlot
         d,
         cUSD,
         dUSD,
-        !collateralAsset.toUpperCase().includes('USD')
+        !collateralAsset.toUpperCase().includes('USDC')
       ),
       pair: mode === Mode.LONG ? [collateralAsset as SupportedAssets, debtAsset as SupportedAssets] : [debtAsset as SupportedAssets, collateralAsset as SupportedAssets],
       leverage: mode === Mode.LONG ? cUSD / size : dUSD / size,
