@@ -30,13 +30,11 @@ export const Row = styled.tr`
   margin: 0px;
 `
 
-export const PositionRowPro = styled.tr<{ hasBalance: boolean, hasWalletBalance: boolean, topSep?: boolean }>`
+export const PositionRowPro = styled.tr<{ hasBalance: boolean, topSep?: boolean }>`
   box-shadow: ${({ theme }) => theme.shadow1};
-  background: ${({ theme, hasBalance, hasWalletBalance }) =>
+  background: ${({ theme, hasBalance }) =>
     hasBalance
-      ? `rgba(0, 255, 0, 0.1)` :
-      hasWalletBalance ? 'rgba(0, 0, 255, 0.1)'
-        : theme.deprecated_bg0};
+      ? `#0C0F12` : '#13171B'};
   width: 100%;
   margin: 0px;
   display: flex;
@@ -66,7 +64,6 @@ export const RowWithDebt = styled.tr<{ hasBalance: boolean }>`
 
 export const CellPro = styled.td`
   border-collapse: separate;
-  background-color: ${({ theme }) => theme.deprecated_bg0};
   &:first-child {
     padding-left: 10px;
   }

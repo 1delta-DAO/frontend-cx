@@ -384,10 +384,7 @@ export const ThemedText = {
 export const ThemedGlobalStyle = createGlobalStyle`
 html {
   color: ${({ theme }) => theme.deprecated_text1};
-  background-image: url(${Background_0VIX});
-  background-size: cover;
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
+  background: #040301;
 }
 
 a {
@@ -398,3 +395,5 @@ a {
   ${({ theme }) => (theme.darkMode ? cssStringFromTheme(darkTheme) : cssStringFromTheme(lightTheme))}
 }
 `
+
+

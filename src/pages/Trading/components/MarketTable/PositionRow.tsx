@@ -213,6 +213,7 @@ const AprText = styled.div<{ pos: boolean }>`
 `
 
 export interface PositionProps extends ExtendedSlot {
+  index: number
   isMobile: boolean
   selectSlot: () => void
   topSep?: boolean
@@ -239,7 +240,7 @@ export default function PositionRow(props: PositionProps) {
   };
 
   return (
-    <PositionRowPro hasBalance={false} hasWalletBalance={false} topSep={props?.topSep}>
+    <PositionRowPro hasBalance={props.index % 2 === 0} topSep={props?.topSep}>
       <AssetCellPro>
         <PairPosition pair={props.pair} isMobile={props.isMobile} leverage={props.leverage} direction={props.direction} />
       </AssetCellPro>

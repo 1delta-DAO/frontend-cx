@@ -268,6 +268,7 @@ export default function PositionTable({
           {
             viewPositions && assetData.filter(d => d.closeTime === 0)
               .map((dat, i) => <PositionRow
+                index={i}
                 isMobile={isMobile}
                 {...dat}
                 key={i}
@@ -283,6 +284,7 @@ export default function PositionTable({
               {
                 assetData.filter(d => d.closeTime > 0)
                   .map((dat, i) => <PositionRow
+                    index={i}
                     isMobile={isMobile}
                     {...dat}
                     key={i}
