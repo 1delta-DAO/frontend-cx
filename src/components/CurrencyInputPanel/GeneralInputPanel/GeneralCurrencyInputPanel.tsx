@@ -22,6 +22,7 @@ import { usePrices } from 'state/oracles/hooks'
 import { SupportedAssets } from 'types/1delta'
 import { formatUSDValuePanel } from 'utils/tableUtils/format'
 import tryParseCurrencyAmount from 'lib/utils/tryParseCurrencyAmount'
+import { handleDisplaySymbol } from 'constants/1delta'
 
 export const InputPanel = styled.div<{ hideInput?: boolean; }>`
   ${({ theme }) => theme.flexColumnNoWrap}
@@ -327,11 +328,7 @@ export default function GeneralCurrencyInputPanel({
                   active={Boolean(currency && currency.symbol)}
 
                 >
-                  {(currency && currency.symbol && currency.symbol.length > 20
-                    ? currency.symbol.slice(0, 4) +
-                    '...' +
-                    currency.symbol.slice(currency.symbol.length - 5, currency.symbol.length)
-                    : currency?.symbol) || <Trans>Select token</Trans>}
+                  {(currency && handleDisplaySymbol(currency?.symbol)) || <Trans>Select token</Trans>}
                 </StyledTokenName>
 
               </RowFixed>

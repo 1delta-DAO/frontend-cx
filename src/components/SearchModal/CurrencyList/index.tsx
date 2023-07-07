@@ -2,6 +2,7 @@ import { Trans } from '@lingui/macro'
 import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core'
 import { useWeb3React } from '@web3-react/core'
 import TokenSafetyIcon from 'components/TokenSafety/TokenSafetyIcon'
+import { handleDisplaySymbol } from 'constants/1delta'
 import { checkWarning } from 'constants/tokenSafety'
 import { RedesignVariant, useRedesignFlag } from 'featureFlags/flags/redesign'
 import { TokenSafetyVariant, useTokenSafetyFlag } from 'featureFlags/flags/tokenSafety'
@@ -165,7 +166,7 @@ export function CurrencyRow({
           {!currency.isNative && !isOnSelectedList && customAdded ? (
             <Trans>{currency.symbol} • Added by user</Trans>
           ) : (
-            currency.symbol
+            handleDisplaySymbol(currency.symbol)
           )}
         </ThemedText.DeprecatedDarkGray>
       </AutoColumn>

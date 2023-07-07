@@ -1,5 +1,5 @@
 import { ScrollBar } from "components/Styles/Lists";
-import { TOKEN_SVGS } from "constants/1delta";
+import { handleDisplaySymbol, TOKEN_SVGS } from "constants/1delta";
 import { useOutsideAlerter } from "hooks/useOutsideClick";
 import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
@@ -276,9 +276,10 @@ export const SingleSearchDropdown: React.FC<SingleDropdownProps> = ({ isLong, se
       <Row key={String(selectedOption)}>
         <Image src={TOKEN_SVGS[selectedOption?.[isLong ? 0 : 1] ?? placeholder]} style={{ width: '25px' }} />
         <DropdownInput
+          spellCheck={false}
           style={{ width: '60px' }}
           type="text"
-          value={inputValue}
+          value={handleDisplaySymbol(inputValue)}
           onChange={handleInputChange}
           placeholder={placeholder}
         />
@@ -331,7 +332,7 @@ const AssetRow = ({ isLong, asset, onSelect }: AssetRowProps): JSX.Element => {
   return <RowPair onClick={() => onSelect(asset)}>
     <Image src={TOKEN_SVGS[relAsset]} key={String(relAsset)} style={{ marginRight: '10px' }} />
     <AssetText>
-      {relAsset}
+      {handleDisplaySymbol(relAsset)}
     </AssetText>
   </RowPair >
 }

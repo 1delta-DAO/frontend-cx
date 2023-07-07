@@ -519,3 +519,9 @@ export const QUOTE_GAS_OVERRIDES: { [chainId: number]: number } = {
 }
 
 export const SHOW_VIX_REWARDS = false
+
+
+export const handleDisplaySymbol = (symbolIn?: string | undefined) => {
+  if (!symbolIn) return undefined
+  return symbolIn === 'WMATIC' ? 'MATIC' : symbolIn
+}
